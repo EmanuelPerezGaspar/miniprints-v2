@@ -129,6 +129,36 @@
             <h1 class="dash-title">Stock de Material</h1>
             <p class="dash-subtitle">Inventario de filamentos · Cambios se sincronizan con el cotizador.</p>
           </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-ghost" onclick="exportarJSON()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar
+            </button>
+            <button class="btn btn-ghost" onclick="abrirImport()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importar
+            </button>
+          </div>
+        </div>
+
+        <!-- Import modal -->
+        <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;">
+          <div style="background:#0f172a;border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:560px;">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Importar materiales</h3>
+            <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;">Pega el JSON copiado desde tu sistema anterior. Los materiales existentes con el mismo ID se actualizarán, los nuevos se agregarán.</p>
+            <p style="font-size:0.75rem;color:#eab308;margin-bottom:12px;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.2);border-radius:6px;padding:8px 12px;">
+              Para obtener el JSON: abre <strong>miniprints-preview.html</strong> en Chrome → F12 → Console → escribe <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">copy(localStorage.getItem('mp_materials'))</code> → Enter
+            </p>
+            <textarea id="import-json" placeholder='{"creality-pla-negro":{"id":"creality-pla-negro","marca":"CREALITY",...}}' style="width:100%;height:140px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:monospace;font-size:0.78rem;padding:10px;resize:vertical;outline:none;box-sizing:border-box;"></textarea>
+            <div id="import-msg" style="font-size:0.8rem;min-height:20px;margin-top:8px;"></div>
+            <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+              <button class="btn btn-ghost" onclick="cerrarImport()">Cancelar</button>
+              <button class="btn btn-primary" onclick="importarJSON()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Importar
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Add form -->
@@ -318,6 +348,44 @@
     window.addEventListener('scroll', () => {
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
     });
+
+    function abrirImport() {
+      const m = document.getElementById('import-modal');
+      m.style.display = 'flex';
+      document.getElementById('import-json').value = '';
+      document.getElementById('import-msg').innerHTML = '';
+    }
+    function cerrarImport() {
+      document.getElementById('import-modal').style.display = 'none';
+    }
+    function importarJSON() {
+      const raw = document.getElementById('import-json').value.trim();
+      const msg = document.getElementById('import-msg');
+      if (!raw) { msg.innerHTML = '<span style="color:#ef4444;">Pega el JSON primero.</span>'; return; }
+      let data;
+      try { data = JSON.parse(raw); } catch(e) { msg.innerHTML = '<span style="color:#ef4444;">JSON inválido. Copia exactamente lo que devuelve la consola.</span>'; return; }
+      if (typeof data !== 'object' || Array.isArray(data)) { msg.innerHTML = '<span style="color:#ef4444;">Formato incorrecto. Debe ser un objeto con los materiales.</span>'; return; }
+      let added = 0, updated = 0;
+      Object.values(data).forEach(m => {
+        if (!m.id || !m.marca) return;
+        if (DB.materials[m.id]) updated++; else added++;
+        DB.materials[m.id] = m;
+      });
+      saveDB();
+      msg.innerHTML = `<span style="color:#22c55e;">✓ Importados: ${added} nuevos, ${updated} actualizados.</span>`;
+      renderKPIs();
+      renderList();
+      setTimeout(cerrarImport, 1800);
+    }
+    function exportarJSON() {
+      const json = JSON.stringify(DB.materials, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'mp_materials_backup.json';
+      a.click();
+      showToast('Exportado correctamente.');
+    }
 
     loadDB();
     renderKPIs();
