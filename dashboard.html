@@ -26,17 +26,10 @@
     </a>
     <div class="nav-links" role="menubar">
       <a class="nav-link" href="index.html">Inicio</a>
-      <a class="nav-link" href="products.html">Productos</a>
-      <a class="nav-link" href="orders.html">Pedidos</a>
-      <a class="nav-link" href="clients.html">Clientes</a>
-      <a class="nav-link" href="reports.html">Reportes</a>
       <a class="nav-link active" href="dashboard.html" aria-current="page">Dashboard</a>
-    </div>
-    <div class="nav-actions">
-      <button class="btn btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        Nuevo pedido
-      </button>
+      <a class="nav-link" href="cotizador.html">Cotizador</a>
+      <a class="nav-link" href="ventas.html">Ventas</a>
+      <a class="nav-link" href="finanzas.html">Finanzas</a>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobile()">
       <span></span><span></span><span></span>
@@ -46,11 +39,12 @@
   <!-- Mobile menu -->
   <div class="mobile-menu" id="mobileMenu" role="menu">
     <a class="nav-link" href="index.html">Inicio</a>
-    <a class="nav-link" href="products.html">Productos</a>
-    <a class="nav-link" href="orders.html">Pedidos</a>
-    <a class="nav-link" href="clients.html">Clientes</a>
-    <a class="nav-link" href="reports.html">Reportes</a>
     <a class="nav-link active" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="cotizador.html">Cotizador</a>
+    <a class="nav-link" href="stock-material.html">Stock Material</a>
+    <a class="nav-link" href="stock-piezas.html">Stock Piezas</a>
+    <a class="nav-link" href="ventas.html">Ventas</a>
+    <a class="nav-link" href="finanzas.html">Finanzas</a>
   </div>
 
   <!-- DASHBOARD -->
@@ -59,39 +53,32 @@
 
       <!-- Sidebar -->
       <aside class="dash-sidebar" role="navigation" aria-label="Menú del dashboard">
-        <p class="sidebar-section-title">Principal</p>
+        <p class="sidebar-section-title">Sistema</p>
         <a class="sidebar-link active" href="dashboard.html" aria-current="page">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Resumen
-        </a>
-        <a class="sidebar-link" href="orders.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Pedidos
-          <span class="sidebar-badge">12</span>
-        </a>
-        <a class="sidebar-link" href="products.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Productos
-        </a>
-        <a class="sidebar-link" href="clients.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          Clientes
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
         </a>
         <div class="sidebar-divider"></div>
-        <p class="sidebar-section-title">Analítica</p>
-        <a class="sidebar-link" href="reports.html">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reportes
+        <p class="sidebar-section-title">Módulos</p>
+        <a class="sidebar-link" href="cotizador.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Cotizador
         </a>
-        <a class="sidebar-link" href="#">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Producción
+        <a class="sidebar-link" href="stock-material.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Stock Material
         </a>
-        <div class="sidebar-divider"></div>
-        <p class="sidebar-section-title">Configuración</p>
-        <a class="sidebar-link" href="#">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M20 12h2M2 12h2M12 20v2M12 2v2"/></svg>
-          Ajustes
+        <a class="sidebar-link" href="stock-piezas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Stock Piezas
+        </a>
+        <a class="sidebar-link" href="ventas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Ventas
+        </a>
+        <a class="sidebar-link" href="finanzas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Finanzas
         </a>
       </aside>
 
@@ -100,91 +87,24 @@
         <div class="dash-header">
           <div>
             <h1 class="dash-title">Panel de Control</h1>
-            <p class="dash-subtitle">Bienvenido de vuelta · Domingo, 8 de junio 2025</p>
+            <p class="dash-subtitle" id="dash-subtitle">Cargando datos…</p>
           </div>
           <div class="dash-toolbar">
-            <select class="select-period" aria-label="Seleccionar período">
-              <option>Este mes</option>
-              <option>Última semana</option>
-              <option>Último trimestre</option>
-              <option>Este año</option>
-            </select>
-            <button class="btn btn-ghost">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exportar
-            </button>
-            <button class="btn btn-primary">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nuevo pedido
-            </button>
+            <a href="cotizador.html" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nueva cotización
+            </a>
           </div>
         </div>
 
         <!-- KPIs -->
-        <div class="kpi-grid" role="list" aria-label="Indicadores clave">
-          <div class="kpi-card" role="listitem">
-            <div class="kpi-top">
-              <span class="kpi-label">INGRESOS</span>
-              <div class="kpi-icon" style="background:rgba(34,197,94,0.12);" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              </div>
-            </div>
-            <div class="kpi-value">$18,420</div>
-            <div class="kpi-change up">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
-              +12.4% <span class="kpi-period">vs mes anterior</span>
-            </div>
-          </div>
-          <div class="kpi-card" role="listitem">
-            <div class="kpi-top">
-              <span class="kpi-label">PEDIDOS</span>
-              <div class="kpi-icon" style="background:rgba(59,130,246,0.12);" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              </div>
-            </div>
-            <div class="kpi-value">184</div>
-            <div class="kpi-change up">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
-              +8.1% <span class="kpi-period">vs mes anterior</span>
-            </div>
-          </div>
-          <div class="kpi-card" role="listitem">
-            <div class="kpi-top">
-              <span class="kpi-label">CLIENTES ACTIVOS</span>
-              <div class="kpi-icon" style="background:rgba(167,139,250,0.12);" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              </div>
-            </div>
-            <div class="kpi-value">327</div>
-            <div class="kpi-change up">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
-              +5.3% <span class="kpi-period">vs mes anterior</span>
-            </div>
-          </div>
-          <div class="kpi-card" role="listitem">
-            <div class="kpi-top">
-              <span class="kpi-label">PENDIENTES</span>
-              <div class="kpi-icon" style="background:rgba(234,179,8,0.12);" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              </div>
-            </div>
-            <div class="kpi-value">12</div>
-            <div class="kpi-change down">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 9 12 15 6 9"/></svg>
-              -3 <span class="kpi-period">vs ayer</span>
-            </div>
-          </div>
-        </div>
+        <div class="kpi-grid" id="kpi-grid" role="list" aria-label="Indicadores clave"></div>
 
         <!-- Charts -->
         <div class="charts-row">
           <div class="chart-card">
             <div class="chart-header">
-              <span class="chart-title">Ingresos mensuales</span>
-              <div class="chart-legend" aria-hidden="true">
-                <span class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span>2025</span>
-                <span class="legend-item"><span class="legend-dot" style="background:#475569;"></span>2024</span>
-              </div>
+              <span class="chart-title">Ingresos — últimos 6 meses</span>
             </div>
             <div class="chart-wrap">
               <canvas id="chartRevenue" aria-label="Gráfico de ingresos mensuales" role="img"></canvas>
@@ -192,10 +112,10 @@
           </div>
           <div class="chart-card">
             <div class="chart-header">
-              <span class="chart-title">Pedidos por estado</span>
+              <span class="chart-title">Piezas más vendidas</span>
             </div>
             <div class="chart-wrap">
-              <canvas id="chartStatus" aria-label="Gráfico de pedidos por estado" role="img"></canvas>
+              <canvas id="chartStatus" aria-label="Piezas más vendidas" role="img"></canvas>
             </div>
           </div>
         </div>
@@ -204,75 +124,31 @@
         <div class="tables-row">
           <div class="table-card">
             <div class="table-head">
-              <span class="table-title">Pedidos Recientes</span>
-              <a href="orders.html" class="link-all">Ver todos →</a>
+              <span class="table-title">Ventas recientes</span>
+              <a href="ventas.html" class="link-all">Ver todas →</a>
             </div>
             <div class="table-wrap">
               <table>
                 <thead>
                   <tr>
-                    <th scope="col"># Pedido</th>
-                    <th scope="col">Cliente</th>
-                    <th scope="col">Producto</th>
-                    <th scope="col">Monto</th>
-                    <th scope="col">Estado</th>
+                    <th scope="col">Pieza</th>
+                    <th scope="col">Cant.</th>
+                    <th scope="col">Precio</th>
+                    <th scope="col">Canal</th>
+                    <th scope="col">Fecha</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr><td>#P-1084</td><td>Laura Méndez</td><td>Tarjetas de visita</td><td>$85.00</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
-                  <tr><td>#P-1083</td><td>Tech Corp SA</td><td>Banner 3×1m</td><td>$340.00</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>En producción</span></td></tr>
-                  <tr><td>#P-1082</td><td>Carlos Ruiz</td><td>Flyers A5 (500u)</td><td>$120.00</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Pendiente</span></td></tr>
-                  <tr><td>#P-1081</td><td>Bakery Dulce</td><td>Etiquetas adhesivas</td><td>$210.00</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
-                  <tr><td>#P-1080</td><td>Juan Pérez</td><td>Carpetas corporativas</td><td>$480.00</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>En producción</span></td></tr>
-                  <tr><td>#P-1079</td><td>Ana Villalobos</td><td>Roll-up 85×200cm</td><td>$195.00</td><td><span class="badge badge-error"><span class="badge-dot" style="background:#ef4444;"></span>Atrasado</span></td></tr>
-                  <tr><td>#P-1078</td><td>Moda Urbana</td><td>Catálogo 24 pág.</td><td>$720.00</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
-                </tbody>
+                <tbody id="tbody-ventas"></tbody>
               </table>
             </div>
           </div>
 
           <div class="table-card">
             <div class="table-head">
-              <span class="table-title">Productos más vendidos</span>
-              <a href="products.html" class="link-all">Ver catálogo →</a>
+              <span class="table-title">Stock de materiales</span>
+              <a href="stock-material.html" class="link-all">Ver inventario →</a>
             </div>
-            <div class="top-products">
-              <div class="top-product-row">
-                <span class="tp-rank">#1</span>
-                <div class="tp-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
-                <span class="tp-name">Tarjetas de visita</span>
-                <span class="tp-sales">248</span>
-                <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:100%;"></div></div></div>
-              </div>
-              <div class="top-product-row">
-                <span class="tp-rank">#2</span>
-                <div class="tp-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
-                <span class="tp-name">Flyers A5</span>
-                <span class="tp-sales">186</span>
-                <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:75%;"></div></div></div>
-              </div>
-              <div class="top-product-row">
-                <span class="tp-rank">#3</span>
-                <div class="tp-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/></svg></div>
-                <span class="tp-name">Banners</span>
-                <span class="tp-sales">134</span>
-                <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:54%;"></div></div></div>
-              </div>
-              <div class="top-product-row">
-                <span class="tp-rank">#4</span>
-                <div class="tp-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-                <span class="tp-name">Etiquetas</span>
-                <span class="tp-sales">112</span>
-                <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:45%;"></div></div></div>
-              </div>
-              <div class="top-product-row">
-                <span class="tp-rank">#5</span>
-                <div class="tp-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
-                <span class="tp-name">Catálogos</span>
-                <span class="tp-sales">89</span>
-                <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:36%;"></div></div></div>
-              </div>
-            </div>
+            <div id="mat-list" class="top-products"></div>
           </div>
         </div>
       </main>
@@ -287,91 +163,139 @@
       btn.classList.toggle('open', open);
       btn.setAttribute('aria-expanded', String(open));
     }
-
-    const font  = "'Plus Jakarta Sans', sans-serif";
-    const grid  = 'rgba(255,255,255,0.06)';
-    const tick  = '#64748b';
-    Chart.defaults.font.family = font;
-    Chart.defaults.color = tick;
-
-    new Chart(document.getElementById('chartRevenue'), {
-      type: 'line',
-      data: {
-        labels: ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
-        datasets: [
-          {
-            label: '2025',
-            data: [9200,11400,10800,13200,12500,18420,null,null,null,null,null,null],
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34,197,94,0.10)',
-            borderWidth: 2.5,
-            pointRadius: 4,
-            pointBackgroundColor: '#22c55e',
-            pointBorderColor: '#0a0f1a',
-            pointBorderWidth: 2,
-            tension: 0.4,
-            fill: true,
-          },
-          {
-            label: '2024',
-            data: [7800,9200,8900,10400,11200,10800,12000,13400,11900,14200,13600,15800],
-            borderColor: '#334155',
-            backgroundColor: 'transparent',
-            borderWidth: 1.8,
-            pointRadius: 3,
-            pointBackgroundColor: '#334155',
-            pointBorderColor: '#0a0f1a',
-            pointBorderWidth: 2,
-            tension: 0.4,
-            borderDash: [4,4],
-          }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.10)', borderWidth: 1,
-            titleColor: '#f1f5f9', bodyColor: '#94a3b8', padding: 12,
-            callbacks: { label: ctx => ' $' + (ctx.parsed.y?.toLocaleString('es') ?? '-') }
-          }
-        },
-        scales: {
-          x: { grid: { color: grid }, ticks: { font: { size: 11 } } },
-          y: { grid: { color: grid }, ticks: { font: { size: 11 }, callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
-        }
-      }
-    });
-
-    new Chart(document.getElementById('chartStatus'), {
-      type: 'doughnut',
-      data: {
-        labels: ['Entregados','En producción','Pendientes','Atrasados'],
-        datasets: [{
-          data: [108,42,22,12],
-          backgroundColor: ['#22c55e','#3b82f6','#eab308','#ef4444'],
-          borderColor: '#0f172a',
-          borderWidth: 3,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false, cutout: '68%',
-        plugins: {
-          legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', font: { size: 12 } } },
-          tooltip: {
-            backgroundColor: '#1e293b', borderColor: 'rgba(255,255,255,0.10)', borderWidth: 1,
-            titleColor: '#f1f5f9', bodyColor: '#94a3b8', padding: 12,
-            callbacks: { label: ctx => '  ' + ctx.label + ': ' + ctx.parsed + ' pedidos' }
-          }
-        }
-      }
-    });
-
     window.addEventListener('scroll', () => {
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
     });
+
+    const DB = { materials: {}, piezas: {}, ventas: [], cotizaciones: [] };
+    function loadDB() {
+      try { const m = localStorage.getItem('mp_materials');    if (m) DB.materials    = JSON.parse(m); } catch(e){}
+      try { const p = localStorage.getItem('mp_piezas');       if (p) DB.piezas       = JSON.parse(p); } catch(e){}
+      try { const v = localStorage.getItem('mp_ventas');       if (v) DB.ventas       = JSON.parse(v); } catch(e){}
+      try { const c = localStorage.getItem('mp_cotizaciones'); if (c) DB.cotizaciones = JSON.parse(c); } catch(e){}
+    }
+
+    const fmt = n => '$' + parseFloat(n||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+    function mesKey(v) {
+      if (!v.fecha) return '';
+      if (v.fecha.match(/^\d{4}-\d{2}-\d{2}$/)) return v.fecha.substring(0,7);
+      const parts = v.fecha.split(' ');
+      const meses = {ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12'};
+      if (parts.length >= 3) { const m = meses[parts[1]?.toLowerCase()?.substring(0,3)]||'01'; return `${parts[2]}-${m}`; }
+      return v.fecha.substring(0,7);
+    }
+
+    function renderKPIs() {
+      const ingresos = DB.ventas.reduce((s,v)=>s+v.precio*v.cantidad,0);
+      const ganancia = ingresos - DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
+      const totalPiezas = Object.values(DB.piezas).reduce((s,n)=>s+n,0);
+      const totalMateriales = Object.keys(DB.materials).length;
+      const critico = Object.values(DB.materials).filter(m=>m.pesoTotal<=200).length;
+      const margen = ingresos > 0 ? ((ganancia/ingresos)*100).toFixed(1) : '0';
+
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">INGRESOS REALES</span>
+            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          </div>
+          <div class="kpi-value">${fmt(ingresos)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">${DB.ventas.length} ventas totales</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">GANANCIA REAL</span>
+            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+          </div>
+          <div class="kpi-value" style="color:${parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444'};">${fmt(ganancia)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">Margen ${margen}%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">PIEZAS EN STOCK</span>
+            <div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          </div>
+          <div class="kpi-value">${totalPiezas}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><span class="kpi-label">MATERIALES</span>
+            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ef4444':'#a78bfa'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          </div>
+          <div class="kpi-value">${totalMateriales}</div>
+          <div class="kpi-change neutral" style="color:${critico>0?'#ef4444':'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
+        </div>`;
+
+      const now = new Date();
+      document.getElementById('dash-subtitle').textContent =
+        'Actualizado ' + now.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    }
+
+    function renderVentas() {
+      const recientes = [...DB.ventas].reverse().slice(0,7);
+      const canalColor = {WhatsApp:'#22c55e',Instagram:'#a78bfa',MercadoLibre:'#eab308',Facebook:'#3b82f6',TikTok:'#06b6d4',Otro:'#94a3b8'};
+      document.getElementById('tbody-ventas').innerHTML = recientes.length
+        ? recientes.map(v=>`<tr>
+            <td>${v.pieza||'—'}</td>
+            <td>${v.cantidad}</td>
+            <td style="color:#22c55e;font-weight:600;">${fmt(v.precio*v.cantidad)}</td>
+            <td><span class="badge" style="background:rgba(${canalColor[v.canal]||'148,163,184'},0.12);color:${canalColor[v.canal]||'#94a3b8'};border:none;">${v.canal||'—'}</span></td>
+            <td style="color:var(--text-dim);font-size:0.8rem;">${v.fecha||'—'}</td>
+          </tr>`).join('')
+        : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">Sin ventas registradas — <a href="ventas.html" style="color:var(--primary);">Registrar venta</a></td></tr>`;
+    }
+
+    function renderMateriales() {
+      const mats = Object.values(DB.materials).sort((a,b)=>a.pesoTotal-b.pesoTotal).slice(0,5);
+      const maxPeso = Math.max(...mats.map(m=>m.pesoTotal), 1);
+      document.getElementById('mat-list').innerHTML = mats.length
+        ? mats.map((m,i)=>{
+            const color = m.pesoTotal<=200?'#ef4444':m.pesoTotal<=500?'#eab308':'#22c55e';
+            const pct = Math.round((m.pesoTotal/maxPeso)*100);
+            return `<div class="top-product-row">
+              <span class="tp-rank">#${i+1}</span>
+              <div class="tp-icon" style="background:${color}20;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg></div>
+              <span class="tp-name" style="font-size:0.78rem;">${m.marca} ${m.color}</span>
+              <span class="tp-sales" style="color:${color};font-size:0.78rem;">${m.pesoTotal}g</span>
+              <div class="tp-bar-wrap"><div class="tp-bar-track"><div class="tp-bar-fill" style="width:${pct}%;background:${color};"></div></div></div>
+            </div>`;
+          }).join('')
+        : `<div style="padding:24px;text-align:center;color:var(--text-dim);font-size:0.85rem;">Sin materiales — <a href="stock-material.html" style="color:var(--primary);">Agregar</a></div>`;
+    }
+
+    let chartRev = null, chartTop = null;
+    function renderCharts() {
+      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+      const grid = 'rgba(255,255,255,0.06)', tick = '#64748b';
+
+      if (chartRev) { chartRev.destroy(); chartRev = null; }
+      const meses = [];
+      for (let i=5;i>=0;i--) { const d=new Date();d.setMonth(d.getMonth()-i);meses.push(d.toISOString().slice(0,7)); }
+      const ingPorMes = meses.map(m=>DB.ventas.filter(v=>mesKey(v)===m).reduce((s,v)=>s+v.precio*v.cantidad,0));
+      const labM = meses.map(m=>{const d=new Date(m+'-01');return d.toLocaleDateString('es-MX',{month:'short',year:'2-digit'});});
+      chartRev = new Chart(document.getElementById('chartRevenue'),{
+        type:'line',
+        data:{labels:labM,datasets:[{label:'Ingresos',data:ingPorMes,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.10)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#22c55e',tension:0.4,fill:true}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'rgba(255,255,255,0.10)',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:12,callbacks:{label:ctx=>' $'+ctx.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:grid},ticks:{color:tick,font:{size:11}}},y:{grid:{color:grid},ticks:{color:tick,font:{size:11},callback:v=>'$'+(v/1000).toFixed(1)+'k'}}}}
+      });
+
+      if (chartTop) { chartTop.destroy(); chartTop = null; }
+      const piezaVentas = {};
+      DB.ventas.forEach(v=>{piezaVentas[v.pieza]=(piezaVentas[v.pieza]||0)+v.cantidad;});
+      const sorted = Object.entries(piezaVentas).sort((a,b)=>b[1]-a[1]).slice(0,6);
+      if (sorted.length) {
+        chartTop = new Chart(document.getElementById('chartStatus'),{
+          type:'bar',
+          data:{labels:sorted.map(([p])=>p.length>14?p.substring(0,14)+'…':p),datasets:[{label:'Unidades vendidas',data:sorted.map(([,n])=>n),backgroundColor:'rgba(34,197,94,0.55)',borderRadius:5}]},
+          options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'rgba(255,255,255,0.10)',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:12}},scales:{x:{grid:{color:grid},ticks:{color:tick}},y:{grid:{color:'transparent'},ticks:{color:tick}}}}
+        });
+      } else {
+        document.getElementById('chartStatus').parentElement.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem;">Registra ventas para ver el ranking</div>';
+      }
+    }
+
+    loadDB();
+    renderKPIs();
+    renderVentas();
+    renderMateriales();
+    setTimeout(renderCharts, 50);
   </script>
 </body>
 </html>

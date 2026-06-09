@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Stock Piezas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
+    .field input, .field select {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
+      font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
+      -moz-appearance: textfield;
+    }
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+    .field select option { background: #1e293b; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+    .form-card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 16px; }
+    .section-lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    /* Piece items */
+    .pieza-item {
+      display: grid; grid-template-columns: 1fr 130px 100px auto;
+      gap: 12px; align-items: center;
+      padding: 16px 20px; margin-bottom: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); transition: border-color 180ms;
+    }
+    .pieza-item:hover { border-color: rgba(255,255,255,0.18); }
+    .pieza-name { font-size: 0.9rem; font-weight: 700; }
+    .pieza-sub { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+    .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+    .qty-btn {
+      width: 30px; height: 30px; border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer; font-size: 16px; font-weight: 700;
+      transition: all 180ms; line-height: 1;
+    }
+    .qty-btn:hover { background: var(--surface-hover); color: var(--text); }
+    .qty-num { font-size: 1.1rem; font-weight: 800; min-width: 28px; text-align: center; }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    @media (max-width: 700px) {
+      .pieza-item { grid-template-columns: 1fr auto auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar" role="navigation">
+    <a class="nav-logo" href="index.html">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="cotizador.html">Cotizador</a>
+      <a class="nav-link" href="stock-material.html">Stock Mat.</a>
+      <a class="nav-link active" href="stock-piezas.html">Stock Piezas</a>
+      <a class="nav-link" href="ventas.html">Ventas</a>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="cotizador.html">Cotizador</a>
+    <a class="nav-link" href="stock-material.html">Stock Material</a>
+    <a class="nav-link active" href="stock-piezas.html">Stock Piezas</a>
+    <a class="nav-link" href="ventas.html">Ventas</a>
+    <a class="nav-link" href="finanzas.html">Finanzas</a>
+  </div>
+
+  <div class="page-container">
+    <div class="dash-layout">
+
+      <aside class="dash-sidebar">
+        <p class="sidebar-section-title">Sistema</p>
+        <a class="sidebar-link" href="dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <div class="sidebar-divider"></div>
+        <p class="sidebar-section-title">Módulos</p>
+        <a class="sidebar-link" href="cotizador.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Cotizador
+        </a>
+        <a class="sidebar-link" href="stock-material.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Stock Material
+        </a>
+        <a class="sidebar-link active" href="stock-piezas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Stock Piezas
+        </a>
+        <a class="sidebar-link" href="ventas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Ventas
+        </a>
+        <a class="sidebar-link" href="finanzas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Finanzas
+        </a>
+      </aside>
+
+      <main class="dash-main">
+        <div class="dash-header">
+          <div>
+            <h1 class="dash-title">Stock de Piezas</h1>
+            <p class="dash-subtitle">Piezas impresas disponibles para venta · El cotizador descuenta materiales automáticamente.</p>
+          </div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-grid" style="margin-bottom:24px;" id="kpi-row"></div>
+
+        <!-- Add piece form -->
+        <div class="form-card">
+          <div class="form-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar pieza manualmente
+          </div>
+          <div class="grid-2" style="margin-bottom:14px;">
+            <div class="field"><label>Nombre de la pieza</label><input type="text" id="pieza-nombre" placeholder="Ej: Mini Cebolla" /></div>
+            <div class="field"><label>Cantidad</label><input type="number" id="pieza-cantidad" value="1" min="1" /></div>
+          </div>
+          <div class="section-lbl">Descontar material (opcional)</div>
+          <div class="grid-3" style="margin-bottom:4px;">
+            <div class="field"><label>Material</label><select id="pieza-mat-sel"><option value="">— Sin descontar —</option></select></div>
+            <div class="field"><label>Gramos a usar</label><input type="number" id="pieza-mat-grams" placeholder="0" min="0" step="0.1" /></div>
+            <div></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="agregarPieza()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Agregar al inventario
+            </button>
+          </div>
+        </div>
+
+        <!-- List -->
+        <div class="section-lbl">Inventario actual</div>
+        <div id="piezas-list"></div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const DB = { materials: {}, piezas: {}, historial: {} };
+
+    function loadDB() {
+      try { const m = localStorage.getItem('mp_materials'); if (m) DB.materials = JSON.parse(m); } catch(e) {}
+      try { const p = localStorage.getItem('mp_piezas');    if (p) DB.piezas    = JSON.parse(p); } catch(e) {}
+      try { const h = localStorage.getItem('mp_historial'); if (h) DB.historial = JSON.parse(h); } catch(e) {}
+    }
+    function saveMats() { try { localStorage.setItem('mp_materials', JSON.stringify(DB.materials)); } catch(e) {} }
+    function savePiezas() { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch(e) {} }
+    function saveHistorial() { try { localStorage.setItem('mp_historial', JSON.stringify(DB.historial)); } catch(e) {} }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
+    }
+    function matsSorted() { return Object.values(DB.materials).sort((a, b) => (a.marca + a.tipo + a.color).localeCompare(b.marca + b.tipo + b.color)); }
+    function matLabel(m) { return `${m.marca} · ${m.tipo} · ${m.color}`; }
+
+    function refreshMatSelect() {
+      const sel = document.getElementById('pieza-mat-sel');
+      const mats = matsSorted();
+      sel.innerHTML = '<option value="">— Sin descontar —</option>' +
+        mats.map(m => `<option value="${m.id}">${matLabel(m)} (${m.pesoTotal}g)</option>`).join('');
+    }
+
+    async function agregarPieza() {
+      const nombre = document.getElementById('pieza-nombre').value.trim();
+      const cantidad = parseInt(document.getElementById('pieza-cantidad').value) || 1;
+      const matSel = document.getElementById('pieza-mat-sel').value;
+      const matGrams = parseFloat(document.getElementById('pieza-mat-grams').value) || 0;
+
+      if (!nombre) return showToast('Escribe el nombre de la pieza');
+
+      if (matSel && matGrams > 0) {
+        const mat = DB.materials[matSel];
+        if (!mat) return showToast('Material no encontrado');
+        if (mat.pesoTotal < matGrams) return showToast(`Stock insuficiente: solo hay ${mat.pesoTotal}g`);
+        DB.materials[matSel].pesoTotal = Math.max(0, mat.pesoTotal - matGrams);
+        saveMats();
+        if (!DB.historial[nombre]) DB.historial[nombre] = [];
+        DB.historial[nombre].push({ matId: matSel, grams: matGrams });
+        saveHistorial();
+      }
+
+      DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
+      savePiezas();
+      renderKPIs();
+      renderList();
+      document.getElementById('pieza-nombre').value = '';
+      document.getElementById('pieza-cantidad').value = 1;
+      document.getElementById('pieza-mat-grams').value = '';
+      document.getElementById('pieza-mat-sel').value = '';
+      showToast(`${cantidad}× "${nombre}" agregadas al inventario`);
+    }
+
+    async function ajustarPieza(nombre, delta) {
+      DB.piezas[nombre] = Math.max(0, (DB.piezas[nombre] || 0) + delta);
+      if (DB.piezas[nombre] === 0) delete DB.piezas[nombre];
+      savePiezas();
+      renderKPIs();
+      renderList();
+    }
+
+    async function eliminarPieza(nombre) {
+      if (!confirm(`Eliminar "${nombre}" del inventario?`)) return;
+      const matsUsados = DB.historial[nombre] || [];
+      if (matsUsados.length > 0) {
+        matsUsados.forEach(m => {
+          if (DB.materials[m.matId]) DB.materials[m.matId].pesoTotal += parseFloat(m.grams);
+        });
+        saveMats();
+        delete DB.historial[nombre];
+        saveHistorial();
+        showToast('Materiales restaurados al stock');
+      } else {
+        showToast(`"${nombre}" eliminada`);
+      }
+      delete DB.piezas[nombre];
+      savePiezas();
+      renderKPIs();
+      renderList();
+    }
+
+    function renderKPIs() {
+      const piezas = Object.entries(DB.piezas);
+      const total = piezas.reduce((s, [, c]) => s + c, 0);
+      const tipos = piezas.length;
+      const bajos = piezas.filter(([, c]) => c <= 2).length;
+      document.getElementById('kpi-row').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Tipos de piezas</div><div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div></div>
+          <div class="kpi-value">${tipos}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">modelos distintos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Unidades totales</div><div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div></div>
+          <div class="kpi-value">${total}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">piezas en stock</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Stock bajo</div><div class="kpi-icon" style="background:rgba(234,179,8,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div></div>
+          <div class="kpi-value" style="color:${bajos > 0 ? '#eab308' : '#22c55e'};">${bajos}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">con 1-2 unidades</div>
+        </div>`;
+    }
+
+    function renderList() {
+      const container = document.getElementById('piezas-list');
+      refreshMatSelect();
+      const piezas = Object.entries(DB.piezas);
+      if (!piezas.length) {
+        container.innerHTML = `<div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:6px;">Sin piezas en inventario</p>
+          <p style="font-size:0.8rem;">Agrega piezas manualmente o confirma una impresión en el <a href="cotizador.html" style="color:var(--primary);">Cotizador</a>.</p>
+        </div>`;
+        return;
+      }
+      container.innerHTML = piezas.map(([nombre, cant]) => {
+        const badgeCls = cant > 5 ? 'badge-success' : cant > 2 ? 'badge-warning' : 'badge-error';
+        const badgeTxt = cant > 5 ? 'En stock' : cant > 2 ? 'Poco' : 'Último(s)';
+        const escapedName = nombre.replace(/'/g, "\\'");
+        return `<div class="pieza-item">
+          <div>
+            <div class="pieza-name">${nombre}</div>
+            <div class="pieza-sub">${cant} unidad${cant !== 1 ? 'es' : ''} disponible${cant !== 1 ? 's' : ''}</div>
+          </div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="ajustarPieza('${escapedName}', -1)">−</button>
+            <span class="qty-num">${cant}</span>
+            <button class="qty-btn" onclick="ajustarPieza('${escapedName}', 1)">+</button>
+          </div>
+          <span class="badge ${badgeCls}">${badgeTxt}</span>
+          <button class="btn btn-ghost" style="padding:6px 10px;" onclick="eliminarPieza('${escapedName}')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          </button>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleMobile() {
+      const btn = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    loadDB();
+    renderKPIs();
+    renderList();
+  </script>
+</body>
+</html>

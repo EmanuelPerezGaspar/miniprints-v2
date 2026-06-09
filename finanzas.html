@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Finanzas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .chart-wrap-tall { position: relative; height: 260px; }
+    .detail-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
+    .detail-table-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 700; }
+    .empty-row { text-align: center; padding: 32px; color: var(--text-dim); font-size: 0.85rem; }
+    .neg { color: #ef4444; }
+    .pos { color: #22c55e; }
+    .pct { color: var(--text-dim); font-size: 0.78rem; }
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    @media (max-width: 900px) { .charts-2col { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar" role="navigation">
+    <a class="nav-logo" href="index.html">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="cotizador.html">Cotizador</a>
+      <a class="nav-link" href="ventas.html">Ventas</a>
+      <a class="nav-link active" href="finanzas.html">Finanzas</a>
+    </div>
+    <button class="hamburger" id="hamburger" onclick="toggleMobile()"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="cotizador.html">Cotizador</a>
+    <a class="nav-link" href="stock-material.html">Stock Material</a>
+    <a class="nav-link" href="stock-piezas.html">Stock Piezas</a>
+    <a class="nav-link" href="ventas.html">Ventas</a>
+    <a class="nav-link active" href="finanzas.html">Finanzas</a>
+  </div>
+
+  <div class="page-container">
+    <div class="dash-layout">
+
+      <aside class="dash-sidebar">
+        <p class="sidebar-section-title">Sistema</p>
+        <a class="sidebar-link" href="dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <div class="sidebar-divider"></div>
+        <p class="sidebar-section-title">Módulos</p>
+        <a class="sidebar-link" href="cotizador.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Cotizador
+        </a>
+        <a class="sidebar-link" href="stock-material.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Stock Material
+        </a>
+        <a class="sidebar-link" href="stock-piezas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Stock Piezas
+        </a>
+        <a class="sidebar-link" href="ventas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Ventas
+        </a>
+        <a class="sidebar-link active" href="finanzas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Finanzas
+        </a>
+      </aside>
+
+      <main class="dash-main">
+        <div class="dash-header">
+          <div>
+            <h1 class="dash-title">Finanzas</h1>
+            <p class="dash-subtitle">Ingresos, costos y márgenes de tu negocio de impresión 3D.</p>
+          </div>
+          <button class="btn btn-ghost" onclick="loadDB();renderAll();">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Actualizar
+          </button>
+        </div>
+
+        <!-- KPI cards -->
+        <div class="kpi-grid" id="kpi-grid" style="margin-bottom:28px;"></div>
+
+        <!-- Charts -->
+        <div class="charts-2col">
+          <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">Ganancia esperada vs real por modelo</span></div>
+            <div class="chart-wrap-tall"><canvas id="chart-gan"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-header"><span class="chart-title">Ingresos de los últimos 6 meses</span></div>
+            <div class="chart-wrap-tall"><canvas id="chart-ing"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Detail table by piece -->
+        <div class="detail-table">
+          <div class="detail-table-head">
+            <span>Detalle por pieza / modelo</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Pieza / Modelo</th>
+                  <th style="text-align:right;">Costo prod.</th>
+                  <th style="text-align:right;">Gan. esperada</th>
+                  <th style="text-align:right;">Ingresos reales</th>
+                  <th style="text-align:right;">Gan. real</th>
+                  <th style="text-align:right;">Margen</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-detalle"></tbody>
+            </table>
+          </div>
+          <div id="detalle-empty" class="empty-row" style="display:none;">Sin datos. Registra cotizaciones y ventas para ver el análisis.</div>
+        </div>
+
+        <!-- Expenses table -->
+        <div class="detail-table">
+          <div class="detail-table-head"><span>Resumen de egresos</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Concepto</th><th style="text-align:right;">Monto</th><th style="text-align:right;">%</th></tr></thead>
+              <tbody id="tbody-egresos"></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const DB = { materials: {}, ventas: [], cotizaciones: [] };
+    let chartGan = null, chartIng = null;
+
+    function loadDB() {
+      try { const m = localStorage.getItem('mp_materials');   if (m) DB.materials   = JSON.parse(m); } catch(e) {}
+      try { const v = localStorage.getItem('mp_ventas');      if (v) DB.ventas      = JSON.parse(v); } catch(e) {}
+      try { const c = localStorage.getItem('mp_cotizaciones');if (c) DB.cotizaciones= JSON.parse(c); } catch(e) {}
+    }
+
+    const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function mesDeVenta(v) {
+      if (!v.fecha) return '';
+      if (v.fecha.match(/^\d{4}-\d{2}-\d{2}$/)) return v.fecha.substring(0, 7);
+      const parts = v.fecha.split(' ');
+      if (parts.length >= 3) {
+        const meses = { ene:'01',feb:'02',mar:'03',abr:'04',may:'05',jun:'06',jul:'07',ago:'08',sep:'09',oct:'10',nov:'11',dic:'12' };
+        const m = meses[parts[1]?.toLowerCase()?.substring(0,3)] || '01';
+        return `${parts[2]}-${m}`;
+      }
+      return v.fecha.substring(0, 7);
+    }
+
+    function renderKPIs() {
+      const ventas = DB.ventas, cots = DB.cotizaciones;
+      const ingresos    = ventas.reduce((s, v) => s + v.precio * v.cantidad, 0);
+      const costosProd  = cots.reduce((s, c) => s + (c.costo_base || 0), 0);
+      const ganEsp      = cots.reduce((s, c) => s + (c.ganancia || 0), 0);
+      const ganReal     = ingresos - costosProd;
+      const margen      = ingresos > 0 ? ((ganReal / ingresos) * 100).toFixed(1) : '0';
+      const valorInv    = Object.values(DB.materials).reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
+      const margenColor = parseFloat(margen) >= 30 ? '#22c55e' : parseFloat(margen) >= 15 ? '#eab308' : '#ef4444';
+
+      document.getElementById('kpi-grid').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Ingresos reales</div><div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;">${fmt(ingresos)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">${ventas.length} ventas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Costos producción</div><div class="kpi-icon" style="background:rgba(239,68,68,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;">${fmt(costosProd)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">${cots.length} cotizaciones</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Ganancia real</div><div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;color:${margenColor};">${fmt(ganReal)}</div>
+          <div class="kpi-change neutral" style="color:${margenColor};">Margen ${margen}%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Ganancia esperada</div><div class="kpi-icon" style="background:rgba(167,139,250,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;color:#a78bfa;">${fmt(ganEsp)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">en cotizaciones</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Valor inventario</div><div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;color:#3b82f6;">${fmt(valorInv)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">en materiales</div>
+        </div>`;
+    }
+
+    function renderCharts() {
+      const grid = 'rgba(255,255,255,0.06)';
+      const textC = '#64748b';
+      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+      Chart.defaults.font.size = 11;
+
+      // Ganancia esperada vs real por pieza
+      if (chartGan) { chartGan.destroy(); chartGan = null; }
+      const cotsByCliente = {};
+      DB.cotizaciones.forEach(c => {
+        const k = c.cliente || 'Sin nombre';
+        if (!cotsByCliente[k]) cotsByCliente[k] = { ganEsp: 0, costoProd: 0 };
+        cotsByCliente[k].ganEsp += (c.ganancia || 0);
+        cotsByCliente[k].costoProd += (c.costo_base || 0);
+      });
+      const ventasByPieza = {};
+      DB.ventas.forEach(v => { ventasByPieza[v.pieza] = (ventasByPieza[v.pieza] || 0) + v.precio * v.cantidad; });
+      const piezasLabels = [...new Set([...Object.keys(cotsByCliente), ...Object.keys(ventasByPieza)])].slice(0, 8);
+      const canvasGan = document.getElementById('chart-gan');
+      if (piezasLabels.length) {
+        chartGan = new Chart(canvasGan, {
+          type: 'bar',
+          data: {
+            labels: piezasLabels.map(p => p.length > 12 ? p.substring(0, 12) + '…' : p),
+            datasets: [
+              { label: 'Gan. esperada', data: piezasLabels.map(p => cotsByCliente[p]?.ganEsp || 0), backgroundColor: 'rgba(167,139,250,0.60)', borderRadius: 5 },
+              { label: 'Gan. real',     data: piezasLabels.map(p => (ventasByPieza[p] || 0) - (cotsByCliente[p]?.costoProd || 0)), backgroundColor: 'rgba(34,197,94,0.60)', borderRadius: 5 },
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: textC } } },
+            scales: {
+              x: { grid: { color: grid }, ticks: { color: textC } },
+              y: { grid: { color: grid }, ticks: { color: textC, callback: v => '$' + (v / 1000).toFixed(0) + 'k' } }
+            }
+          }
+        });
+      } else {
+        canvasGan.parentElement.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:0.85rem;">Sin datos de cotizaciones</div>';
+      }
+
+      // Ingresos últimos 6 meses
+      if (chartIng) { chartIng.destroy(); chartIng = null; }
+      const meses = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(); d.setMonth(d.getMonth() - i);
+        meses.push(d.toISOString().slice(0, 7));
+      }
+      const ingPorMes = meses.map(m => DB.ventas.filter(v => mesDeVenta(v) === m).reduce((s, v) => s + v.precio * v.cantidad, 0));
+      const labelsM = meses.map(m => { const d = new Date(m + '-01'); return d.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }); });
+      chartIng = new Chart(document.getElementById('chart-ing'), {
+        type: 'line',
+        data: {
+          labels: labelsM,
+          datasets: [{
+            label: 'Ingresos', data: ingPorMes,
+            borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.12)',
+            tension: 0.4, fill: true, pointRadius: 5, pointBackgroundColor: '#22c55e',
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: grid }, ticks: { color: textC } },
+            y: { grid: { color: grid }, ticks: { color: textC, callback: v => '$' + v.toLocaleString('es-MX') } }
+          }
+        }
+      });
+    }
+
+    function renderDetalle() {
+      const cotsByCliente = {};
+      DB.cotizaciones.forEach(c => {
+        const k = c.cliente || 'Sin nombre';
+        if (!cotsByCliente[k]) cotsByCliente[k] = { costoProd: 0, ganEsp: 0 };
+        cotsByCliente[k].costoProd += (c.costo_base || 0);
+        cotsByCliente[k].ganEsp += (c.ganancia || 0);
+      });
+      const ventasByPieza = {};
+      DB.ventas.forEach(v => {
+        if (!ventasByPieza[v.pieza]) ventasByPieza[v.pieza] = 0;
+        ventasByPieza[v.pieza] += v.precio * v.cantidad;
+      });
+      const piezas = new Set([...Object.keys(cotsByCliente), ...Object.keys(ventasByPieza)]);
+
+      const tbody  = document.getElementById('tbody-detalle');
+      const empty  = document.getElementById('detalle-empty');
+      if (!piezas.size) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+
+      tbody.innerHTML = [...piezas].map(p => {
+        const c = cotsByCliente[p] || { costoProd: 0, ganEsp: 0 };
+        const ingresos = ventasByPieza[p] || 0;
+        const ganReal = ingresos - c.costoProd;
+        const margen = ingresos > 0 ? ((ganReal / ingresos) * 100).toFixed(1) : '—';
+        const mColor = parseFloat(margen) >= 30 ? '#22c55e' : parseFloat(margen) >= 15 ? '#eab308' : '#ef4444';
+        return `<tr>
+          <td>${p}</td>
+          <td style="text-align:right;color:var(--text-muted);">${fmt(c.costoProd)}</td>
+          <td style="text-align:right;color:#a78bfa;">${fmt(c.ganEsp)}</td>
+          <td style="text-align:right;color:#22c55e;">${fmt(ingresos)}</td>
+          <td style="text-align:right;color:${ganReal >= 0 ? '#22c55e' : '#ef4444'};font-weight:700;">${fmt(ganReal)}</td>
+          <td style="text-align:right;color:${margen === '—' ? 'var(--text-dim)' : mColor};">${margen}${margen !== '—' ? '%' : ''}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    function renderEgresos() {
+      const costosProd = DB.cotizaciones.reduce((s, c) => s + (c.costo_base || 0), 0);
+      const matCost    = Object.values(DB.materials).reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
+      const ivaTotal   = DB.cotizaciones.reduce((s, c) => s + (c.iva || 0), 0);
+      const rows = [
+        ['Costos de producción (cotizaciones)', costosProd],
+        ['Valor inventario materiales actual', matCost],
+        ['IVA generado en cotizaciones', ivaTotal],
+      ];
+      const total = rows.reduce((s, [, v]) => s + v, 0);
+      document.getElementById('tbody-egresos').innerHTML = rows.map(([c, v]) =>
+        `<tr>
+          <td>${c}</td>
+          <td style="text-align:right;color:var(--primary);font-weight:600;">${fmt(v)}</td>
+          <td style="text-align:right;color:var(--text-dim);">${total > 0 ? ((v / total) * 100).toFixed(1) : 0}%</td>
+        </tr>`).join('');
+    }
+
+    function renderAll() {
+      renderKPIs();
+      renderDetalle();
+      renderEgresos();
+      setTimeout(renderCharts, 50);
+    }
+
+    function toggleMobile() {
+      const btn = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    loadDB();
+    renderAll();
+  </script>
+</body>
+</html>

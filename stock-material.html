@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Stock Material</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px;
+      text-transform: uppercase; color: var(--text-dim);
+    }
+    .field input, .field select {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
+      font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
+      -moz-appearance: textfield;
+    }
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+    .grid-5 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; }
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+    .form-card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+    .msg { font-size: 0.8rem; margin-top: 6px; min-height: 20px; }
+    /* Material items */
+    .mat-item {
+      display: grid; grid-template-columns: 1fr 90px 90px 80px auto;
+      gap: 12px; align-items: center;
+      padding: 16px 20px; margin-bottom: 10px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); transition: border-color 180ms, transform 180ms;
+    }
+    .mat-item:hover { border-color: rgba(255,255,255,0.18); transform: translateX(2px); }
+    .mat-info {}
+    .mat-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
+    .mat-sub { font-size: 0.75rem; color: var(--text-dim); }
+    .mat-stat { text-align: center; }
+    .mat-stat-val { font-size: 0.95rem; font-weight: 800; }
+    .mat-stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-top: 2px; }
+    .pbar { height: 5px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; margin-top: 5px; width: 100%; max-width: 80px; }
+    .pbar-fill { height: 100%; border-radius: 99px; }
+    .pbar-green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+    .pbar-yellow { background: linear-gradient(90deg, #eab308, #fbbf24); }
+    .pbar-red { background: linear-gradient(90deg, #ef4444, #f87171); }
+    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
+    .empty-state svg { margin: 0 auto 12px; opacity: 0.4; }
+    #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    @media (max-width: 800px) {
+      .grid-5 { grid-template-columns: 1fr 1fr; }
+      .mat-item { grid-template-columns: 1fr auto; }
+      .mat-stat { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav id="navbar" role="navigation" aria-label="Navegación principal">
+    <a class="nav-logo" href="index.html">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+      <a class="nav-link" href="cotizador.html">Cotizador</a>
+      <a class="nav-link active" href="stock-material.html">Stock Mat.</a>
+      <a class="nav-link" href="ventas.html">Ventas</a>
+      <a class="nav-link" href="finanzas.html">Finanzas</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menú" onclick="toggleMobile()"><span></span><span></span><span></span></button>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+    <a class="nav-link" href="cotizador.html">Cotizador</a>
+    <a class="nav-link active" href="stock-material.html">Stock Material</a>
+    <a class="nav-link" href="stock-piezas.html">Stock Piezas</a>
+    <a class="nav-link" href="ventas.html">Ventas</a>
+    <a class="nav-link" href="finanzas.html">Finanzas</a>
+  </div>
+
+  <div class="page-container">
+    <div class="dash-layout">
+
+      <aside class="dash-sidebar">
+        <p class="sidebar-section-title">Sistema</p>
+        <a class="sidebar-link" href="dashboard.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+        <div class="sidebar-divider"></div>
+        <p class="sidebar-section-title">Módulos</p>
+        <a class="sidebar-link" href="cotizador.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+          Cotizador
+        </a>
+        <a class="sidebar-link active" href="stock-material.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Stock Material
+        </a>
+        <a class="sidebar-link" href="stock-piezas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          Stock Piezas
+        </a>
+        <a class="sidebar-link" href="ventas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Ventas
+        </a>
+        <a class="sidebar-link" href="finanzas.html">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          Finanzas
+        </a>
+      </aside>
+
+      <main class="dash-main">
+        <div class="dash-header">
+          <div>
+            <h1 class="dash-title">Stock de Material</h1>
+            <p class="dash-subtitle">Inventario de filamentos · Cambios se sincronizan con el cotizador.</p>
+          </div>
+        </div>
+
+        <!-- Add form -->
+        <div class="form-card">
+          <div class="form-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Agregar / Restock material
+          </div>
+          <div class="grid-5">
+            <div class="field"><label>Marca</label><input type="text" id="mat-marca" placeholder="Creality" /></div>
+            <div class="field"><label>Material</label><input type="text" id="mat-tipo" placeholder="PLA MATTE" /></div>
+            <div class="field"><label>Color</label><input type="text" id="mat-color" placeholder="Azul" /></div>
+            <div class="field"><label>Peso (g)</label><input type="number" id="mat-peso" placeholder="1000" min="1" /></div>
+            <div class="field"><label>Precio / kg ($)</label><input type="number" id="mat-costo" placeholder="399" min="0" step="1" /></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="agregarMaterial()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+              Guardar
+            </button>
+            <button class="btn btn-ghost" onclick="limpiarForm()">Limpiar</button>
+          </div>
+          <div class="msg" id="form-msg"></div>
+        </div>
+
+        <!-- KPI row -->
+        <div class="kpi-grid" style="margin-bottom:24px;" id="kpi-row"></div>
+
+        <!-- Stock list -->
+        <div style="font-size:0.8rem;font-weight:700;letter-spacing:0.5px;color:var(--text-dim);margin-bottom:12px;text-transform:uppercase;">Stock actual</div>
+        <div id="mat-list"></div>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const DB = { materials: {} };
+
+    function loadDB() {
+      try { const m = localStorage.getItem('mp_materials'); if (m) DB.materials = JSON.parse(m); } catch(e) {}
+    }
+    function saveDB() {
+      try { localStorage.setItem('mp_materials', JSON.stringify(DB.materials)); } catch(e) {}
+    }
+
+    const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function showToast(msg) {
+      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
+    }
+    function matsSorted() {
+      return Object.values(DB.materials).sort((a, b) => (a.marca + a.tipo + a.color).localeCompare(b.marca + b.tipo + b.color));
+    }
+    function matLabel(m) { return `${m.marca} · ${m.tipo} · ${m.color}`; }
+    function matId(marca, tipo, color) {
+      return (marca + '-' + tipo + '-' + color).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+
+    async function agregarMaterial() {
+      const marca = document.getElementById('mat-marca').value.trim().toUpperCase();
+      const tipo  = document.getElementById('mat-tipo').value.trim().toUpperCase();
+      const color = document.getElementById('mat-color').value.trim().toUpperCase();
+      const peso  = parseFloat(document.getElementById('mat-peso').value);
+      const costo = parseFloat(document.getElementById('mat-costo').value);
+      const msg   = document.getElementById('form-msg');
+
+      if (!marca || !tipo || !color) { msg.innerHTML = '<span style="color:#ef4444;">Completa marca, material y color.</span>'; return; }
+      if (!peso || peso <= 0) { msg.innerHTML = '<span style="color:#ef4444;">Peso inválido.</span>'; return; }
+      if (isNaN(costo) || costo < 0) { msg.innerHTML = '<span style="color:#ef4444;">Precio inválido.</span>'; return; }
+
+      const id = matId(marca, tipo, color);
+      const existing = DB.materials[id];
+      if (existing) {
+        DB.materials[id] = { ...existing, pesoTotal: existing.pesoTotal + peso, costo, marca, tipo, color };
+        msg.innerHTML = `<span style="color:var(--primary);">Actualizado: ${matLabel(DB.materials[id])} — total: ${DB.materials[id].pesoTotal}g</span>`;
+      } else {
+        DB.materials[id] = { id, marca, tipo, color, pesoTotal: peso, costo };
+        msg.innerHTML = `<span style="color:var(--primary);">Agregado: ${matLabel(DB.materials[id])}</span>`;
+      }
+      saveDB();
+      renderKPIs();
+      renderList();
+      limpiarForm();
+    }
+
+    function limpiarForm() {
+      ['mat-marca','mat-tipo','mat-color','mat-peso','mat-costo'].forEach(id => document.getElementById(id).value = '');
+      setTimeout(() => document.getElementById('form-msg').innerHTML = '', 2500);
+    }
+
+    function editarPeso(id, val) {
+      if (DB.materials[id]) { DB.materials[id].pesoTotal = Math.max(0, parseFloat(val) || 0); saveDB(); renderKPIs(); }
+    }
+
+    async function eliminarMaterial(id) {
+      if (!confirm(`Eliminar "${matLabel(DB.materials[id])}"?`)) return;
+      delete DB.materials[id];
+      saveDB();
+      renderKPIs();
+      renderList();
+      showToast('Material eliminado');
+    }
+
+    function renderKPIs() {
+      const mats = matsSorted();
+      const totalVal = mats.reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
+      const totalPeso = mats.reduce((s, m) => s + m.pesoTotal, 0);
+      const criticos = mats.filter(m => m.pesoTotal <= 200).length;
+      document.getElementById('kpi-row').innerHTML = `
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Materiales</div><div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div></div>
+          <div class="kpi-value">${mats.length}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">tipos en stock</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Peso total</div><div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+          <div class="kpi-value">${(totalPeso / 1000).toFixed(2)}<span style="font-size:1rem;font-weight:500;color:var(--text-dim);">kg</span></div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">${totalPeso.toLocaleString('es-MX')}g en total</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Valor inventario</div><div class="kpi-icon" style="background:rgba(167,139,250,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.5rem;">${fmt(totalVal)}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">en materiales</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-label">Stock crítico</div><div class="kpi-icon" style="background:rgba(239,68,68,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div></div>
+          <div class="kpi-value" style="color:${criticos > 0 ? '#ef4444' : '#22c55e'};">${criticos}</div>
+          <div class="kpi-change neutral" style="color:var(--text-dim);">materiales ≤ 200g</div>
+        </div>`;
+    }
+
+    function renderList() {
+      const container = document.getElementById('mat-list');
+      const mats = matsSorted();
+      if (!mats.length) {
+        container.innerHTML = `<div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:6px;">Sin materiales registrados</p>
+          <p style="font-size:0.8rem;">Agrega tu primer filamento usando el formulario.</p>
+        </div>`;
+        return;
+      }
+      container.innerHTML = mats.map(m => {
+        const pct = Math.min(100, (m.pesoTotal / 1000) * 100);
+        const barCls = m.pesoTotal > 500 ? 'pbar-green' : m.pesoTotal > 200 ? 'pbar-yellow' : 'pbar-red';
+        const badgeCls = m.pesoTotal > 500 ? 'badge-success' : m.pesoTotal > 200 ? 'badge-warning' : 'badge-error';
+        const badgeTxt = m.pesoTotal > 500 ? 'OK' : m.pesoTotal > 200 ? 'Bajo' : 'Crítico';
+        const valorMat = (m.pesoTotal / 1000) * m.costo;
+        return `<div class="mat-item">
+          <div class="mat-info">
+            <div class="mat-name">${m.marca} · ${m.tipo} · ${m.color}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+              <div class="pbar" style="max-width:120px;"><div class="pbar-fill ${barCls}" style="width:${pct.toFixed(0)}%;"></div></div>
+              <span class="badge ${badgeCls}">${badgeTxt}</span>
+            </div>
+          </div>
+          <div class="mat-stat">
+            <input type="number" value="${m.pesoTotal}" min="0" style="width:72px;padding:4px 6px;font-size:0.82rem;text-align:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);outline:none;" onchange="editarPeso('${m.id}', this.value)" />
+            <div class="mat-stat-lbl">g stock</div>
+          </div>
+          <div class="mat-stat">
+            <div class="mat-stat-val">${fmt(m.costo)}</div>
+            <div class="mat-stat-lbl">$/kg</div>
+          </div>
+          <div class="mat-stat">
+            <div class="mat-stat-val" style="color:var(--primary);">${fmt(valorMat)}</div>
+            <div class="mat-stat-lbl">valor</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="eliminarMaterial('${m.id}')">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function toggleMobile() {
+      const btn = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    loadDB();
+    renderKPIs();
+    renderList();
+  </script>
+</body>
+</html>
