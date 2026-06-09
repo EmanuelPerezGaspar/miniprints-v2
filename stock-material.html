@@ -363,16 +363,26 @@
       const msg = document.getElementById('import-msg');
       if (!raw) { msg.innerHTML = '<span style="color:#ef4444;">Pega el JSON primero.</span>'; return; }
       let data;
-      try { data = JSON.parse(raw); } catch(e) { msg.innerHTML = '<span style="color:#ef4444;">JSON inválido. Copia exactamente lo que devuelve la consola.</span>'; return; }
-      if (typeof data !== 'object' || Array.isArray(data)) { msg.innerHTML = '<span style="color:#ef4444;">Formato incorrecto. Debe ser un objeto con los materiales.</span>'; return; }
+      try { data = JSON.parse(raw); } catch(e) { msg.innerHTML = '<span style="color:#ef4444;">JSON inválido.</span>'; return; }
+      // Normalize: accept array (Supabase format) or object (localStorage format)
+      const rows = Array.isArray(data) ? data : Object.values(data);
+      if (!rows.length) { msg.innerHTML = '<span style="color:#ef4444;">El JSON está vacío.</span>'; return; }
       let added = 0, updated = 0;
-      Object.values(data).forEach(m => {
+      rows.forEach(m => {
         if (!m.id || !m.marca) return;
-        if (DB.materials[m.id]) updated++; else added++;
-        DB.materials[m.id] = m;
+        const normalized = {
+          id: m.id,
+          marca: m.marca,
+          tipo: m.tipo,
+          color: m.color,
+          pesoTotal: parseFloat(m.pesoTotal ?? m.peso_total ?? 1000),
+          costo: parseFloat(m.costo ?? 0),
+        };
+        if (DB.materials[normalized.id]) updated++; else added++;
+        DB.materials[normalized.id] = normalized;
       });
       saveDB();
-      msg.innerHTML = `<span style="color:#22c55e;">✓ Importados: ${added} nuevos, ${updated} actualizados.</span>`;
+      msg.innerHTML = `<span style="color:#22c55e;">✓ ${added} materiales nuevos, ${updated} actualizados.</span>`;
       renderKPIs();
       renderList();
       setTimeout(cerrarImport, 1800);
