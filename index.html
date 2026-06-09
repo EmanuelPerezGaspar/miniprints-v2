@@ -89,8 +89,10 @@
     .falling-bg-overlay {
       position: absolute;
       inset: 0;
-      background-image: radial-gradient(circle at 50% 50%, transparent 0, transparent 4px, rgba(10,15,26,0.88) 4px);
-      background-size: 14px 14px;
+      backdrop-filter: blur(1em);
+      -webkit-backdrop-filter: blur(1em);
+      background-image: radial-gradient(circle at 50% 50%, transparent 0, transparent 2px, #0a0f1a 2px);
+      background-size: 8px 8px;
     }
     @keyframes fallingPattern {
       from {
@@ -117,11 +119,11 @@
           100px 5119px, 103px 5119px, 251.5px 5221px,
           125px 8428px, 128px 8428px, 276.5px 8495px,
           150px 9876px, 153px 9876px, 301.5px 9965.5px,
-          175px 14640px, 178px 14640px, 326.5px 14789.5px,
-          200px 12584px, 203px 12584px, 351.5px 12691.5px,
-          225px 14784px, 228px 14784px, 376.5px 14920.5px,
-          250px 5282px, 253px 5282px, 401.5px 5387px,
-          275px 6825px, 278px 6825px, 426.5px 6930px;
+          175px 13391px, 178px 13391px, 326.5px 13540.5px,
+          200px 14741px, 203px 14741px, 351.5px 14848.5px,
+          225px 18770px, 228px 18770px, 376.5px 18910.5px,
+          250px 5082px, 253px 5082px, 401.5px 5161px,
+          275px 6375px, 278px 6375px, 426.5px 6480px;
       }
     }
 
