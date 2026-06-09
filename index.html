@@ -22,36 +22,6 @@
       color: #f1f5f9;
     }
 
-    /* ── Gradient Dots background ───────────────────── */
-    #bg {
-      position: fixed;
-      inset: 0;
-      background-color: #0a0f1a;
-      background-image:
-        radial-gradient(circle at 50% 50%, transparent 1.5px, #0a0f1a 0 8px, transparent 8px),
-        radial-gradient(circle at 50% 50%, transparent 1.5px, #0a0f1a 0 8px, transparent 8px),
-        radial-gradient(circle at 50% 50%, #f00, transparent 60%),
-        radial-gradient(circle at 50% 50%, #ff0, transparent 60%),
-        radial-gradient(circle at 50% 50%, #0f0, transparent 60%),
-        radial-gradient(ellipse  at 50% 50%, #00f, transparent 60%);
-      background-size:
-        10px 17.32px, 10px 17.32px,
-        200% 200%, 200% 200%, 200% 200%, 200% 17.32px;
-      background-position:
-        0px 0px, 5px 8.66px,
-        800% 400%, 1000% -400%, -1200% -600%, 400% 17.32px;
-      animation: dots-move 30s linear infinite, dots-hue 6s linear infinite;
-      z-index: 0;
-    }
-    @keyframes dots-move {
-      0%   { background-position: 0px 0px, 5px 8.66px, 800% 400%,  1000% -400%, -1200% -600%, 400% 17.32px; }
-      100% { background-position: 0px 0px, 5px 8.66px, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
-    }
-    @keyframes dots-hue {
-      from { filter: hue-rotate(0deg); }
-      to   { filter: hue-rotate(360deg); }
-    }
-
     /* ── Orbital container ──────────────────────────── */
     #orbital {
       position: fixed;
@@ -322,8 +292,8 @@
 </head>
 <body>
 
-  <!-- Background -->
-  <div id="bg" aria-hidden="true"></div>
+  <!-- Falling pattern background -->
+  <div class="falling-bg" aria-hidden="true"><div class="falling-bg-anim"></div><div class="falling-bg-overlay"></div></div>
 
   <!-- Orbital menu -->
   <div id="orbital" role="navigation" aria-label="Menú de navegación">
