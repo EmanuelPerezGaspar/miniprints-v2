@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Pedidos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" role="navigation" aria-label="Navegación principal">
+    <a class="nav-logo" href="index.html" aria-label="MiniPrints inicio">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links" role="menubar">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link" href="products.html">Productos</a>
+      <a class="nav-link active" href="orders.html" aria-current="page">Pedidos</a>
+      <a class="nav-link" href="clients.html">Clientes</a>
+      <a class="nav-link" href="reports.html">Reportes</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo pedido
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu" role="menu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link" href="products.html">Productos</a>
+    <a class="nav-link active" href="orders.html">Pedidos</a>
+    <a class="nav-link" href="clients.html">Clientes</a>
+    <a class="nav-link" href="reports.html">Reportes</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="page-container">
+    <div class="inner-page">
+      <div class="inner-header">
+        <div>
+          <h1 class="inner-title">Gestión de Pedidos</h1>
+          <p class="inner-subtitle">184 pedidos este mes · 12 pendientes · 3 atrasados</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-ghost">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar
+          </button>
+          <button class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo pedido
+          </button>
+        </div>
+      </div>
+
+      <!-- Status summary -->
+      <div class="placeholder-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-bottom:28px;">
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--primary); margin-bottom:4px;">108</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Entregados</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#3b82f6; margin-bottom:4px;">42</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">En producción</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#eab308; margin-bottom:4px;">22</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Pendientes</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#ef4444; margin-bottom:4px;">12</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Atrasados</div>
+        </div>
+      </div>
+
+      <!-- Orders table -->
+      <div class="empty-table">
+        <div class="table-head">
+          <span class="table-title">Todos los pedidos</span>
+          <div style="display:flex; gap:8px;">
+            <select style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text-muted); font-family:var(--font); font-size:0.8rem; padding:6px 12px; outline:none; cursor:pointer;" aria-label="Filtrar por estado">
+              <option>Todos los estados</option>
+              <option>Entregados</option>
+              <option>En producción</option>
+              <option>Pendientes</option>
+              <option>Atrasados</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col"># Pedido</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Producto</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Monto</th>
+                <th scope="col">Fecha entrega</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>#P-1084</td><td>Laura Méndez</td><td>Tarjetas de visita</td><td>500 u.</td><td>$85.00</td><td>05 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
+              <tr><td>#P-1083</td><td>Tech Corp SA</td><td>Banner 3×1m</td><td>2 u.</td><td>$340.00</td><td>10 Jun 2025</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>En producción</span></td></tr>
+              <tr><td>#P-1082</td><td>Carlos Ruiz</td><td>Flyers A5</td><td>500 u.</td><td>$120.00</td><td>12 Jun 2025</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Pendiente</span></td></tr>
+              <tr><td>#P-1081</td><td>Bakery Dulce</td><td>Etiquetas adhesivas</td><td>300 u.</td><td>$210.00</td><td>03 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
+              <tr><td>#P-1080</td><td>Juan Pérez</td><td>Carpetas corporativas</td><td>100 u.</td><td>$480.00</td><td>11 Jun 2025</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>En producción</span></td></tr>
+              <tr><td>#P-1079</td><td>Ana Villalobos</td><td>Roll-up 85×200cm</td><td>1 u.</td><td>$195.00</td><td>01 Jun 2025</td><td><span class="badge badge-error"><span class="badge-dot" style="background:#ef4444;"></span>Atrasado</span></td></tr>
+              <tr><td>#P-1078</td><td>Moda Urbana</td><td>Catálogo 24 pág.</td><td>100 u.</td><td>$720.00</td><td>02 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Entregado</span></td></tr>
+              <tr><td>#P-1077</td><td>Empresa XYZ</td><td>Brochure tri-fold</td><td>1000 u.</td><td>$380.00</td><td>14 Jun 2025</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Pendiente</span></td></tr>
+              <tr><td>#P-1076</td><td>Restaurante Sol</td><td>Menús laminados</td><td>50 u.</td><td>$240.00</td><td>08 Jun 2025</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>En producción</span></td></tr>
+              <tr><td>#P-1075</td><td>María Castro</td><td>Invitaciones boda</td><td>200 u.</td><td>$310.00</td><td>20 Jun 2025</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Pendiente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMobile() {
+      const btn  = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
+</body>
+</html>

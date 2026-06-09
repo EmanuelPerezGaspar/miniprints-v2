@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Inicio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Variables ──────────────────────────────────── */
+    :root {
+      --primary: #22c55e;
+      --font: 'Plus Jakarta Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: #0a0f1a;
+      color: #f1f5f9;
+    }
+
+    /* ── Gradient Dots background ───────────────────── */
+    #bg {
+      position: fixed;
+      inset: 0;
+      background-color: #0a0f1a;
+      background-image:
+        radial-gradient(circle at 50% 50%, transparent 1.5px, #0a0f1a 0 8px, transparent 8px),
+        radial-gradient(circle at 50% 50%, transparent 1.5px, #0a0f1a 0 8px, transparent 8px),
+        radial-gradient(circle at 50% 50%, #f00, transparent 60%),
+        radial-gradient(circle at 50% 50%, #ff0, transparent 60%),
+        radial-gradient(circle at 50% 50%, #0f0, transparent 60%),
+        radial-gradient(ellipse  at 50% 50%, #00f, transparent 60%);
+      background-size:
+        10px 17.32px, 10px 17.32px,
+        200% 200%, 200% 200%, 200% 200%, 200% 17.32px;
+      background-position:
+        0px 0px, 5px 8.66px,
+        800% 400%, 1000% -400%, -1200% -600%, 400% 17.32px;
+      animation: dots-move 30s linear infinite, dots-hue 6s linear infinite;
+      z-index: 0;
+    }
+    @keyframes dots-move {
+      0%   { background-position: 0px 0px, 5px 8.66px, 800% 400%,  1000% -400%, -1200% -600%, 400% 17.32px; }
+      100% { background-position: 0px 0px, 5px 8.66px, 0% 0%, 0% 0%, 0% 0%, 0% 0%; }
+    }
+    @keyframes dots-hue {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(360deg); }
+    }
+
+    /* ── Orbital container ──────────────────────────── */
+    #orbital {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+    }
+
+    /* ── Orbit ring ─────────────────────────────────── */
+    .orbit-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    /* ── Center orb ─────────────────────────────────── */
+    #center-orb {
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a78bfa, #3b82f6, #22c55e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      cursor: pointer;
+    }
+    #center-orb .ping1, #center-orb .ping2 {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.20);
+      animation: ping 2s cubic-bezier(0,0,0.2,1) infinite;
+      pointer-events: none;
+    }
+    #center-orb .ping1 { width: 90px;  height: 90px;  animation-delay: 0s; }
+    #center-orb .ping2 { width: 110px; height: 110px; animation-delay: 0.6s; opacity: 0.6; }
+    @keyframes ping {
+      0%   { transform: scale(1);   opacity: 0.6; }
+      80%  { transform: scale(1.2); opacity: 0; }
+      100% { transform: scale(1.2); opacity: 0; }
+    }
+    #center-orb .inner {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #center-orb .inner svg { color: #0a0f1a; }
+
+    /* Center label */
+    #center-label {
+      position: absolute;
+      top: calc(50% + 52px);
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    #center-label .brand {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.9), 0 0 24px rgba(0,0,0,0.7);
+    }
+    #center-label .brand em { color: #22c55e; font-style: normal; }
+    #center-label .sub {
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.70);
+      margin-top: 2px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+    }
+
+    /* ── Nodes ──────────────────────────────────────── */
+    .node {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      will-change: transform, opacity;
+    }
+
+    /* Glow halo behind icon */
+    .node-halo {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+      width: 70px; height: 70px;
+      top: -15px; left: -15px;
+      pointer-events: none;
+      transition: opacity 300ms;
+      opacity: 0;
+    }
+    .node.pulsing .node-halo { opacity: 1; animation: pulse-halo 1s ease-in-out infinite; }
+    @keyframes pulse-halo {
+      0%, 100% { transform: scale(1);   opacity: 0.8; }
+      50%       { transform: scale(1.3); opacity: 0.3; }
+    }
+
+    .node-icon {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.35);
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.85);
+      transition: all 300ms cubic-bezier(0.34,1.56,0.64,1);
+      position: relative;
+      z-index: 2;
+    }
+    .node:hover .node-icon {
+      border-color: rgba(255,255,255,0.70);
+      background: rgba(255,255,255,0.12);
+    }
+    .node.active .node-icon {
+      background: #ffffff;
+      color: #0a0f1a;
+      border-color: #ffffff;
+      transform: scale(1.45);
+      box-shadow: 0 0 24px rgba(255,255,255,0.35), 0 0 8px rgba(255,255,255,0.20);
+    }
+
+    .node-label {
+      margin-top: 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #ffffff;
+      white-space: nowrap;
+      transition: all 300ms;
+      position: relative;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.82);
+      padding: 3px 8px;
+      border-radius: 99px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .node:hover .node-label  { background: rgba(0,0,0,0.92); border-color: rgba(255,255,255,0.28); }
+    .node.active .node-label { background: rgba(0,0,0,0.85); border-color: rgba(34,197,94,0.60); color: #ffffff; transform: scale(1.1); }
+
+    /* ── Popup card ─────────────────────────────────── */
+    .node-card {
+      position: absolute;
+      width: 200px;
+      background: rgba(8, 12, 22, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow:
+        0 16px 48px rgba(0,0,0,0.60),
+        inset 0 1px 0 rgba(255,255,255,0.10);
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.88) translateY(6px);
+      transition: opacity 250ms ease, transform 250ms cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 300;
+    }
+    .node-card.visible {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* connector line from icon to card */
+    .node-card::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 1px;
+      height: 14px;
+      background: rgba(255,255,255,0.30);
+    }
+    .node-card.above::before { bottom: -14px; }
+    .node-card.below::before { top:    -14px; }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.50);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .card-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 12px;
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 180ms, transform 180ms;
+      text-decoration: none;
+    }
+    .card-btn:hover { background: #16a34a; transform: translateY(-1px); }
+
+    /* ── Connection lines ───────────────────────────── */
+    #connections-svg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    /* ── Hint ───────────────────────────────────────── */
+    #hint {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.70);
+      letter-spacing: 0.8px;
+      z-index: 5;
+      pointer-events: none;
+      background: rgba(0,0,0,0.50);
+      padding: 4px 14px;
+      border-radius: 99px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #bg { animation: none; }
+      .node-card { transition: none; }
+    }
+    @media (max-width: 480px) {
+      #center-orb { width: 56px; height: 56px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background -->
+  <div id="bg" aria-hidden="true"></div>
+
+  <!-- Orbital menu -->
+  <div id="orbital" role="navigation" aria-label="Menú de navegación">
+
+    <!-- SVG connection lines (drawn by JS) -->
+    <svg id="connections-svg" aria-hidden="true"></svg>
+
+    <!-- Orbit rings -->
+    <div class="orbit-ring" style="width:400px; height:400px;" aria-hidden="true"></div>
+    <div class="orbit-ring" style="width:500px; height:500px; border-color:rgba(255,255,255,0.04);" aria-hidden="true"></div>
+
+    <!-- Center orb -->
+    <div id="center-orb" title="MiniPrints" aria-label="MiniPrints inicio">
+      <div class="ping1" aria-hidden="true"></div>
+      <div class="ping2" aria-hidden="true"></div>
+      <div class="inner">
+        <svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+          <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="2"/>
+          <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+          <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Brand label -->
+    <div id="center-label" aria-hidden="true">
+      <div class="brand">Mini<em>Prints</em></div>
+      <div class="sub">Sistema de gestión</div>
+    </div>
+
+  </div>
+
+  <!-- Hint -->
+  <p id="hint">Haz clic en un nodo para navegar</p>
+
+  <script>
+    /* ── Pages data ───────────────────────────────────── */
+    const pages = [
+      {
+        id: 1, title: 'Dashboard', url: 'dashboard.html',
+        desc: 'Panel de control con KPIs, gráficos y pedidos recientes.',
+        icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+      },
+      {
+        id: 2, title: 'Pedidos', url: 'orders.html',
+        desc: 'Crea y rastrea pedidos en tiempo real con control de estado.',
+        icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>`,
+      },
+      {
+        id: 3, title: 'Productos', url: 'products.html',
+        desc: 'Catálogo completo con precios, materiales y especificaciones.',
+        icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>`,
+      },
+      {
+        id: 4, title: 'Clientes', url: 'clients.html',
+        desc: 'Historial de clientes, pedidos y datos de contacto.',
+        icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+      },
+      {
+        id: 5, title: 'Reportes', url: 'reports.html',
+        desc: 'Métricas de ingresos, productos top y tendencias del negocio.',
+        icon: `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+      },
+    ];
+
+    /* ── State ────────────────────────────────────────── */
+    let rotationAngle = 0;
+    let autoRotate    = true;
+    let activeId      = null;
+    let rafId         = null;
+    let lastTime      = null;
+    const SPEED_DEG_PER_SEC = 8; // degrees per second
+    const RADIUS = 180;
+
+    /* ── Build DOM ────────────────────────────────────── */
+    const container = document.getElementById('orbital');
+    const svg       = document.getElementById('connections-svg');
+    const nodeEls   = {};
+
+    pages.forEach(page => {
+      const wrap = document.createElement('div');
+      wrap.className = 'node';
+      wrap.setAttribute('role', 'menuitem');
+      wrap.setAttribute('aria-label', page.title);
+      wrap.dataset.id = page.id;
+
+      wrap.innerHTML = `
+        <div class="node-halo"></div>
+        <div class="node-icon">${page.icon}</div>
+        <div class="node-label">${page.title}</div>
+        <div class="node-card" role="tooltip">
+          <div class="card-title">${page.title}</div>
+          <div class="card-desc">${page.desc}</div>
+          <a class="card-btn" href="${page.url}">
+            Abrir
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      `;
+
+      wrap.addEventListener('click', e => { e.stopPropagation(); toggleNode(page.id); });
+      container.appendChild(wrap);
+      nodeEls[page.id] = wrap;
+    });
+
+    /* ── Toggle node ─────────────────────────────────── */
+    function toggleNode(id) {
+      if (activeId === id) {
+        closeAll();
+        return;
+      }
+      // Close previous
+      if (activeId !== null) {
+        nodeEls[activeId].classList.remove('active', 'pulsing');
+        nodeEls[activeId].querySelector('.node-card').classList.remove('visible');
+      }
+      activeId = id;
+      autoRotate = false;
+
+      const el   = nodeEls[id];
+      const card = el.querySelector('.node-card');
+      el.classList.add('active');
+
+      // Position card above or below based on current y
+      const idx = pages.findIndex(p => p.id === id);
+      const pos = calcPos(idx, pages.length, rotationAngle);
+      positionCard(el, card, pos.y);
+      card.classList.add('visible');
+
+      // Pulse related nodes (all others)
+      pages.forEach(p => {
+        if (p.id !== id) nodeEls[p.id].classList.add('pulsing');
+      });
+    }
+
+    function closeAll() {
+      if (activeId !== null) {
+        nodeEls[activeId].classList.remove('active');
+        nodeEls[activeId].querySelector('.node-card').classList.remove('visible');
+      }
+      pages.forEach(p => nodeEls[p.id].classList.remove('pulsing'));
+      activeId   = null;
+      autoRotate = true;
+    }
+
+    /* click outside closes */
+    container.addEventListener('click', closeAll);
+    document.getElementById('center-orb').addEventListener('click', e => { e.stopPropagation(); closeAll(); });
+
+    /* ── Card position (above or below node) ─────────── */
+    function positionCard(nodeEl, card, posY) {
+      if (posY > 0) {
+        card.style.top    = 'auto';
+        card.style.bottom = '58px';
+        card.classList.remove('below');
+        card.classList.add('above');
+      } else {
+        card.style.bottom = 'auto';
+        card.style.top    = '58px';
+        card.classList.remove('above');
+        card.classList.add('below');
+      }
+    }
+
+    /* ── Calculate node position ─────────────────────── */
+    function calcPos(index, total, angle) {
+      const deg    = ((index / total) * 360 + angle) % 360;
+      const rad    = (deg * Math.PI) / 180;
+      const x      = RADIUS * Math.cos(rad);
+      const y      = RADIUS * Math.sin(rad);
+      const zIndex = Math.round(100 + 50 * Math.cos(rad));
+      const opacity = Math.max(0.35, Math.min(1, 0.35 + 0.65 * ((1 + Math.sin(rad)) / 2)));
+      return { x, y, zIndex, opacity, rad };
+    }
+
+    /* ── Draw connection lines ───────────────────────── */
+    function drawConnections(positions) {
+      svg.innerHTML = '';
+      if (activeId === null) return;
+
+      const cx = container.offsetWidth  / 2;
+      const cy = container.offsetHeight / 2;
+      const activePos = positions[activeId];
+      if (!activePos) return;
+
+      pages.forEach(p => {
+        if (p.id === activeId) return;
+        const pos = positions[p.id];
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', cx + activePos.x);
+        line.setAttribute('y1', cy + activePos.y);
+        line.setAttribute('x2', cx + pos.x);
+        line.setAttribute('y2', cy + pos.y);
+        line.setAttribute('stroke', 'rgba(255,255,255,0.08)');
+        line.setAttribute('stroke-width', '1');
+        line.setAttribute('stroke-dasharray', '4 6');
+        svg.appendChild(line);
+      });
+    }
+
+    /* ── Animation loop ──────────────────────────────── */
+    function tick(timestamp) {
+      if (lastTime === null) lastTime = timestamp;
+      const delta = (timestamp - lastTime) / 1000; // seconds
+      lastTime = timestamp;
+
+      if (autoRotate) {
+        rotationAngle = (rotationAngle + SPEED_DEG_PER_SEC * delta) % 360;
+      }
+
+      const positions = {};
+
+      pages.forEach((page, i) => {
+        const pos = calcPos(i, pages.length, rotationAngle);
+        positions[page.id] = pos;
+
+        const el = nodeEls[page.id];
+        const isActive = activeId === page.id;
+
+        // translate from center (left:50% top:50%) by orbital offset, then back by half node size (~21px)
+        el.style.transform = `translate(calc(-50% + ${pos.x}px), calc(-50% + ${pos.y}px))`;
+        el.style.zIndex    = isActive ? 200 : pos.zIndex;
+        el.style.opacity   = isActive ? 1 : pos.opacity;
+
+        if (isActive) {
+          const card = el.querySelector('.node-card');
+          if (card.classList.contains('visible')) positionCard(el, card, pos.y);
+        }
+      });
+
+      drawConnections(positions);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    rafId = requestAnimationFrame(tick);
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Clientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" role="navigation" aria-label="Navegación principal">
+    <a class="nav-logo" href="index.html" aria-label="MiniPrints inicio">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links" role="menubar">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link" href="products.html">Productos</a>
+      <a class="nav-link" href="orders.html">Pedidos</a>
+      <a class="nav-link active" href="clients.html" aria-current="page">Clientes</a>
+      <a class="nav-link" href="reports.html">Reportes</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo cliente
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu" role="menu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link" href="products.html">Productos</a>
+    <a class="nav-link" href="orders.html">Pedidos</a>
+    <a class="nav-link active" href="clients.html">Clientes</a>
+    <a class="nav-link" href="reports.html">Reportes</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="page-container">
+    <div class="inner-page">
+      <div class="inner-header">
+        <div>
+          <h1 class="inner-title">Base de Clientes</h1>
+          <p class="inner-subtitle">327 clientes activos · Historial completo de pedidos y contacto.</p>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-ghost">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Importar
+          </button>
+          <button class="btn btn-primary">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo cliente
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary cards -->
+      <div class="placeholder-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); margin-bottom:28px;">
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:var(--primary); margin-bottom:4px;">327</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Activos</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#a78bfa; margin-bottom:4px;">48</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Nuevos este mes</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#3b82f6; margin-bottom:4px;">$56</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Ticket promedio</div>
+        </div>
+        <div class="placeholder-card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:800; color:#eab308; margin-bottom:4px;">12</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Sin actividad 30d</div>
+        </div>
+      </div>
+
+      <!-- Clients table -->
+      <div class="empty-table">
+        <div class="table-head">
+          <span class="table-title">Todos los clientes</span>
+          <button class="btn btn-ghost" style="font-size:0.8rem; padding:6px 14px;">Filtrar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Cliente</th>
+                <th scope="col">Contacto</th>
+                <th scope="col">Pedidos</th>
+                <th scope="col">Total gastado</th>
+                <th scope="col">Último pedido</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Laura Méndez</td><td>laura@email.com</td><td>14</td><td>$1,240.00</td><td>05 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Tech Corp SA</td><td>contacto@techcorp.com</td><td>28</td><td>$8,340.00</td><td>08 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Carlos Ruiz</td><td>carlos.ruiz@email.com</td><td>7</td><td>$640.00</td><td>07 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Bakery Dulce</td><td>pedidos@bakerydulce.com</td><td>22</td><td>$3,120.00</td><td>03 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Juan Pérez</td><td>jperez@email.com</td><td>5</td><td>$1,080.00</td><td>06 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Ana Villalobos</td><td>ana.v@email.com</td><td>3</td><td>$390.00</td><td>28 May 2025</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Inactivo</span></td></tr>
+              <tr><td>Moda Urbana</td><td>pedidos@modaurbana.com</td><td>19</td><td>$4,580.00</td><td>02 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Empresa XYZ</td><td>compras@xyz.com</td><td>11</td><td>$2,200.00</td><td>07 Jun 2025</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Restaurante Sol</td><td>info@restaurantesol.com</td><td>8</td><td>$960.00</td><td>06 Jun 2025</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>Nuevo</span></td></tr>
+              <tr><td>María Castro</td><td>mcastro@email.com</td><td>2</td><td>$310.00</td><td>07 Jun 2025</td><td><span class="badge badge-info"><span class="badge-dot" style="background:#3b82f6;"></span>Nuevo</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMobile() {
+      const btn  = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
+</body>
+</html>

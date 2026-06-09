@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniPrints — Productos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" role="navigation" aria-label="Navegación principal">
+    <a class="nav-logo" href="index.html" aria-label="MiniPrints inicio">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="currentColor" fill-opacity="0.15"/>
+        <rect x="5" y="10" width="18" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M9 10V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3" stroke="currentColor" stroke-width="1.8"/>
+        <circle cx="8.5" cy="14.5" r="1.5" fill="currentColor"/>
+        <rect x="9" y="18" width="10" height="1.5" rx="0.75" fill="currentColor"/>
+      </svg>
+      <span>Mini<em>Prints</em></span>
+    </a>
+    <div class="nav-links" role="menubar">
+      <a class="nav-link" href="index.html">Inicio</a>
+      <a class="nav-link active" href="products.html" aria-current="page">Productos</a>
+      <a class="nav-link" href="orders.html">Pedidos</a>
+      <a class="nav-link" href="clients.html">Clientes</a>
+      <a class="nav-link" href="reports.html">Reportes</a>
+      <a class="nav-link" href="dashboard.html">Dashboard</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo producto
+      </button>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobile()">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu" role="menu">
+    <a class="nav-link" href="index.html">Inicio</a>
+    <a class="nav-link active" href="products.html">Productos</a>
+    <a class="nav-link" href="orders.html">Pedidos</a>
+    <a class="nav-link" href="clients.html">Clientes</a>
+    <a class="nav-link" href="reports.html">Reportes</a>
+    <a class="nav-link" href="dashboard.html">Dashboard</a>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="page-container">
+    <div class="inner-page">
+      <div class="inner-header">
+        <div>
+          <h1 class="inner-title">Catálogo de Productos</h1>
+          <p class="inner-subtitle">Administra todos tus productos de impresión, precios y especificaciones.</p>
+        </div>
+        <button class="btn btn-primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nuevo producto
+        </button>
+      </div>
+
+      <div class="placeholder-grid">
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <h3>Tarjetas de visita</h3>
+          <p>248 vendidas · Desde $45/500u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/></svg></div>
+          <h3>Banners y lonas</h3>
+          <p>134 vendidos · Desde $120/u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+          <h3>Flyers y volantes</h3>
+          <p>186 vendidos · Desde $35/500u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Etiquetas adhesivas</h3>
+          <p>112 vendidas · Desde $25/100u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <h3>Catálogos</h3>
+          <p>89 vendidos · Desde $180/100u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div>
+          <h3>Carpetas corporativas</h3>
+          <p>67 vendidas · Desde $95/50u</p>
+        </div>
+        <div class="placeholder-card">
+          <div class="placeholder-card-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+          <h3>Roll-ups</h3>
+          <p>54 vendidos · Desde $150/u</p>
+        </div>
+        <div class="placeholder-card" style="border-style:dashed; cursor:pointer;">
+          <div class="placeholder-card-icon" style="background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.10);" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <h3 style="color:var(--text-muted);">Agregar producto</h3>
+          <p>Clic para crear un nuevo producto en el catálogo.</p>
+        </div>
+      </div>
+
+      <div class="empty-table">
+        <div class="table-head">
+          <span class="table-title">Todos los productos</span>
+          <button class="btn btn-ghost" style="font-size:0.8rem; padding:6px 14px;">Filtrar</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Producto</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Precio base</th>
+                <th scope="col">Ventas</th>
+                <th scope="col">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Tarjetas de visita (500u)</td><td>Papelería</td><td>$45.00</td><td>248</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Flyers A5 (500u)</td><td>Papelería</td><td>$35.00</td><td>186</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Banner lona 3×1m</td><td>Gran formato</td><td>$120.00</td><td>134</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Etiquetas adhesivas (100u)</td><td>Etiquetas</td><td>$25.00</td><td>112</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Catálogo 24 páginas (100u)</td><td>Catálogos</td><td>$180.00</td><td>89</td><td><span class="badge badge-warning"><span class="badge-dot" style="background:#eab308;"></span>Stock bajo</span></td></tr>
+              <tr><td>Carpetas corporativas (50u)</td><td>Papelería</td><td>$95.00</td><td>67</td><td><span class="badge badge-success"><span class="badge-dot" style="background:#22c55e;"></span>Activo</span></td></tr>
+              <tr><td>Roll-up 85×200cm</td><td>Gran formato</td><td>$150.00</td><td>54</td><td><span class="badge badge-error"><span class="badge-dot" style="background:#ef4444;"></span>Sin stock</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleMobile() {
+      const btn  = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      const open = menu.classList.toggle('open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    }
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
+</body>
+</html>
