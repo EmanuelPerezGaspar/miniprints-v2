@@ -832,10 +832,8 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
 .falling-bg-overlay {
   position: absolute;
   inset: 0;
-  backdrop-filter: blur(1em);
-  -webkit-backdrop-filter: blur(1em);
-  background-image: radial-gradient(circle at 50% 50%, transparent 0, transparent 2px, var(--bg) 2px);
-  background-size: 8px 8px;
+  background-image: radial-gradient(circle at 50% 50%, transparent 0, transparent 4px, rgba(10,15,26,0.88) 4px);
+  background-size: 14px 14px;
 }
 @keyframes fallingPattern {
   from {
