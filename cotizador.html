@@ -156,6 +156,22 @@
       letter-spacing: 0.8px;
       color: var(--text-dim);
     }
+    .mat-select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.875rem;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 180ms;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .mat-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(34,197,94,0.12); }
+    .mat-select option { background: #1e293b; color: var(--text); }
     .mat-row {
       display: grid;
       grid-template-columns: 2fr 1fr 36px;
