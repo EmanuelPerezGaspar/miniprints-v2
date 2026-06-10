@@ -827,6 +827,7 @@
           const d = document.createElement('div');
           d.className = 'time-row';
           const rowPrinter = row.printer || 'A1 MINI';
+          row.printer = rowPrinter;
           const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${rowPrinter===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
             <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value">${opts}</select>
@@ -1131,7 +1132,7 @@
         if (d.singleMatId) state.singleMatId = d.singleMatId;
         if (d.singleGrams) state.singleGrams = d.singleGrams;
         if (d.matRows?.length)  state.matRows  = d.matRows;
-        if (d.timeRows?.length) state.timeRows = d.timeRows;
+        if (d.timeRows?.length) state.timeRows = d.timeRows.map(r => ({ ...r, printer: r.printer || 'A1 MINI' }));
 
         document.getElementById('chk-multicolor').checked = d.multicolor || false;
         document.getElementById('chk-multi-imp').checked  = d.multiImp   || false;
