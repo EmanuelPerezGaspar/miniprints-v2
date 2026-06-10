@@ -304,6 +304,36 @@
     .bc-val { font-size: 1rem; font-weight: 800; color: var(--text); }
     .bc-val.green { color: #22c55e; }
     .bc-val.purple { color: #a78bfa; }
+    /* ML price card */
+    .ml-price-card {
+      background: rgba(251, 191, 36, 0.07);
+      border: 1px solid rgba(251, 191, 36, 0.28);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .ml-price-left { flex: 1; }
+    .ml-price-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: #d97706; margin-bottom: 4px; }
+    .ml-price-val { font-size: 1.6rem; font-weight: 800; color: #fbbf24; line-height: 1; }
+    .ml-price-note { font-size: 0.7rem; color: var(--text-dim); margin-top: 5px; }
+    .ml-price-badge {
+      background: rgba(251,191,36,0.13);
+      border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.7rem;
+      color: #fbbf24;
+      white-space: nowrap;
+    }
+    @media print {
+      .ml-price-card { background: #fffbeb !important; border-color: #fde68a !important; }
+      .ml-price-lbl { color: #b45309 !important; }
+      .ml-price-val { color: #d97706 !important; }
+    }
     /* Tables in result */
     .res-table {
       background: var(--surface);
@@ -592,6 +622,15 @@
                 <div class="breakdown-card" id="bc-unit" style="display:none;"><div class="bc-lbl">Por pieza</div><div class="bc-val green" id="res-unit-card">$0</div></div>
               </div>
 
+              <div class="ml-price-card">
+                <div class="ml-price-left">
+                  <div class="ml-price-lbl">Precio en Mercado Libre</div>
+                  <div class="ml-price-val" id="res-ml-price">$0.00</div>
+                  <div class="ml-price-note" id="res-ml-note">Comisión ~19.1% + envío estimado</div>
+                </div>
+                <div class="ml-price-badge" id="res-ml-badge">ML Premium</div>
+              </div>
+
               <div class="confirm-card">
                 <div class="confirm-card-title">¿Esta cotización se va a imprimir?</div>
                 <div class="confirm-card-sub">Confirmar descuenta materiales y agrega las piezas al inventario.</div>
@@ -860,6 +899,10 @@
         document.getElementById('chk-mo').checked ? 'flex' : 'none';
     }
 
+    /* ── Constantes Mercado Libre ─────────────── */
+    const ML_FEE  = 0.1914; // 16.5% comisión Premium + 16% IVA sobre comisión
+    const ML_SHIP = 80;     // estimado de envío Mercado Envíos (MXN)
+
     /* ── Calcular ─────────────────────────────── */
     function calcular() {
       const printerName = document.getElementById('single-printer')?.value || 'A1 MINI';
@@ -969,6 +1012,14 @@
       document.getElementById('res-costo').textContent = fmt(subtotalFalla);
       document.getElementById('res-ganancia').textContent = fmt(ganancia) + ` (${(margenPct * 100).toFixed(0)}%)`;
       document.getElementById('res-iva').textContent = aplicaIva ? fmt(ivaMonto) : '$0.00';
+
+      // Precio Mercado Libre
+      const precioML = Math.ceil((precioFinal + ML_SHIP) / (1 - ML_FEE));
+      const precioMLUnit = numPiezas > 1 ? fmt(precioML / numPiezas) + ' c/u · ' : '';
+      document.getElementById('res-ml-price').textContent = fmt(precioML);
+      document.getElementById('res-ml-note').textContent =
+        `${precioMLUnit}Comisión ~19.1% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
+      state.lastCalc.precioML = precioML;
 
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
         `<tr>
@@ -1093,6 +1144,7 @@
       msg += `• Costo base: ${fmt(c.subtotalFalla)}\n`;
       msg += `• Ganancia: ${fmt(c.ganancia)}\n`;
       if (c.ivaMonto > 0) msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
+      if (c.precioML) msg += `\n🛒 Precio en Mercado Libre: ${fmt(c.precioML)}\n`;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
 
