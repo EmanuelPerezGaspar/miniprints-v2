@@ -978,11 +978,16 @@
           <td style="text-align:right;color:var(--primary);font-weight:600;">${fmt(d.costo)}</td>
         </tr>`).join('');
 
+      const printerGroups = {};
+      detTiempos.forEach(d => {
+        if (!printerGroups[d.printer]) printerGroups[d.printer] = { t: 0, consumo: d.consumo, desgaste: d.desgaste };
+        printerGroups[d.printer].t += d.t;
+      });
       const filasElec = isMultiImp
-        ? detTiempos.map(d => [`Electricidad ${d.printer} (${d.t.toFixed(2)}h · ${d.consumo}W)`, fmt(d.t * (d.consumo / 1000) * KWH)])
+        ? Object.entries(printerGroups).map(([name, v]) => [`Electricidad ${name} (${v.t.toFixed(2)}h · ${v.consumo}W)`, fmt(v.t * (v.consumo / 1000) * KWH)])
         : [[`Electricidad (${tiempo.toFixed(2)}h · ${printer.consumo}W)`, fmt(costoElec)]];
       const filasMaq = isMultiImp
-        ? detTiempos.map(d => [`Desgaste ${d.printer} (${d.t.toFixed(2)}h)`, fmt(d.t * d.desgaste)])
+        ? Object.entries(printerGroups).map(([name, v]) => [`Desgaste ${name} (${v.t.toFixed(2)}h)`, fmt(v.t * v.desgaste)])
         : [[`Desgaste máquina (${tiempo.toFixed(2)}h)`, fmt(costoMaq)]];
 
       const filas = [
