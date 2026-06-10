@@ -766,7 +766,7 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
   .dash-sidebar { display: none; }
   .dash-main    { padding: 20px 16px; }
   .kpi-grid     { grid-template-columns: repeat(2, 1fr); }
-  .hamburger    { display: flex; order: -1; margin-right: 8px; }
+  .hamburger    { display: flex; margin-left: auto; }
   .nav-links    { display: none; }
   .nav-actions  { display: none; }
   #hero         { padding: 60px 16px; }
