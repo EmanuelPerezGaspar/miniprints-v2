@@ -477,6 +477,12 @@
             <h1 class="dash-title">Cotizador 3D</h1>
             <p class="dash-subtitle">Calcula el precio de impresión considerando materiales, electricidad y margen.</p>
           </div>
+          <div class="dash-toolbar">
+            <button class="btn btn-ghost" onclick="clearDraft()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Nueva cotización
+            </button>
+          </div>
         </div>
 
         <div class="cot-grid">
@@ -1003,6 +1009,7 @@
       const panel = document.getElementById('result-panel');
       panel.style.display = 'block';
       setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      saveDraft();
     }
 
     /* ── Confirm / process print ──────────────── */
@@ -1086,6 +1093,86 @@
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
     }
 
+    /* ── Draft persistence ───────────────────── */
+    function saveDraft() {
+      const draft = {
+        cliente:       document.getElementById('inp-cliente')?.value || '',
+        piezas:        document.getElementById('inp-piezas')?.value || '1',
+        multicolor:    document.getElementById('chk-multicolor')?.checked || false,
+        multiImp:      document.getElementById('chk-multi-imp')?.checked || false,
+        margen:        document.getElementById('inp-margen')?.value || '60',
+        mo:            document.getElementById('chk-mo')?.checked || false,
+        moCosto:       document.getElementById('inp-mo-costo')?.value || '20',
+        moHoras:       document.getElementById('inp-mo-horas')?.value || '1',
+        iva:           document.getElementById('chk-iva')?.checked || false,
+        singleMatId:   state.singleMatId,
+        singleGrams:   state.singleGrams,
+        singleHours:   document.getElementById('single-hours')?.value || '',
+        singleMins:    document.getElementById('single-minutes')?.value || '',
+        singlePrinter: document.getElementById('single-printer')?.value || 'A1 MINI',
+        matRows:       state.matRows,
+        timeRows:      state.timeRows,
+      };
+      localStorage.setItem('mp_cot_draft', JSON.stringify(draft));
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem('mp_cot_draft');
+        if (!raw) return;
+        const d = JSON.parse(raw);
+
+        if (d.singleMatId) state.singleMatId = d.singleMatId;
+        if (d.singleGrams) state.singleGrams = d.singleGrams;
+        if (d.matRows?.length)  state.matRows  = d.matRows;
+        if (d.timeRows?.length) state.timeRows = d.timeRows;
+
+        document.getElementById('chk-multicolor').checked = d.multicolor || false;
+        document.getElementById('chk-multi-imp').checked  = d.multiImp   || false;
+        renderMats();
+        renderTimes();
+
+        document.getElementById('inp-cliente').value = d.cliente || '';
+        document.getElementById('inp-piezas').value  = d.piezas  || '1';
+        document.getElementById('inp-margen').value  = d.margen  || '60';
+        document.getElementById('chk-iva').checked   = d.iva     || false;
+        document.getElementById('chk-mo').checked    = d.mo      || false;
+        if (d.mo) {
+          document.getElementById('mo-fields').style.display = 'flex';
+          document.getElementById('inp-mo-costo').value = d.moCosto || '20';
+          document.getElementById('inp-mo-horas').value = d.moHoras || '1';
+        }
+        if (!d.multiImp) {
+          const h = document.getElementById('single-hours');   if (h) h.value = d.singleHours || '';
+          const m = document.getElementById('single-minutes'); if (m) m.value = d.singleMins  || '';
+          const p = document.getElementById('single-printer'); if (p) p.value = d.singlePrinter || 'A1 MINI';
+        }
+      } catch(e) {}
+    }
+
+    function clearDraft() {
+      localStorage.removeItem('mp_cot_draft');
+      state.matRows    = [];
+      state.timeRows   = [];
+      state.lastCalc   = null;
+      state.singleMatId = '';
+      state.singleGrams = '';
+      document.getElementById('chk-multicolor').checked = false;
+      document.getElementById('chk-multi-imp').checked  = false;
+      document.getElementById('chk-mo').checked         = false;
+      document.getElementById('chk-iva').checked        = false;
+      document.getElementById('mo-fields').style.display = 'none';
+      document.getElementById('inp-cliente').value  = '';
+      document.getElementById('inp-piezas').value   = '1';
+      document.getElementById('inp-margen').value   = '60';
+      document.getElementById('inp-mo-costo').value = '20';
+      document.getElementById('inp-mo-horas').value = '1';
+      document.getElementById('result-panel').style.display = 'none';
+      renderMats();
+      renderTimes();
+      showToast('Nueva cotización lista');
+    }
+
     /* ── Nav mobile ───────────────────────────── */
     function toggleMobile() {
       const btn = document.getElementById('hamburger');
@@ -1102,6 +1189,8 @@
     loadDB();
     renderMats();
     renderTimes();
+    loadDraft();
+    window.addEventListener('beforeunload', saveDraft);
   </script>
 </body>
 </html>
