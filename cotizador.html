@@ -448,6 +448,7 @@
       <a class="nav-link" href="stock-piezas.html">Stock Piezas</a>
       <a class="nav-link" href="ventas.html">Ventas</a>
       <a class="nav-link" href="finanzas.html">Finanzas</a>
+      <a class="nav-link nav-reset" href="reset.html">Reset</a>
     </div>
     <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false" onclick="toggleMobile()">
       <span></span><span></span><span></span>
@@ -523,15 +524,6 @@
               </div>
             </div>
 
-            <div class="config-panel">
-              <div class="config-panel-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                Stock disponible
-              </div>
-              <div class="config-panel-body" id="stock-preview">
-                <p style="font-size:0.78rem; color:var(--text-dim);">Sin materiales registrados.</p>
-              </div>
-            </div>
           </div>
 
           <!-- Form + result (right) -->
@@ -795,7 +787,6 @@
         c.appendChild(btn);
       }
 
-      updateStockPreview();
     }
 
     function removeMatRow(i) {
@@ -854,29 +845,6 @@
       if (state.timeRows.length <= 2) return showToast('Mínimo 2 filas');
       state.timeRows.splice(i, 1);
       renderTimes();
-    }
-
-    /* ── Stock preview ────────────────────────── */
-    function updateStockPreview() {
-      const el = document.getElementById('stock-preview');
-      const mats = matsSorted();
-      if (!mats.length) {
-        el.innerHTML = `<p style="font-size:0.78rem;color:var(--text-dim);">Sin materiales. <a href="stock-material.html" style="color:var(--primary);">Agregar →</a></p>`;
-        return;
-      }
-      el.innerHTML = mats.slice(0, 6).map(m => {
-        const pct = Math.min(100, (m.pesoTotal / 1000) * 100);
-        const color = m.pesoTotal > 500 ? '#22c55e' : m.pesoTotal > 200 ? '#eab308' : '#ef4444';
-        return `<div style="margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.72rem;margin-bottom:3px;">
-            <span style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px;">${matLabel(m)}</span>
-            <span style="color:${color};font-weight:700;flex-shrink:0;">${m.pesoTotal}g</span>
-          </div>
-          <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:99px;overflow:hidden;">
-            <div style="height:100%;width:${pct}%;background:${color};border-radius:99px;"></div>
-          </div>
-        </div>`;
-      }).join('') + (mats.length > 6 ? `<p style="font-size:0.7rem;color:var(--text-dim);margin-top:4px;">+${mats.length - 6} más en <a href="stock-material.html" style="color:var(--primary);">Stock Material</a></p>` : '');
     }
 
     /* ── Toggle MO ────────────────────────────── */
@@ -1091,7 +1059,6 @@
       document.getElementById('confirm-msg').innerHTML =
         `<span style="color:var(--primary);">${cantidad}× "${nombre}" en inventario. Materiales descontados.</span>`;
       showToast(`${cantidad}× "${nombre}" agregadas al stock`);
-      updateStockPreview();
     }
 
     /* ── Export PDF ───────────────────────────── */

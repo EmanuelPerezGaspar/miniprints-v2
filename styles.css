@@ -153,6 +153,8 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 }
 .nav-link:hover  { color: var(--text); background: var(--surface); }
 .nav-link.active { color: var(--primary); background: rgba(34,197,94,0.10); }
+.nav-link.nav-reset { color: #ef4444; }
+.nav-link.nav-reset:hover { color: #ef4444; background: rgba(239,68,68,0.10); }
 .nav-actions {
   display: flex;
   align-items: center;
