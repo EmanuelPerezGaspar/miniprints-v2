@@ -1013,12 +1013,12 @@
       document.getElementById('res-ganancia').textContent = fmt(ganancia) + ` (${(margenPct * 100).toFixed(0)}%)`;
       document.getElementById('res-iva').textContent = aplicaIva ? fmt(ivaMonto) : '$0.00';
 
-      // Precio Mercado Libre
-      const precioML = Math.ceil((precioFinal + ML_SHIP) / (1 - ML_FEE));
-      const precioMLUnit = numPiezas > 1 ? fmt(precioML / numPiezas) + ' c/u · ' : '';
+      // Precio Mercado Libre (por pieza — cada venta ML es 1 pieza con su envío)
+      const precioML = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
       document.getElementById('res-ml-price').textContent = fmt(precioML);
-      document.getElementById('res-ml-note').textContent =
-        `${precioMLUnit}Comisión ~19.1% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
+      document.getElementById('res-ml-note').textContent = numPiezas > 1
+        ? `Precio por pieza · ${numPiezas} piezas = ${fmt(precioML * numPiezas)} · Comisión ~19.1% + envío est. $${ML_SHIP}`
+        : `Comisión ~19.1% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
       state.lastCalc.precioML = precioML;
 
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
