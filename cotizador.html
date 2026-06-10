@@ -179,6 +179,24 @@
       align-items: center;
       margin-bottom: 8px;
     }
+    .time-row {
+      display: grid;
+      grid-template-columns: 1.8fr 0.8fr 0.8fr 36px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .time-row-header {
+      display: grid;
+      grid-template-columns: 1.8fr 0.8fr 0.8fr 36px;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .time-row-header span {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      color: var(--text-dim);
+    }
     .rm-btn {
       width: 36px; height: 36px;
       display: flex; align-items: center; justify-content: center;
@@ -816,16 +834,20 @@
           <div class="field"><label>Minutos</label><input type="number" id="single-minutes" min="0" max="59" step="1" placeholder="0" /></div>
         </div>`;
       } else {
-        if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '' }, { h: '', m: '' }];
+        const defaultPrinter = document.getElementById('sel-impresora').value || 'A1 MINI';
+        if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', printer: defaultPrinter }, { h: '', m: '', printer: defaultPrinter }];
         const header = document.createElement('div');
-        header.className = 'mat-rows-header';
-        header.innerHTML = '<span>Horas</span><span>Minutos</span><span></span>';
+        header.className = 'time-row-header';
+        header.innerHTML = '<span>Impresora</span><span>Horas</span><span>Min</span><span></span>';
         c.appendChild(header);
 
+        const printerOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
         state.timeRows.forEach((row, i) => {
           const d = document.createElement('div');
-          d.className = 'mat-row';
+          d.className = 'time-row';
+          const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${row.printer===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
+            <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value">${opts}</select>
             <input type="number" min="0" step="1" placeholder="0" value="${row.h}" oninput="state.timeRows[${i}].h=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
             <input type="number" min="0" max="59" step="1" placeholder="0" value="${row.m}" oninput="state.timeRows[${i}].m=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
             <div class="rm-btn" onclick="removeTimeRow(${i})">✕</div>`;
@@ -919,17 +941,25 @@
       }
 
       // Time
-      let tiempo = 0;
+      let tiempo = 0, costoElec = 0, costoMaq = 0;
       const isMultiImp = document.getElementById('chk-multi-imp').checked;
+      const detTiempos = [];
       if (!isMultiImp) {
         tiempo = (parseFloat(document.getElementById('single-hours')?.value) || 0) +
                  (parseFloat(document.getElementById('single-minutes')?.value) || 0) / 60;
+        costoElec = tiempo * (printer.consumo / 1000) * KWH;
+        costoMaq  = tiempo * printer.desgaste;
+        detTiempos.push({ printer: printerName, t: tiempo, consumo: printer.consumo, desgaste: printer.desgaste });
       } else {
-        state.timeRows.forEach(r => { tiempo += (parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60; });
+        state.timeRows.forEach(r => {
+          const t = (parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60;
+          const pr = PRINTERS[r.printer] || PRINTERS['A1 MINI'];
+          costoElec += t * (pr.consumo / 1000) * KWH;
+          costoMaq  += t * pr.desgaste;
+          tiempo    += t;
+          if (t > 0) detTiempos.push({ printer: r.printer, t, consumo: pr.consumo, desgaste: pr.desgaste });
+        });
       }
-
-      const costoElec = tiempo * (printer.consumo / 1000) * KWH;
-      const costoMaq = tiempo * printer.desgaste;
       const costoMO = horasMO * costoMOH;
       const costoBase = costoMat + costoElec + costoMaq + costoMO;
       const margenFalla = costoBase * FALLA;
@@ -940,7 +970,7 @@
       const precioFinal = subtotalFalla + ganancia + ivaMonto;
       const xUnidad = precioFinal / numPiezas;
 
-      state.lastCalc = { detMat, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, tiempo, printer: printerName };
+      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, tiempo, printer: printerDisplay };
 
       // Save quotation
       const cot = {
@@ -973,7 +1003,10 @@
         ru.style.display = 'none';
         bcUnit.style.display = 'none';
       }
-      document.getElementById('res-printer').textContent = '🖨️ ' + printerName;
+      const printerDisplay = isMultiImp
+        ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
+        : printerName;
+      document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
       document.getElementById('res-costo').textContent = fmt(costoBase);
       document.getElementById('res-falla').textContent = fmt(subtotalFalla);
       document.getElementById('res-ganancia').textContent = fmt(ganancia) + ` (${(margenPct * 100).toFixed(0)}%)`;
@@ -987,10 +1020,17 @@
           <td style="text-align:right;color:var(--primary);font-weight:600;">${fmt(d.costo)}</td>
         </tr>`).join('');
 
+      const filasElec = isMultiImp
+        ? detTiempos.map(d => [`Electricidad ${d.printer} (${d.t.toFixed(2)}h · ${d.consumo}W)`, fmt(d.t * (d.consumo / 1000) * KWH)])
+        : [[`Electricidad (${tiempo.toFixed(2)}h · ${printer.consumo}W)`, fmt(costoElec)]];
+      const filasMaq = isMultiImp
+        ? detTiempos.map(d => [`Desgaste ${d.printer} (${d.t.toFixed(2)}h)`, fmt(d.t * d.desgaste)])
+        : [[`Desgaste máquina (${tiempo.toFixed(2)}h)`, fmt(costoMaq)]];
+
       const filas = [
         ['Material(es)', fmt(costoMat)],
-        [`Electricidad (${tiempo.toFixed(2)}h · ${printer.consumo}W)`, fmt(costoElec)],
-        [`Desgaste máquina (${tiempo.toFixed(2)}h)`, fmt(costoMaq)],
+        ...filasElec,
+        ...filasMaq,
         ...(aplicaMO ? [[`Mano de obra (${horasMO}h × $${costoMOH})`, fmt(costoMO)]] : []),
         ['─────', ''],
         ['= Costo base', fmt(costoBase)],
