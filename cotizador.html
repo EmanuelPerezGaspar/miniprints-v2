@@ -488,18 +488,6 @@
                 Configuración
               </div>
               <div class="config-panel-body">
-                <div class="field">
-                  <label>Impresora</label>
-                  <select id="sel-impresora" onchange="updatePrinterInfo()">
-                    <option value="A1 MINI">A1 MINI — 280W</option>
-                    <option value="A1">A1 — 350W</option>
-                    <option value="X2D">X2D — 1100W</option>
-                  </select>
-                </div>
-                <div class="mpill">
-                  <span class="mpill-lbl">Desgaste / hora</span>
-                  <span class="mpill-val" id="display-desgaste">$5.00</span>
-                </div>
                 <div class="mpill">
                   <span class="mpill-lbl">Electricidad kWh</span>
                   <span class="mpill-val">$5.00 MXN</span>
@@ -739,12 +727,6 @@
       'X2D':     { consumo: 1100, desgaste: 25999 / 3000 },
     };
 
-    function updatePrinterInfo() {
-      const p = document.getElementById('sel-impresora').value;
-      const pr = PRINTERS[p] || PRINTERS['A1'];
-      document.getElementById('display-desgaste').textContent = '$' + pr.desgaste.toFixed(2);
-    }
-
     /* ── State ────────────────────────────────── */
     const state = { matRows: [], timeRows: [], singleMatId: '', singleGrams: '', lastCalc: null };
 
@@ -829,12 +811,14 @@
       c.innerHTML = '';
 
       if (!isMulti) {
-        c.innerHTML = `<div class="grid-2">
+        const prOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
+        c.innerHTML = `<div class="grid-3">
+          <div class="field"><label>Impresora</label><select id="single-printer">${prOpts}</select></div>
           <div class="field"><label>Horas</label><input type="number" id="single-hours" min="0" step="1" placeholder="0" /></div>
           <div class="field"><label>Minutos</label><input type="number" id="single-minutes" min="0" max="59" step="1" placeholder="0" /></div>
         </div>`;
       } else {
-        const defaultPrinter = document.getElementById('sel-impresora').value || 'A1 MINI';
+        const defaultPrinter = state.timeRows[0]?.printer || 'A1 MINI';
         if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', printer: defaultPrinter }, { h: '', m: '', printer: defaultPrinter }];
         const header = document.createElement('div');
         header.className = 'time-row-header';
@@ -903,8 +887,8 @@
 
     /* ── Calcular ─────────────────────────────── */
     function calcular() {
-      const printerName = document.getElementById('sel-impresora').value;
-      const printer = PRINTERS[printerName] || PRINTERS['A1'];
+      const printerName = document.getElementById('single-printer')?.value || 'A1 MINI';
+      const printer = PRINTERS[printerName] || PRINTERS['A1 MINI'];
       const margenPct = (parseFloat(document.getElementById('inp-margen').value) || 60) / 100;
       const numPiezas = Math.max(1, parseInt(document.getElementById('inp-piezas').value) || 1);
       const aplicaMO = document.getElementById('chk-mo').checked;
@@ -1149,7 +1133,6 @@
 
     /* ── Init ─────────────────────────────────── */
     loadDB();
-    updatePrinterInfo();
     renderMats();
     renderTimes();
   </script>
