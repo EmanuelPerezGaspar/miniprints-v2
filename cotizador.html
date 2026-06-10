@@ -826,7 +826,8 @@
         state.timeRows.forEach((row, i) => {
           const d = document.createElement('div');
           d.className = 'time-row';
-          const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${row.printer===k?'selected':''}>${k}</option>`).join('');
+          const rowPrinter = row.printer || 'A1 MINI';
+          const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${rowPrinter===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
             <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value">${opts}</select>
             <input type="number" min="0" step="1" placeholder="0" value="${row.h}" oninput="state.timeRows[${i}].h=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
@@ -840,7 +841,7 @@
         btn.textContent = '+ Agregar impresión';
         btn.onclick = () => {
           if (state.timeRows.length >= 10) return showToast('Máximo 10 impresiones');
-          state.timeRows.push({ h: '', m: '' });
+          state.timeRows.push({ h: '', m: '', printer: state.timeRows[0]?.printer || 'A1 MINI' });
           renderTimes();
         };
         c.appendChild(btn);
@@ -915,7 +916,7 @@
           costoElec += t * (pr.consumo / 1000) * KWH;
           costoMaq  += t * pr.desgaste;
           tiempo    += t;
-          if (t > 0) detTiempos.push({ printer: r.printer, t, consumo: pr.consumo, desgaste: pr.desgaste });
+          if (t > 0) detTiempos.push({ printer: r.printer || 'A1 MINI', t, consumo: pr.consumo, desgaste: pr.desgaste });
         });
       }
       const costoMO = horasMO * costoMOH;
