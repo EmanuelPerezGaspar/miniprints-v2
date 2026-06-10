@@ -628,7 +628,7 @@
                   <div class="ml-price-val" id="res-ml-price">$0.00</div>
                   <div class="ml-price-note" id="res-ml-note">Comisión ~19.1% + envío estimado</div>
                 </div>
-                <div class="ml-price-badge" id="res-ml-badge">ML Premium</div>
+                <div class="ml-price-badge" id="res-ml-badge">ML Clásica</div>
               </div>
 
               <div class="confirm-card">
@@ -900,8 +900,8 @@
     }
 
     /* ── Constantes Mercado Libre ─────────────── */
-    const ML_FEE  = 0.1914; // 16.5% comisión Premium + 16% IVA sobre comisión
-    const ML_SHIP = 80;     // estimado de envío Mercado Envíos (MXN)
+    const ML_FEE  = 0.24;   // 15% comisión Clásica + ~9% impuestos (dato real simulador ML)
+    const ML_SHIP = 68;     // estimado Mercado Envíos (dato real simulador ML, varía por peso/destino)
 
     /* ── Calcular ─────────────────────────────── */
     function calcular() {
@@ -1017,8 +1017,8 @@
       const precioML = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
       document.getElementById('res-ml-price').textContent = fmt(precioML);
       document.getElementById('res-ml-note').textContent = numPiezas > 1
-        ? `Precio por pieza · ${numPiezas} piezas = ${fmt(precioML * numPiezas)} · Comisión ~19.1% + envío est. $${ML_SHIP}`
-        : `Comisión ~19.1% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
+        ? `Precio por pieza · ${numPiezas} piezas = ${fmt(precioML * numPiezas)} · Comisión ~15% + imp. ~9% + envío est. $${ML_SHIP}`
+        : `Comisión ~15% + imp. ~9% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
       state.lastCalc.precioML = precioML;
 
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
