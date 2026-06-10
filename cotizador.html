@@ -922,6 +922,9 @@
       const precioFinal = subtotalFalla + ganancia + ivaMonto;
       const xUnidad = precioFinal / numPiezas;
 
+      const printerDisplay = isMultiImp
+        ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
+        : printerName;
       state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, tiempo, printer: printerDisplay };
 
       // Save quotation
@@ -955,9 +958,6 @@
         ru.style.display = 'none';
         bcUnit.style.display = 'none';
       }
-      const printerDisplay = isMultiImp
-        ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
-        : printerName;
       document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
       document.getElementById('res-costo').textContent = fmt(costoBase);
       document.getElementById('res-falla').textContent = fmt(subtotalFalla);
