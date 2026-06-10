@@ -587,7 +587,6 @@
 
               <div class="breakdown-grid">
                 <div class="breakdown-card"><div class="bc-lbl">Costo base</div><div class="bc-val" id="res-costo">$0</div></div>
-                <div class="breakdown-card"><div class="bc-lbl">Subtotal+falla</div><div class="bc-val purple" id="res-falla">$0</div></div>
                 <div class="breakdown-card"><div class="bc-lbl">Ganancia</div><div class="bc-val green" id="res-ganancia">$0</div></div>
                 <div class="breakdown-card"><div class="bc-lbl">IVA</div><div class="bc-val" id="res-iva">$0</div></div>
                 <div class="breakdown-card" id="bc-unit" style="display:none;"><div class="bc-lbl">Por pieza</div><div class="bc-val green" id="res-unit-card">$0</div></div>
@@ -967,8 +966,7 @@
         bcUnit.style.display = 'none';
       }
       document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
-      document.getElementById('res-costo').textContent = fmt(costoBase);
-      document.getElementById('res-falla').textContent = fmt(subtotalFalla);
+      document.getElementById('res-costo').textContent = fmt(subtotalFalla);
       document.getElementById('res-ganancia').textContent = fmt(ganancia) + ` (${(margenPct * 100).toFixed(0)}%)`;
       document.getElementById('res-iva').textContent = aplicaIva ? fmt(ivaMonto) : '$0.00';
 
@@ -997,10 +995,9 @@
         ...filasElec,
         ...filasMaq,
         ...(aplicaMO ? [[`Mano de obra (${horasMO}h × $${costoMOH})`, fmt(costoMO)]] : []),
-        ['─────', ''],
-        ['= Costo base', fmt(costoBase)],
         ['+ Margen de falla (10%)', fmt(margenFalla)],
-        ['= Subtotal + falla', fmt(subtotalFalla)],
+        ['─────', ''],
+        ['= Costo base', fmt(subtotalFalla)],
         [`+ Ganancia (${(margenPct * 100).toFixed(0)}%)`, fmt(ganancia)],
         ...(aplicaIva ? [[`+ IVA 16%`, fmt(ivaMonto)]] : []),
         ['─────', ''],
@@ -1093,8 +1090,7 @@
       msg += `💰 *Total: ${fmt(c.precioFinal)}*\n`;
       if (c.numPiezas > 1) msg += `   ↳ ${fmt(c.precioFinal / c.numPiezas)} por pieza\n`;
       msg += `\n📊 Desglose:\n`;
-      msg += `• Costo base: ${fmt(c.costoBase)}\n`;
-      msg += `• Subtotal + falla (10%): ${fmt(c.subtotalFalla)}\n`;
+      msg += `• Costo base: ${fmt(c.subtotalFalla)}\n`;
       msg += `• Ganancia: ${fmt(c.ganancia)}\n`;
       if (c.ivaMonto > 0) msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
       window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
