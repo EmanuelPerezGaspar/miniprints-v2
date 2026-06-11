@@ -113,7 +113,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   align-items: center;
   padding: 0 20px;
   gap: 8px;
-  transition: background 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  transition: background 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
 }
 #navbar.scrolled {
   background: rgba(10, 15, 26, 0.55);
@@ -179,7 +179,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   height: 2px;
   background: var(--text);
   border-radius: 2px;
-  transition: transform 0.25s, opacity 0.25s;
+  transition: transform 250ms var(--ease-in-out), opacity 250ms var(--ease-out);
 }
 .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .hamburger.open span:nth-child(2) { opacity: 0; }
@@ -791,9 +791,17 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
 
 /* ── Reduced motion ──────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+  /* Kill movement and entrance animations */
   .falling-bg-anim { animation: none; }
   .kpi-card        { animation: none; }
-  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  /* Remove positional transforms only — keep opacity/color transitions for comprehension */
+  *, *::before, *::after { animation-duration: 0.01ms !important; }
+  .btn, .btn-calc, .feature-card, .kpi-card, .pricing-card, .placeholder-card,
+  .nav-link, .sidebar-link, .hamburger span {
+    transition: opacity 160ms var(--ease-out), background 160ms var(--ease-out),
+                border-color 160ms var(--ease-out), color 160ms var(--ease-out);
+    transform: none !important;
+  }
 }
 
 /* ─────────────────────────────────────────────────
