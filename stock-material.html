@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -58,7 +58,16 @@
   </style>
 </head>
 <body>
-  <div class="falling-bg" aria-hidden="true"><div class="falling-bg-anim"></div><div class="falling-bg-overlay"></div></div>
+  <style>
+  #loom-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: #0a0f1a;
+  }
+</style>
+<canvas id="loom-bg" aria-hidden="true"></canvas>
 
   <nav id="navbar" role="navigation" aria-label="Navegación principal">
     <a class="nav-logo" href="index.html">
@@ -371,6 +380,66 @@
     loadDB();
     renderKPIs();
     renderList();
+  </script>
+
+  <script>
+    /* Digital Loom Background */
+    (function () {
+      const canvas = document.getElementById('loom-bg');
+      const ctx = canvas.getContext('2d');
+      const THREAD_COLOR = 'rgba(217,70,239,0.5)';
+      const BG_COLOR     = '#0a0f1a';
+      const THREAD_COUNT = 80;
+      let threads = [], animId, width, height;
+      function Thread() { this.reset(); }
+      Thread.prototype.reset = function () {
+        width          = window.innerWidth;
+        height         = window.innerHeight;
+        this.x         = Math.random() * width;
+        this.y         = Math.random() * height;
+        this.speed     = Math.random() * 0.5 + 0.1;
+        this.amplitude = Math.random() * 20 + 10;
+        this.frequency = Math.random() * 0.02 + 0.01;
+        this.phase     = Math.random() * Math.PI * 2;
+      };
+      Thread.prototype.update = function () {
+        this.x += this.speed;
+        if (this.x > width) { this.x = 0; this.y = Math.random() * height; }
+      };
+      Thread.prototype.draw = function () {
+        const startX = Math.max(this.x - 200, 0);
+        ctx.beginPath();
+        ctx.moveTo(startX, this.y + Math.sin(startX * this.frequency + this.phase) * this.amplitude);
+        for (let i = startX; i < this.x; i++) {
+          ctx.lineTo(i, this.y + Math.sin(i * this.frequency + this.phase) * this.amplitude);
+        }
+        ctx.strokeStyle = THREAD_COLOR;
+        ctx.lineWidth   = 0.5;
+        ctx.stroke();
+      };
+      function setup() {
+        width = window.innerWidth; height = window.innerHeight;
+        canvas.width = width; canvas.height = height;
+        threads = Array.from({ length: THREAD_COUNT }, () => new Thread());
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(0, 0, width, height);
+      }
+      function animate() {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(0,0,0,0.1)';
+        ctx.fillRect(0, 0, width, height);
+        ctx.globalCompositeOperation = 'lighter';
+        threads.forEach(t => { t.update(); t.draw(); });
+        animId = requestAnimationFrame(animate);
+      }
+      window.addEventListener('resize', setup);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+      });
+      setup(); animate();
+    })();
   </script>
 </body>
 </html>
