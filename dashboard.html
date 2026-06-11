@@ -17,6 +17,8 @@
     z-index: 0;
     pointer-events: none;
     background: #0a0f1a;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
   }
 </style>
 <body>
@@ -341,9 +343,10 @@
 
       window.addEventListener('resize', setup);
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) cancelAnimationFrame(animId);
-        else animate();
+        if (document.hidden) { cancelAnimationFrame(animId); animId = null; }
+        else if (!animId) animate();
       });
+      window.addEventListener('pageshow', () => { if (!animId) animate(); });
 
       setup();
       animate();

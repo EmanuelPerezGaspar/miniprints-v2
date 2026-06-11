@@ -30,7 +30,18 @@
     z-index: 0;
     pointer-events: none;
     background: #0a0f1a;
-  }
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}'@
+
+    # 2. Replace visibility handler + add pageshow for iOS bfcache
+    $oldHandler = @'
+      window.addEventListener('resize', setup);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+      });
+      setup(); animate();
 </style>
 <canvas id="loom-bg" aria-hidden="true"></canvas>
 
