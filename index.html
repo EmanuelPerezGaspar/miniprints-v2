@@ -668,7 +668,7 @@
     import { getShaderColorFromString } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/get-shader-color-from-string.js';
 
     const colorHexes = ['#06b6d4', '#0891b2', '#f97316', '#000000'];
-    const colors = colorHexes.flatMap(c => getShaderColorFromString(c));
+    const colors = colorHexes.map(c => getShaderColorFromString(c));
 
     new ShaderMount(document.getElementById('shader-bg'), meshGradientFragmentShader, {
       u_colors:      colors,
