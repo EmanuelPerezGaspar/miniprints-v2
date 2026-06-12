@@ -403,28 +403,33 @@
 </head>
 <body>
 
-  <!-- Falling pattern background -->
+  <!-- Animated SVG Background -->
   <style>
-  #loom-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: #0a0f1a;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-}'@
-
-    # 2. Replace visibility handler + add pageshow for iOS bfcache
-    $oldHandler = @'
-      window.addEventListener('resize', setup);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) cancelAnimationFrame(animId);
-        else animate();
-      });
-      setup(); animate();
-</style>
-<canvas id="loom-bg" aria-hidden="true"></canvas>
+    #svg-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: #0a0f1a;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    @keyframes drawPath {
+      0%   { stroke-dashoffset: 800; stroke-dasharray: 50 800; opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { stroke-dashoffset: 0; stroke-dasharray: 20 800; opacity: 0; }
+    }
+    .anim-path {
+      stroke-linecap: round;
+      stroke-width: 2.3;
+      fill: none;
+      animation: drawPath 10s linear infinite;
+    }
+  </style>
+  <svg id="svg-bg" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
 
   <!-- Orbital menu -->
   <div id="orbital" role="navigation" aria-label="Menú de navegación">
@@ -669,62 +674,61 @@
   </script>
 
   <script>
-    /* Digital Loom Background */
+    /* Animated SVG Background */
     (function () {
-      const canvas = document.getElementById('loom-bg');
-      const ctx = canvas.getContext('2d');
-      const THREAD_COLOR = 'rgba(217,70,239,0.5)';
-      const BG_COLOR     = '#0a0f1a';
-      const THREAD_COUNT = 80;
-      let threads = [], animId, width, height;
-      function Thread() { this.reset(); }
-      Thread.prototype.reset = function () {
-        width          = window.innerWidth;
-        height         = window.innerHeight;
-        this.x         = Math.random() * width;
-        this.y         = Math.random() * height;
-        this.speed     = Math.random() * 0.5 + 0.1;
-        this.amplitude = Math.random() * 20 + 10;
-        this.frequency = Math.random() * 0.02 + 0.01;
-        this.phase     = Math.random() * Math.PI * 2;
-      };
-      Thread.prototype.update = function () {
-        this.x += this.speed;
-        if (this.x > width) { this.x = 0; this.y = Math.random() * height; }
-      };
-      Thread.prototype.draw = function () {
-        const startX = Math.max(this.x - 200, 0);
-        ctx.beginPath();
-        ctx.moveTo(startX, this.y + Math.sin(startX * this.frequency + this.phase) * this.amplitude);
-        for (let i = startX; i < this.x; i++) {
-          ctx.lineTo(i, this.y + Math.sin(i * this.frequency + this.phase) * this.amplitude);
+      const svg = document.getElementById('svg-bg');
+      const ns  = 'http://www.w3.org/2000/svg';
+      const cx  = 720, cy = 450;
+
+      const colors = [
+        '#46A5CA','#8C2F2F','#4FAE4D','#D6590C','#811010',
+        '#247AFB','#A534A0','#A8A438','#D6590C','#46A29C',
+        '#670F6D','#D7C200','#59BBEB','#504F1C','#55BC54',
+        '#4D3568','#9F39A5','#363636','#860909','#6A286F','#604483'
+      ];
+
+      const curvatures = [80,-60,100,-80,50,-100,70,-50,90,-70,60,-90,80,-60,100,-40,70,-80,50,-100,90];
+
+      function generatePath(angleRad, curve) {
+        const len = 1100, steps = 6;
+        let d = `M${cx} ${cy}`;
+        for (let j = 1; j <= steps; j++) {
+          const t    = j / steps;
+          const pt   = (j - 1) / steps;
+          const dist = len * t;
+          const pdist= len * pt;
+          const perp = angleRad + Math.PI / 2;
+          const off  = curve * Math.sin(t  * Math.PI);
+          const poff = curve * Math.sin(pt * Math.PI);
+          const x  = cx + Math.cos(angleRad) * dist  + Math.cos(perp) * off;
+          const y  = cy + Math.sin(angleRad) * dist  + Math.sin(perp) * off;
+          const px = cx + Math.cos(angleRad) * pdist + Math.cos(perp) * poff;
+          const py = cy + Math.sin(angleRad) * pdist + Math.sin(perp) * poff;
+          const c1x = (px + (x - px) * 0.4).toFixed(1);
+          const c1y = (py + (y - py) * 0.4).toFixed(1);
+          const c2x = (px + (x - px) * 0.6).toFixed(1);
+          const c2y = (py + (y - py) * 0.6).toFixed(1);
+          d += ` C${c1x} ${c1y} ${c2x} ${c2y} ${x.toFixed(1)} ${y.toFixed(1)}`;
         }
-        ctx.strokeStyle = THREAD_COLOR;
-        ctx.lineWidth   = 0.5;
-        ctx.stroke();
-      };
-      function setup() {
-        width = window.innerWidth; height = window.innerHeight;
-        canvas.width = width; canvas.height = height;
-        threads = Array.from({ length: THREAD_COUNT }, () => new Thread());
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = BG_COLOR;
-        ctx.fillRect(0, 0, width, height);
+        return d;
       }
-      function animate() {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(0,0,0,0.1)';
-        ctx.fillRect(0, 0, width, height);
-        ctx.globalCompositeOperation = 'lighter';
-        threads.forEach(t => { t.update(); t.draw(); });
-        animId = requestAnimationFrame(animate);
+
+      function rnd(max) { return Math.floor(Math.random() * max); }
+
+      for (let pass = 0; pass < 2; pass++) {
+        colors.forEach((color, idx) => {
+          const angle = (idx * 360 / 21) * Math.PI / 180;
+          const el = document.createElementNS(ns, 'path');
+          el.setAttribute('d', generatePath(angle, curvatures[idx]));
+          el.setAttribute('stroke', color);
+          el.classList.add('anim-path');
+          el.style.animationDelay    = `${rnd(10)}s`;
+          el.style.animationDuration = `${8 + rnd(5)}s`;
+          svg.appendChild(el);
+        });
       }
-      window.addEventListener('resize', setup);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) cancelAnimationFrame(animId);
-        else animate();
-      });
-      setup(); animate();
+
+      setTimeout(() => { svg.style.opacity = '1'; }, 100);
     })();
   </script>
 </body>
