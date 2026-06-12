@@ -294,16 +294,42 @@
       gap: 12px;
       margin-bottom: 16px;
     }
-    .breakdown-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 14px;
+    .bm-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, background .2s;
     }
-    .bc-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 4px; }
-    .bc-val { font-size: 1rem; font-weight: 800; color: var(--text); }
-    .bc-val.green { color: #22c55e; }
-    .bc-val.purple { color: #a78bfa; }
+    .bm-card:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.17); }
+    .bm-header { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+    .bm-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.55; }
+    .bm-label { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); font-weight: 600; }
+    .bm-value { font-size: 1.2rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+    .bm-sub { font-size: 0.67rem; color: var(--text-dim); margin-bottom: 10px; min-height: 1em; }
+    .bm-bar-track { position: relative; height: 5px; background: rgba(255,255,255,0.07); border-radius: 999px; margin-bottom: 8px; overflow: hidden; }
+    .bm-bar-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 900ms cubic-bezier(0.23,0.86,0.39,0.96); }
+    .bm-levels { display: flex; height: 3px; border-radius: 999px; overflow: hidden; gap: 1px; }
+    .bm-lv { height: 100%; }
+    .bm-lv-r { background: #ef4444; }
+    .bm-lv-o { background: #f97316; }
+    .bm-lv-y { background: #eab308; }
+    .bm-lv-g { background: #22c55e; }
+    /* Per-card accent */
+    .bm-card--cost .bm-icon  { color: #818cf8; }
+    .bm-card--cost .bm-value { color: #a5b4fc; }
+    .bm-card--cost .bm-bar-fill { background: linear-gradient(to right,#6366f1,#818cf8); }
+    .bm-card--profit .bm-icon  { color: #22c55e; }
+    .bm-card--profit .bm-value { color: #22c55e; }
+    .bm-card--profit .bm-bar-fill { background: linear-gradient(to right,#16a34a,#22c55e); }
+    .bm-card--iva .bm-icon  { color: #f59e0b; }
+    .bm-card--iva .bm-value { color: #fbbf24; }
+    .bm-card--iva .bm-bar-fill { background: linear-gradient(to right,#d97706,#f59e0b); }
+    .bm-card--unit .bm-icon  { color: #a78bfa; }
+    .bm-card--unit .bm-value { color: #a78bfa; }
+    .bm-card--unit .bm-bar-fill { background: linear-gradient(to right,#7c3aed,#a78bfa); }
     /* ML price card */
     .ml-price-card {
       background: rgba(251, 191, 36, 0.07);
@@ -395,11 +421,13 @@
       .rh-unitprice { background: #dcfce7 !important; border-color: #86efac !important; color: #15803d !important; }
       .rh-printer { color: #64748b !important; }
       .breakdown-grid { margin-top: 16px !important; }
-      .breakdown-card { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
-      .bc-lbl { color: #475569 !important; }
-      .bc-val { color: #0f172a !important; }
-      .bc-val.green { color: #15803d !important; }
-      .bc-val.purple { color: #7c3aed !important; }
+      .bm-card { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
+      .bm-label { color: #475569 !important; }
+      .bm-value { color: #0f172a !important; }
+      .bm-card--profit .bm-value, .bm-card--unit .bm-value { color: #15803d !important; }
+      .bm-sub { color: #64748b !important; }
+      .bm-bar-track { background: #e2e8f0 !important; }
+      .bm-levels { display: none !important; }
       .res-table { border: 1px solid #e2e8f0 !important; }
       .res-table-head { color: #334155 !important; background: #f1f5f9 !important; }
       table th, table td { color: #0f172a !important; border-color: #e2e8f0 !important; }
@@ -633,10 +661,68 @@
               </div>
 
               <div class="breakdown-grid">
-                <div class="breakdown-card"><div class="bc-lbl">Costo base</div><div class="bc-val" id="res-costo">$0</div></div>
-                <div class="breakdown-card"><div class="bc-lbl">Ganancia</div><div class="bc-val green" id="res-ganancia">$0</div></div>
-                <div class="breakdown-card"><div class="bc-lbl">IVA</div><div class="bc-val" id="res-iva">$0</div></div>
-                <div class="breakdown-card" id="bc-unit" style="display:none;"><div class="bc-lbl">Por pieza</div><div class="bc-val green" id="res-unit-card">$0</div></div>
+                <!-- Costo de producción -->
+                <div class="bm-card bm-card--cost">
+                  <div class="bm-header">
+                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span class="bm-label">Costo de producción</span>
+                  </div>
+                  <div class="bm-value" id="res-costo">$0.00</div>
+                  <div class="bm-sub" id="res-costo-sub">— del precio final</div>
+                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-costo-bar"></div></div>
+                  <div class="bm-levels">
+                    <div class="bm-lv bm-lv-g" style="width:40%"></div>
+                    <div class="bm-lv bm-lv-y" style="width:20%"></div>
+                    <div class="bm-lv bm-lv-o" style="width:20%"></div>
+                    <div class="bm-lv bm-lv-r" style="width:20%"></div>
+                  </div>
+                </div>
+                <!-- Ganancia -->
+                <div class="bm-card bm-card--profit">
+                  <div class="bm-header">
+                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                    <span class="bm-label">Ganancia</span>
+                  </div>
+                  <div class="bm-value" id="res-ganancia">$0.00</div>
+                  <div class="bm-sub" id="res-ganancia-sub">Margen del 0%</div>
+                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-ganancia-bar"></div></div>
+                  <div class="bm-levels">
+                    <div class="bm-lv bm-lv-r" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-o" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-y" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-g" style="width:25%"></div>
+                  </div>
+                </div>
+                <!-- IVA -->
+                <div class="bm-card bm-card--iva">
+                  <div class="bm-header">
+                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+                    <span class="bm-label">IVA</span>
+                  </div>
+                  <div class="bm-value" id="res-iva">$0.00</div>
+                  <div class="bm-sub" id="res-iva-sub">— del precio final</div>
+                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-iva-bar"></div></div>
+                  <div class="bm-levels">
+                    <div class="bm-lv bm-lv-y" style="width:50%"></div>
+                    <div class="bm-lv bm-lv-o" style="width:50%"></div>
+                  </div>
+                </div>
+                <!-- Por pieza -->
+                <div class="bm-card bm-card--unit" id="bc-unit" style="display:none;">
+                  <div class="bm-header">
+                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <span class="bm-label">Por pieza</span>
+                  </div>
+                  <div class="bm-value" id="res-unit-card">$0.00</div>
+                  <div class="bm-sub" id="res-unit-sub">precio unitario</div>
+                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-unit-bar"></div></div>
+                  <div class="bm-levels">
+                    <div class="bm-lv bm-lv-r" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-o" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-y" style="width:25%"></div>
+                    <div class="bm-lv bm-lv-g" style="width:25%"></div>
+                  </div>
+                </div>
               </div>
 
               <div class="ml-price-card">
@@ -731,6 +817,24 @@
   <script>
     /* ── Utilities ─────────────────────────────── */
     const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function animateBmValue(el, toVal, duration) {
+      const from = parseFloat((el.textContent || '').replace(/[^0-9.-]/g, '')) || 0;
+      const start = performance.now();
+      (function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - t, 3);
+        el.textContent = fmt(from + (toVal - from) * ease);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = fmt(toVal);
+      })(performance.now());
+    }
+    function animateBmBar(barEl, pct) {
+      barEl.style.width = '0%';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        barEl.style.width = Math.max(0, Math.min(pct, 100)) + '%';
+      }));
+    }
 
     function showToast(msg, dur = 3200) {
       const t = document.getElementById('toast');
@@ -1019,16 +1123,25 @@
       if (numPiezas > 1) {
         ru.textContent = fmt(xUnidad) + ' c/u · ' + numPiezas + ' piezas';
         ru.style.display = 'inline-block';
-        ruCard.textContent = fmt(xUnidad);
+        animateBmValue(document.getElementById('res-unit-card'), xUnidad, 800);
+        animateBmBar(document.getElementById('res-unit-bar'), 100);
         bcUnit.style.display = '';
       } else {
         ru.style.display = 'none';
         bcUnit.style.display = 'none';
       }
       document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
-      document.getElementById('res-costo').textContent = fmt(subtotalFalla);
-      document.getElementById('res-ganancia').textContent = fmt(ganancia) + ` (${(margenPct * 100).toFixed(0)}%)`;
-      document.getElementById('res-iva').textContent = aplicaIva ? fmt(ivaMonto) : '$0.00';
+      animateBmValue(document.getElementById('res-costo'), subtotalFalla, 800);
+      document.getElementById('res-costo-sub').textContent = `${((subtotalFalla / precioFinal) * 100).toFixed(0)}% del precio final`;
+      animateBmBar(document.getElementById('res-costo-bar'), (subtotalFalla / precioFinal) * 100);
+
+      animateBmValue(document.getElementById('res-ganancia'), ganancia, 800);
+      document.getElementById('res-ganancia-sub').textContent = `Margen del ${(margenPct * 100).toFixed(0)}%`;
+      animateBmBar(document.getElementById('res-ganancia-bar'), (ganancia / precioFinal) * 100);
+
+      animateBmValue(document.getElementById('res-iva'), aplicaIva ? ivaMonto : 0, 800);
+      document.getElementById('res-iva-sub').textContent = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}% del precio final` : 'Exento de IVA';
+      animateBmBar(document.getElementById('res-iva-bar'), aplicaIva ? (ivaMonto / precioFinal) * 100 : 0);
 
       // Precio Mercado Libre (por pieza — cada venta ML es 1 pieza con su envío)
       const precioML = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
@@ -1065,7 +1178,7 @@
         ...(aplicaMO ? [[`Mano de obra (${horasMO}h × $${costoMOH})`, fmt(costoMO)]] : []),
         ['+ Margen de falla (10%)', fmt(margenFalla)],
         ['─────', ''],
-        ['= Costo base', fmt(subtotalFalla)],
+        ['= Costo de producción', fmt(subtotalFalla)],
         [`+ Ganancia (${(margenPct * 100).toFixed(0)}%)`, fmt(ganancia)],
         ...(aplicaIva ? [[`+ IVA 16%`, fmt(ivaMonto)]] : []),
         ['─────', ''],
@@ -1158,7 +1271,7 @@
       msg += `💰 *Total: ${fmt(c.precioFinal)}*\n`;
       if (c.numPiezas > 1) msg += `   ↳ ${fmt(c.precioFinal / c.numPiezas)} por pieza\n`;
       msg += `\n📊 Desglose:\n`;
-      msg += `• Costo base: ${fmt(c.subtotalFalla)}\n`;
+      msg += `• Costo de producción: ${fmt(c.subtotalFalla)}\n`;
       msg += `• Ganancia: ${fmt(c.ganancia)}\n`;
       if (c.ivaMonto > 0) msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
       if (c.precioML) msg += `\n🛒 Precio en Mercado Libre: ${fmt(c.precioML)}\n`;
