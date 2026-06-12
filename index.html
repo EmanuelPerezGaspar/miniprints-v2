@@ -403,33 +403,22 @@
 </head>
 <body>
 
-  <!-- Animated SVG Background -->
+  <!-- Mesh Gradient Background -->
   <style>
-    #svg-bg {
+    #shader-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: #0a0f1a;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      transition: opacity 1s ease;
+      background: #000;
     }
-    @keyframes drawPath {
-      0%   { stroke-dashoffset: 800; stroke-dasharray: 50 800; opacity: 0; }
-      10%  { opacity: 1; }
-      90%  { opacity: 1; }
-      100% { stroke-dashoffset: 0; stroke-dasharray: 20 800; opacity: 0; }
-    }
-    .anim-path {
-      stroke-linecap: round;
-      stroke-width: 2.3;
-      fill: none;
-      animation: drawPath 10s linear infinite;
+    #shader-bg canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
     }
   </style>
-  <svg id="svg-bg" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+  <div id="shader-bg" aria-hidden="true"></div>
 
   <!-- Orbital menu -->
   <div id="orbital" role="navigation" aria-label="Menú de navegación">
@@ -673,63 +662,22 @@
     rafId = requestAnimationFrame(tick);
   </script>
 
-  <script>
-    /* Animated SVG Background */
-    (function () {
-      const svg = document.getElementById('svg-bg');
-      const ns  = 'http://www.w3.org/2000/svg';
-      const cx  = 720, cy = 450;
+  <script type="module">
+    import { ShaderMount } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/shader-mount.js';
+    import { meshGradientFragmentShader } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/shaders/mesh-gradient.js';
+    import { getShaderColorFromString } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/get-shader-color-from-string.js';
 
-      const colors = [
-        '#46A5CA','#8C2F2F','#4FAE4D','#D6590C','#811010',
-        '#247AFB','#A534A0','#A8A438','#D6590C','#46A29C',
-        '#670F6D','#D7C200','#59BBEB','#504F1C','#55BC54',
-        '#4D3568','#9F39A5','#363636','#860909','#6A286F','#604483'
-      ];
+    const colorHexes = ['#06b6d4', '#0891b2', '#f97316', '#000000'];
+    const colors = colorHexes.flatMap(c => getShaderColorFromString(c));
 
-      const curvatures = [80,-60,100,-80,50,-100,70,-50,90,-70,60,-90,80,-60,100,-40,70,-80,50,-100,90];
-
-      function generatePath(angleRad, curve) {
-        const len = 1100, steps = 6;
-        let d = `M${cx} ${cy}`;
-        for (let j = 1; j <= steps; j++) {
-          const t    = j / steps;
-          const pt   = (j - 1) / steps;
-          const dist = len * t;
-          const pdist= len * pt;
-          const perp = angleRad + Math.PI / 2;
-          const off  = curve * Math.sin(t  * Math.PI);
-          const poff = curve * Math.sin(pt * Math.PI);
-          const x  = cx + Math.cos(angleRad) * dist  + Math.cos(perp) * off;
-          const y  = cy + Math.sin(angleRad) * dist  + Math.sin(perp) * off;
-          const px = cx + Math.cos(angleRad) * pdist + Math.cos(perp) * poff;
-          const py = cy + Math.sin(angleRad) * pdist + Math.sin(perp) * poff;
-          const c1x = (px + (x - px) * 0.4).toFixed(1);
-          const c1y = (py + (y - py) * 0.4).toFixed(1);
-          const c2x = (px + (x - px) * 0.6).toFixed(1);
-          const c2y = (py + (y - py) * 0.6).toFixed(1);
-          d += ` C${c1x} ${c1y} ${c2x} ${c2y} ${x.toFixed(1)} ${y.toFixed(1)}`;
-        }
-        return d;
-      }
-
-      function rnd(max) { return Math.floor(Math.random() * max); }
-
-      for (let pass = 0; pass < 2; pass++) {
-        colors.forEach((color, idx) => {
-          const angle = (idx * 360 / 21) * Math.PI / 180;
-          const el = document.createElementNS(ns, 'path');
-          el.setAttribute('d', generatePath(angle, curvatures[idx]));
-          el.setAttribute('stroke', color);
-          el.classList.add('anim-path');
-          el.style.animationDelay    = `${rnd(10)}s`;
-          el.style.animationDuration = `${8 + rnd(5)}s`;
-          svg.appendChild(el);
-        });
-      }
-
-      setTimeout(() => { svg.style.opacity = '1'; }, 100);
-    })();
+    new ShaderMount(document.getElementById('shader-bg'), meshGradientFragmentShader, {
+      u_colors:      colors,
+      u_colorsCount: colorHexes.length,
+      u_distortion:  1.0,
+      u_swirl:       0.3,
+      u_grainMixer:  0.5,
+      u_grainOverlay:0.1,
+    }, {}, 1);
   </script>
 </body>
 </html>
