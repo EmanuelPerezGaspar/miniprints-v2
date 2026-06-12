@@ -244,91 +244,66 @@
     }
     .btn-calc:hover { background: var(--primary-dark); box-shadow: 0 6px 28px rgba(34,197,94,0.45); transform: translateY(-1px); }
     .btn-calc:active { transform: scale(0.97); }
-    /* Receipt panel — replaces hero-metric + identical card grid */
-    .receipt-panel {
-      background: var(--surface);
-      border: 1px solid var(--border);
+    /* Result hero */
+    .result-hero {
+      background: linear-gradient(135deg, rgba(34,197,94,0.10), rgba(167,139,250,0.07));
+      border: 1px solid rgba(34,197,94,0.20);
       border-radius: var(--radius);
-      padding: 20px 22px;
+      padding: 32px 24px;
+      text-align: center;
       margin-bottom: 16px;
     }
-    .receipt-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
-      min-height: 20px;
+    .rh-cliente {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 8px;
     }
-    .receipt-client {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .receipt-meta {
-      font-size: 0.76rem;
+    .rh-label {
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
       color: var(--text-dim);
-      text-align: right;
+      margin-bottom: 6px;
     }
-    .receipt-rows {
-      display: flex;
-      flex-direction: column;
-      gap: 11px;
-      margin-bottom: 14px;
-    }
-    .receipt-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-    .rr-lbl {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-    .rr-val {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text);
-    }
-    .rr-val.rr-green { color: var(--primary); }
-    .receipt-divider {
-      height: 1px;
-      background: var(--border);
-      margin: 16px 0;
-    }
-    .receipt-total {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-    }
-    .rt-lbl {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    .rt-right {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-    }
-    .rt-amount {
-      font-size: 2.1rem;
+    .rh-amount {
+      font-size: 3.2rem;
       font-weight: 800;
       color: var(--primary);
-      letter-spacing: -1px;
+      letter-spacing: -2px;
       line-height: 1;
     }
-    .rt-currency {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      font-weight: 500;
+    .rh-unit { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .rh-unitprice {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.20);
+      border-radius: 8px;
+      padding: 6px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--primary);
     }
-    .receipt-unit {
-      margin-top: 8px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-align: right;
+    .rh-printer { margin-top: 6px; font-size: 0.78rem; color: var(--text-dim); }
+    /* Breakdown grid */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
     }
+    .breakdown-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .bc-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 4px; }
+    .bc-val { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .bc-val.green { color: #22c55e; }
+    .bc-val.purple { color: #a78bfa; }
     /* ML price card */
     .ml-price-card {
       background: rgba(251, 191, 36, 0.07);
@@ -413,17 +388,18 @@
       .cot-layout { display: block !important; }
       .cot-right { padding: 0 !important; }
       #result-panel { display: block !important; margin: 0 !important; }
-      .receipt-panel { background: none !important; border: 2px solid #16a34a !important; }
-      .receipt-client { color: #0f172a !important; font-weight: 700; }
-      .receipt-meta { color: #64748b !important; }
-      .rr-lbl { color: #475569 !important; }
-      .rr-val { color: #0f172a !important; }
-      .rr-val.rr-green { color: #15803d !important; }
-      .receipt-divider { background: #e2e8f0 !important; }
-      .rt-lbl { color: #475569 !important; }
-      .rt-amount { color: #15803d !important; font-size: 1.8rem !important; }
-      .rt-currency { color: #64748b !important; }
-      .receipt-unit { color: #64748b !important; }
+      .result-hero { background: none !important; border: 2px solid #16a34a !important; border-radius: 12px; padding: 24px !important; text-align: center; }
+      .rh-label { color: #475569 !important; }
+      .rh-amount { color: #15803d !important; font-size: 2.5rem !important; }
+      .rh-unit { color: #64748b !important; }
+      .rh-unitprice { background: #dcfce7 !important; border-color: #86efac !important; color: #15803d !important; }
+      .rh-printer { color: #64748b !important; }
+      .breakdown-grid { margin-top: 16px !important; }
+      .breakdown-card { background: #f8fafc !important; border: 1px solid #e2e8f0 !important; }
+      .bc-lbl { color: #475569 !important; }
+      .bc-val { color: #0f172a !important; }
+      .bc-val.green { color: #15803d !important; }
+      .bc-val.purple { color: #7c3aed !important; }
       .res-table { border: 1px solid #e2e8f0 !important; }
       .res-table-head { color: #334155 !important; background: #f1f5f9 !important; }
       table th, table td { color: #0f172a !important; border-color: #e2e8f0 !important; }
@@ -471,9 +447,11 @@
     @media (max-width: 900px) {
       .cot-grid { grid-template-columns: 1fr; }
       .cot-config { position: static; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; }
     }
     @media (max-width: 600px) {
       .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .breakdown-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
@@ -487,9 +465,18 @@
     background: #0a0f1a;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
-  }
-  </style>
-  <canvas id="loom-bg" aria-hidden="true"></canvas>
+}'@
+
+    # 2. Replace visibility handler + add pageshow for iOS bfcache
+    $oldHandler = @'
+      window.addEventListener('resize', setup);
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
+      });
+      setup(); animate();
+</style>
+<canvas id="loom-bg" aria-hidden="true"></canvas>
 
   <!-- NAVBAR -->
   <nav id="navbar" role="navigation" aria-label="Navegación principal">
@@ -639,38 +626,20 @@
             <div id="result-panel" style="display:none; margin-top:24px;">
               <div class="section-lbl">Resultado</div>
 
-              <div class="receipt-panel" id="result-hero">
-                <div class="receipt-header">
-                  <div class="receipt-client" id="res-cliente" style="display:none;"></div>
-                  <div class="receipt-meta" id="res-printer"></div>
-                </div>
-                <div class="receipt-rows">
-                  <div class="receipt-row">
-                    <span class="rr-lbl">Costo base</span>
-                    <span class="rr-val" id="res-costo">$0.00</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span class="rr-lbl">Ganancia</span>
-                    <span class="rr-val rr-green" id="res-ganancia">$0.00</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span class="rr-lbl">IVA</span>
-                    <span class="rr-val" id="res-iva">$0.00</span>
-                  </div>
-                  <div class="receipt-row" id="bc-unit" style="display:none;">
-                    <span class="rr-lbl">Por pieza</span>
-                    <span class="rr-val rr-green" id="res-unit-card">$0.00</span>
-                  </div>
-                </div>
-                <div class="receipt-divider"></div>
-                <div class="receipt-total">
-                  <span class="rt-lbl">Total a cobrar</span>
-                  <div class="rt-right">
-                    <div class="rt-amount" id="res-total">$0.00</div>
-                    <div class="rt-currency">MXN</div>
-                  </div>
-                </div>
-                <div class="receipt-unit" id="res-unit" style="display:none;"></div>
+              <div class="result-hero" id="result-hero">
+                <div class="rh-cliente" id="res-cliente" style="display:none;"></div>
+                <div class="rh-label">Total a cobrar</div>
+                <div class="rh-amount" id="res-total">$0.00</div>
+                <div class="rh-unit">MXN</div>
+                <div class="rh-unitprice" id="res-unit" style="display:none;"></div>
+                <div class="rh-printer" id="res-printer"></div>
+              </div>
+
+              <div class="breakdown-grid">
+                <div class="breakdown-card"><div class="bc-lbl">Costo base</div><div class="bc-val" id="res-costo">$0</div></div>
+                <div class="breakdown-card"><div class="bc-lbl">Ganancia</div><div class="bc-val green" id="res-ganancia">$0</div></div>
+                <div class="breakdown-card"><div class="bc-lbl">IVA</div><div class="bc-val" id="res-iva">$0</div></div>
+                <div class="breakdown-card" id="bc-unit" style="display:none;"><div class="bc-lbl">Por pieza</div><div class="bc-val green" id="res-unit-card">$0</div></div>
               </div>
 
               <div class="ml-price-card">
@@ -1352,10 +1321,9 @@
       }
       window.addEventListener('resize', setup);
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { cancelAnimationFrame(animId); animId = null; }
-        else if (!animId) animate();
+        if (document.hidden) cancelAnimationFrame(animId);
+        else animate();
       });
-      window.addEventListener('pageshow', () => { if (!animId) animate(); });
       setup(); animate();
     })();
   </script>
