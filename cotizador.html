@@ -309,8 +309,11 @@
     .bm-label { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); font-weight: 600; }
     .bm-value { font-size: 1.2rem; font-weight: 800; line-height: 1; margin-bottom: 3px; }
     .bm-sub { font-size: 0.67rem; color: var(--text-dim); margin-bottom: 10px; min-height: 1em; }
-    .bm-bar-track { position: relative; height: 5px; background: rgba(255,255,255,0.07); border-radius: 999px; margin-bottom: 8px; overflow: hidden; }
+    .bm-bar-track { position: relative; height: 5px; background: rgba(255,255,255,0.07); border-radius: 999px; overflow: hidden; }
     .bm-bar-fill { height: 100%; border-radius: 999px; width: 0%; transition: width 900ms cubic-bezier(0.23,0.86,0.39,0.96); }
+    .bm-bar-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; margin-bottom: 8px; }
+    .bm-bar-hint { font-size: 0.59rem; color: var(--text-dim); opacity: 0.7; }
+    .bm-bar-pct  { font-size: 0.65rem; font-weight: 700; color: var(--text-dim); }
     .bm-levels { display: flex; height: 3px; border-radius: 999px; overflow: hidden; gap: 1px; }
     .bm-lv { height: 100%; }
     .bm-lv-r { background: #ef4444; }
@@ -668,8 +671,11 @@
                     <span class="bm-label">Costo de producción</span>
                   </div>
                   <div class="bm-value" id="res-costo">$0.00</div>
-                  <div class="bm-sub" id="res-costo-sub">— del precio final</div>
                   <div class="bm-bar-track"><div class="bm-bar-fill" id="res-costo-bar"></div></div>
+                  <div class="bm-bar-meta">
+                    <span class="bm-bar-hint">del precio total</span>
+                    <span class="bm-bar-pct" id="res-costo-sub">—</span>
+                  </div>
                   <div class="bm-levels">
                     <div class="bm-lv bm-lv-g" style="width:40%"></div>
                     <div class="bm-lv bm-lv-y" style="width:20%"></div>
@@ -684,8 +690,11 @@
                     <span class="bm-label">Ganancia</span>
                   </div>
                   <div class="bm-value" id="res-ganancia">$0.00</div>
-                  <div class="bm-sub" id="res-ganancia-sub">Margen del 0%</div>
                   <div class="bm-bar-track"><div class="bm-bar-fill" id="res-ganancia-bar"></div></div>
+                  <div class="bm-bar-meta">
+                    <span class="bm-bar-hint">del precio total</span>
+                    <span class="bm-bar-pct" id="res-ganancia-sub">margen 0%</span>
+                  </div>
                   <div class="bm-levels">
                     <div class="bm-lv bm-lv-r" style="width:25%"></div>
                     <div class="bm-lv bm-lv-o" style="width:25%"></div>
@@ -700,8 +709,11 @@
                     <span class="bm-label">IVA</span>
                   </div>
                   <div class="bm-value" id="res-iva">$0.00</div>
-                  <div class="bm-sub" id="res-iva-sub">— del precio final</div>
                   <div class="bm-bar-track"><div class="bm-bar-fill" id="res-iva-bar"></div></div>
+                  <div class="bm-bar-meta">
+                    <span class="bm-bar-hint" id="res-iva-hint">tasa 16%</span>
+                    <span class="bm-bar-pct" id="res-iva-sub">—</span>
+                  </div>
                   <div class="bm-levels">
                     <div class="bm-lv bm-lv-y" style="width:50%"></div>
                     <div class="bm-lv bm-lv-o" style="width:50%"></div>
@@ -714,8 +726,11 @@
                     <span class="bm-label">Por pieza</span>
                   </div>
                   <div class="bm-value" id="res-unit-card">$0.00</div>
-                  <div class="bm-sub" id="res-unit-sub">precio unitario</div>
                   <div class="bm-bar-track"><div class="bm-bar-fill" id="res-unit-bar"></div></div>
+                  <div class="bm-bar-meta">
+                    <span class="bm-bar-hint">del precio total</span>
+                    <span class="bm-bar-pct" id="res-unit-sub">—</span>
+                  </div>
                   <div class="bm-levels">
                     <div class="bm-lv bm-lv-r" style="width:25%"></div>
                     <div class="bm-lv bm-lv-o" style="width:25%"></div>
@@ -1124,7 +1139,8 @@
         ru.textContent = fmt(xUnidad) + ' c/u · ' + numPiezas + ' piezas';
         ru.style.display = 'inline-block';
         animateBmValue(document.getElementById('res-unit-card'), xUnidad, 800);
-        animateBmBar(document.getElementById('res-unit-bar'), 100);
+        document.getElementById('res-unit-sub').textContent = `${((xUnidad / precioFinal) * 100).toFixed(0)}%`;
+        animateBmBar(document.getElementById('res-unit-bar'), (xUnidad / precioFinal) * 100);
         bcUnit.style.display = '';
       } else {
         ru.style.display = 'none';
@@ -1132,15 +1148,16 @@
       }
       document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
       animateBmValue(document.getElementById('res-costo'), subtotalFalla, 800);
-      document.getElementById('res-costo-sub').textContent = `${((subtotalFalla / precioFinal) * 100).toFixed(0)}% del precio final`;
+      document.getElementById('res-costo-sub').textContent = `${((subtotalFalla / precioFinal) * 100).toFixed(0)}%`;
       animateBmBar(document.getElementById('res-costo-bar'), (subtotalFalla / precioFinal) * 100);
 
       animateBmValue(document.getElementById('res-ganancia'), ganancia, 800);
-      document.getElementById('res-ganancia-sub').textContent = `Margen del ${(margenPct * 100).toFixed(0)}%`;
+      document.getElementById('res-ganancia-sub').textContent = `margen ${(margenPct * 100).toFixed(0)}%`;
       animateBmBar(document.getElementById('res-ganancia-bar'), (ganancia / precioFinal) * 100);
 
       animateBmValue(document.getElementById('res-iva'), aplicaIva ? ivaMonto : 0, 800);
-      document.getElementById('res-iva-sub').textContent = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}% del precio final` : 'Exento de IVA';
+      document.getElementById('res-iva-hint').textContent = aplicaIva ? 'tasa 16%' : 'exento';
+      document.getElementById('res-iva-sub').textContent = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}%` : '—';
       animateBmBar(document.getElementById('res-iva-bar'), aplicaIva ? (ivaMonto / precioFinal) * 100 : 0);
 
       // Precio Mercado Libre (por pieza — cada venta ML es 1 pieza con su envío)
