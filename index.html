@@ -24,111 +24,6 @@
       color: #f1f5f9;
     }
 
-    /* ── Falling Pattern Background ─────────────── */
-    .falling-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .falling-bg-anim {
-      position: absolute;
-      inset: 0;
-      background-color: #0a0f1a;
-      background-image:
-        radial-gradient(4px 100px at 0px 235px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 235px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 117.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 252px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 252px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 126px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 150px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 150px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 75px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 253px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 253px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 126.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 204px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 204px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 102px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 134px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 134px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 67px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 179px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 179px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 89.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 299px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 299px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 149.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 215px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 215px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 107.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 281px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 281px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 140.5px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 158px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 158px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 79px, #22c55e 100%, transparent 150%),
-        radial-gradient(4px 100px at 0px 210px, #22c55e, transparent),
-        radial-gradient(4px 100px at 300px 210px, #22c55e, transparent),
-        radial-gradient(1.5px 1.5px at 150px 105px, #22c55e 100%, transparent 150%);
-      background-size:
-        300px 235px, 300px 235px, 300px 235px,
-        300px 252px, 300px 252px, 300px 252px,
-        300px 150px, 300px 150px, 300px 150px,
-        300px 253px, 300px 253px, 300px 253px,
-        300px 204px, 300px 204px, 300px 204px,
-        300px 134px, 300px 134px, 300px 134px,
-        300px 179px, 300px 179px, 300px 179px,
-        300px 299px, 300px 299px, 300px 299px,
-        300px 215px, 300px 215px, 300px 215px,
-        300px 281px, 300px 281px, 300px 281px,
-        300px 158px, 300px 158px, 300px 158px,
-        300px 210px, 300px 210px, 300px 210px;
-      animation: fallingPattern 150s linear infinite;
-    }
-    .falling-bg-overlay {
-      position: absolute;
-      inset: 0;
-      backdrop-filter: blur(1em);
-      -webkit-backdrop-filter: blur(1em);
-      background-image: radial-gradient(circle at 50% 50%, transparent 0, transparent 2px, #0a0f1a 2px);
-      background-size: 8px 8px;
-    }
-    @keyframes fallingPattern {
-      from {
-        background-position:
-          0px 220px, 3px 220px, 151.5px 337.5px,
-          25px 24px, 28px 24px, 176.5px 150px,
-          50px 16px, 53px 16px, 201.5px 91px,
-          75px 224px, 78px 224px, 226.5px 230.5px,
-          100px 19px, 103px 19px, 251.5px 121px,
-          125px 120px, 128px 120px, 276.5px 187px,
-          150px 31px, 153px 31px, 301.5px 120.5px,
-          175px 235px, 178px 235px, 326.5px 384.5px,
-          200px 121px, 203px 121px, 351.5px 228.5px,
-          225px 224px, 228px 224px, 376.5px 364.5px,
-          250px 26px, 253px 26px, 401.5px 105px,
-          275px 75px, 278px 75px, 426.5px 180px;
-      }
-      to {
-        background-position:
-          0px 6800px, 3px 6800px, 151.5px 6917.5px,
-          25px 13632px, 28px 13632px, 176.5px 13758px,
-          50px 5416px, 53px 5416px, 201.5px 5491px,
-          75px 17175px, 78px 17175px, 226.5px 17301.5px,
-          100px 5119px, 103px 5119px, 251.5px 5221px,
-          125px 8428px, 128px 8428px, 276.5px 8495px,
-          150px 9876px, 153px 9876px, 301.5px 9965.5px,
-          175px 13391px, 178px 13391px, 326.5px 13540.5px,
-          200px 14741px, 203px 14741px, 351.5px 14848.5px,
-          225px 18770px, 228px 18770px, 376.5px 18910.5px,
-          250px 5082px, 253px 5082px, 401.5px 5161px,
-          275px 6375px, 278px 6375px, 426.5px 6480px;
-      }
-    }
-
     /* ── Orbital container ──────────────────────────── */
     #orbital {
       position: fixed;
@@ -403,22 +298,140 @@
 </head>
 <body>
 
-  <!-- Mesh Gradient Background -->
+  <!-- Shape Landing Hero Background -->
   <style>
-    #shader-bg {
+    html { background: #030303; }
+
+    #shapes-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: #000;
+      overflow: hidden;
     }
-    #shader-bg canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
+    #shapes-ambient {
+      position: absolute;
+      inset: -40px;
+      background: linear-gradient(
+        135deg,
+        rgba(99, 102, 241, 0.06) 0%,
+        transparent 50%,
+        rgba(34, 197, 94, 0.06) 100%
+      );
+      filter: blur(60px);
+    }
+
+    /* entrance */
+    .es {
+      position: absolute;
+      animation: esIn 2.4s cubic-bezier(0.23, 0.86, 0.39, 0.96) var(--d, 0s) both;
+    }
+    @keyframes esIn {
+      from {
+        opacity: 0;
+        transform: translateY(-150px) rotate(calc(var(--r, 0deg) - 15deg));
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0px) rotate(var(--r, 0deg));
+      }
+    }
+
+    /* float loop (on inner div so rotation from wrapper is preserved) */
+    .es-inner {
+      position: relative;
+      animation: esFloat 12s ease-in-out calc(var(--d, 0s) + 2.4s) infinite;
+    }
+    @keyframes esFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(15px); }
+    }
+
+    /* pill visual */
+    .es-pill {
+      position: absolute;
+      inset: 0;
+      border-radius: 9999px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+    .es-pill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 70%);
+    }
+
+    /* color variants — adapted to MiniPrints palette */
+    .es-indigo { background: linear-gradient(to right, rgba(99,102,241,0.15),  transparent); }
+    .es-green  { background: linear-gradient(to right, rgba(34,197,94,0.15),   transparent); }
+    .es-violet { background: linear-gradient(to right, rgba(139,92,246,0.15),  transparent); }
+    .es-purple { background: linear-gradient(to right, rgba(167,139,250,0.15), transparent); }
+    .es-teal   { background: linear-gradient(to right, rgba(20,184,166,0.12),  transparent); }
+
+    /* vignette — darkens top and bottom edges */
+    #shapes-vignette {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(3,3,3,0.70) 0%,
+        transparent 30%,
+        transparent 70%,
+        rgba(3,3,3,0.80) 100%
+      );
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .es, .es-inner { animation: none !important; opacity: 1 !important; }
     }
   </style>
-  <div id="shader-bg" aria-hidden="true"></div>
+
+  <div id="shapes-bg" aria-hidden="true">
+    <div id="shapes-ambient"></div>
+
+    <!-- Shape 1: 600×140, indigo, left-top, rotate 12° -->
+    <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
+      <div class="es-inner" style="width:600px; height:140px">
+        <div class="es-pill es-indigo"></div>
+      </div>
+    </div>
+
+    <!-- Shape 2: 500×120, green, right-bottom, rotate -15° -->
+    <div class="es" style="--d:.50s; --r:-15deg; right:-4%; top:72%">
+      <div class="es-inner" style="width:500px; height:120px">
+        <div class="es-pill es-green"></div>
+      </div>
+    </div>
+
+    <!-- Shape 3: 300×80, violet, left-bottom, rotate -8° -->
+    <div class="es" style="--d:.40s; --r:-8deg; left:7%; bottom:8%">
+      <div class="es-inner" style="width:300px; height:80px">
+        <div class="es-pill es-violet"></div>
+      </div>
+    </div>
+
+    <!-- Shape 4: 200×60, purple, right-top, rotate 20° -->
+    <div class="es" style="--d:.60s; --r:20deg; right:16%; top:11%">
+      <div class="es-inner" style="width:200px; height:60px">
+        <div class="es-pill es-purple"></div>
+      </div>
+    </div>
+
+    <!-- Shape 5: 150×40, teal, left-top, rotate -25° -->
+    <div class="es" style="--d:.70s; --r:-25deg; left:23%; top:6%">
+      <div class="es-inner" style="width:150px; height:40px">
+        <div class="es-pill es-teal"></div>
+      </div>
+    </div>
+
+    <div id="shapes-vignette"></div>
+  </div>
+
+
 
   <!-- Orbital menu -->
   <div id="orbital" role="navigation" aria-label="Menú de navegación">
@@ -662,23 +675,6 @@
     rafId = requestAnimationFrame(tick);
   </script>
 
-  <script type="module">
-    import { ShaderMount } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/shader-mount.js';
-    import { meshGradientFragmentShader } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/shaders/mesh-gradient.js';
-    import { getShaderColorFromString } from 'https://unpkg.com/@paper-design/shaders@0.0.76/dist/get-shader-color-from-string.js';
-
-    const colorHexes = ['#06b6d4', '#0891b2', '#f97316', '#000000'];
-    const colors = colorHexes.map(c => getShaderColorFromString(c));
-
-    new ShaderMount(document.getElementById('shader-bg'), meshGradientFragmentShader, {
-      u_colors:      colors,
-      u_colorsCount: colorHexes.length,
-      u_distortion:  1.0,
-      u_swirl:       0.3,
-      u_grainMixer:  0.5,
-      u_grainOverlay:0.1,
-    }, {}, 1);
-  </script>
   <script src="glass.js"></script>
 </body>
 </html>
