@@ -95,18 +95,16 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   height: 54px;
   z-index: 1000;
 
-  /* liquid glass */
-  background: rgba(255, 255, 255, 0.11);
-  backdrop-filter: blur(28px) saturate(160%);
-  -webkit-backdrop-filter: blur(28px) saturate(160%);
-
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  /* glass shell — tint sits above the distorted blur layer */
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 18px;
 
+  /* outer drop shadow + top/bottom rim lighting */
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.14),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.12),
-    0 8px 32px rgba(0, 0, 0, 0.40),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14),
+    0 8px 32px rgba(0, 0, 0, 0.42),
     0 2px 8px  rgba(0, 0, 0, 0.20);
 
   display: flex;
@@ -115,14 +113,52 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   gap: 8px;
   transition: background 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
 }
+
+/* Liquid glass layer — blurred + SVG-distorted backdrop */
+#navbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 17px;
+  backdrop-filter: blur(22px) saturate(180%) brightness(1.06);
+  -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(1.06);
+  filter: url(#glass-distortion);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Specular gleam — top-edge highlight strip */
+#navbar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.50) 25%,
+    rgba(255, 255, 255, 0.60) 50%,
+    rgba(255, 255, 255, 0.50) 75%,
+    transparent
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
 #navbar.scrolled {
-  background: rgba(10, 15, 26, 0.55);
+  background: rgba(10, 15, 26, 0.48);
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.20),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.16),
     0 12px 40px rgba(0, 0, 0, 0.55),
     0 2px 8px  rgba(0, 0, 0, 0.25);
+}
+#navbar.scrolled::before {
+  backdrop-filter: blur(28px) saturate(200%) brightness(0.97);
+  -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.97);
 }
 .nav-logo {
   display: flex;
