@@ -689,6 +689,11 @@
                 </div>
 
                 <div class="field">
+                  <label>Empaque / envío ($)</label>
+                  <input type="number" id="inp-empaque" value="12" min="0" step="1" onchange="saveConfig()" />
+                </div>
+
+                <div class="field">
                   <label>% Ganancia</label>
                   <input type="number" id="inp-margen" value="60" min="0" max="300" step="5" />
                   <span class="markup-hint" id="markup-hint"></span>
@@ -1023,20 +1028,22 @@
     function today() { return new Date().toISOString().split('T')[0]; }
 
     /* ── Config ────────────────────────────────── */
-    const CONFIG = { kwh: 5.0, falla: 10, precioMin: 150 };
+    const CONFIG = { kwh: 5.0, falla: 10, precioMin: 150, empaque: 12 };
 
     function loadConfig() {
       try {
         const c = localStorage.getItem('mp_config');
         if (c) Object.assign(CONFIG, JSON.parse(c));
       } catch(e) {}
-      document.getElementById('inp-kwh').value   = CONFIG.kwh;
-      document.getElementById('inp-falla').value = CONFIG.falla;
+      document.getElementById('inp-kwh').value    = CONFIG.kwh;
+      document.getElementById('inp-falla').value  = CONFIG.falla;
+      document.getElementById('inp-empaque').value = CONFIG.empaque;
     }
 
     function saveConfig() {
-      CONFIG.kwh   = parseFloat(document.getElementById('inp-kwh').value)   || 5.0;
-      CONFIG.falla = parseFloat(document.getElementById('inp-falla').value) || 10;
+      CONFIG.kwh    = parseFloat(document.getElementById('inp-kwh').value)    || 5.0;
+      CONFIG.falla  = parseFloat(document.getElementById('inp-falla').value)  || 10;
+      CONFIG.empaque = parseFloat(document.getElementById('inp-empaque').value) || 0;
       localStorage.setItem('mp_config', JSON.stringify(CONFIG));
     }
 
@@ -1426,13 +1433,14 @@
       animateBmBar(document.getElementById('res-iva-bar'), aplicaIva ? (ivaMonto / precioFinal) * 100 : 0);
 
       // ML price — calculated per unit (cada venta ML es 1 pieza con su propio envío)
-      const ML_COM_PCT  = 0.15;          // comisión ML Clásica
-      const ML_IVA_COM  = 0.16;          // IVA sobre la comisión
-      const precioML    = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
-      const comisionML  = precioML * ML_COM_PCT;
-      const ivaComision = comisionML * ML_IVA_COM;
-      const totalCargos = comisionML + ivaComision + ML_SHIP;
-      const ingresoNeto = precioML - totalCargos;
+      const ML_COM_PCT   = 0.15;
+      const ML_IVA_COM   = 0.16;
+      const costoEmpaque = CONFIG.empaque || 0;
+      const precioML     = Math.ceil((xUnidad + ML_SHIP + costoEmpaque) / (1 - ML_FEE));
+      const comisionML   = precioML * ML_COM_PCT;
+      const ivaComision  = comisionML * ML_IVA_COM;
+      const totalCargos  = comisionML + ivaComision + ML_SHIP + costoEmpaque;
+      const ingresoNeto  = precioML - totalCargos;
       const gananciaNeta = ingresoNeto - xUnidad;
       const margenNeto   = precioML > 0 ? (gananciaNeta / precioML) * 100 : 0;
 
@@ -1462,6 +1470,11 @@
           <span class="ml-breakdown-lbl">(-) Envío Mercado Envíos</span>
           <span class="ml-breakdown-val neg">-${fmt(ML_SHIP)}</span>
         </div>
+        ${costoEmpaque > 0 ? `
+        <div class="ml-breakdown-row">
+          <span class="ml-breakdown-lbl">(-) Empaque (bolsa/caja)</span>
+          <span class="ml-breakdown-val neg">-${fmt(costoEmpaque)}</span>
+        </div>` : ''}
         <div class="ml-breakdown-row divider">
           <span class="ml-breakdown-lbl">= Tu ingreso neto</span>
           <span class="ml-breakdown-val neutral">${fmt(ingresoNeto)}</span>
