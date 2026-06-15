@@ -1281,7 +1281,7 @@
               <select id="single-mat" onchange="state.singleMatId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
             </div>
             <div class="field">
-              <label>Peso a usar (g)</label>
+              <label>Peso total del trabajo (g)</label>
               <input type="number" id="single-grams" min="0" step="0.1" placeholder="0.0" value="${state.singleGrams}" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" />
             </div>
             <div class="field">
@@ -1305,7 +1305,7 @@
         }
         const header = document.createElement('div');
         header.className = 'mat-rows-header';
-        header.innerHTML = '<span>Material</span><span>Gramos</span><span></span>';
+        header.innerHTML = '<span>Material</span><span>Gramos totales</span><span></span>';
         c.appendChild(header);
 
         state.matRows.forEach((row, i) => {
@@ -1738,10 +1738,10 @@
         });
       }
 
-      // Descontar material × cantidad de piezas confirmadas
+      // Descontar material (gramos totales del trabajo, sin multiplicar por cantidad)
       matsUsados.forEach(m => {
         if (DB.materials[m.matId]) {
-          DB.materials[m.matId].pesoTotal = Math.max(0, (DB.materials[m.matId].pesoTotal || 0) - m.grams * cantidad);
+          DB.materials[m.matId].pesoTotal = Math.max(0, (DB.materials[m.matId].pesoTotal || 0) - m.grams);
         }
       });
       saveKey('materials');
