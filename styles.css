@@ -675,12 +675,17 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   flex: 1;
   min-width: 0;
 }
-.kpi-grid {
+.dash-left {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 190px;
   flex-shrink: 0;
+}
+.kpi-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 .kpi-card {
   padding: 10px 14px;
@@ -1116,7 +1121,8 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
   .dash-sidebar { display: none; }
   .dash-main    { padding: 20px 16px; }
   .dash-body    { flex-direction: column; }
-  .kpi-grid     { width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .dash-left    { width: 100%; }
+  .kpi-grid     { flex-direction: row; flex-wrap: wrap; }
   .kpi-card     { flex: 1 1 calc(50% - 5px); min-width: 140px; }
   .hamburger    { display: flex; margin-left: auto; }
   .nav-links    { display: none; }
