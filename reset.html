@@ -133,10 +133,11 @@
       <span>✗ Cotizaciones</span>
       <span>✗ Stock de piezas</span>
       <span>✗ Historial de impresión</span>
+      <span>✗ Peso de filamentos — restablecido a 1000g c/u</span>
     </div>
 
     <div class="keep">
-      ✓ <strong>Materiales — se conservan</strong>
+      ✓ <strong>Materiales — nombres, precios y tipos se conservan</strong>
     </div>
 
     <button class="btn-reset" onclick="doReset()">Restablecer ahora</button>
@@ -148,6 +149,11 @@
   <script>
     function doReset() {
       ['mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial'].forEach(k => localStorage.removeItem(k));
+      try {
+        const mats = JSON.parse(localStorage.getItem('mp_materials') || '{}');
+        Object.values(mats).forEach(m => { m.pesoTotal = 1000; });
+        localStorage.setItem('mp_materials', JSON.stringify(mats));
+      } catch(e) {}
       document.querySelector('.btn-reset').disabled = true;
       document.querySelector('.btn-back').disabled = true;
       document.getElementById('done').style.display = 'block';
