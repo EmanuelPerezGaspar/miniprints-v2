@@ -668,12 +668,12 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 }
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
 }
 .kpi-card {
-  padding: 22px 24px;
+  padding: 14px 16px;
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--border);
@@ -685,11 +685,11 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 .kpi-card:nth-child(3) { animation-delay: 130ms; }
 .kpi-card:nth-child(4) { animation-delay: 195ms; }
 .kpi-card:hover { border-color: var(--border-strong); }
-.kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-.kpi-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.3px; }
-.kpi-icon  { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; }
-.kpi-value { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 8px; }
-.kpi-change { font-size: 0.78rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.kpi-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.3px; }
+.kpi-icon  { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.kpi-value { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; margin-bottom: 5px; }
+.kpi-change { font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 4px; }
 .kpi-change.up   { color: #22c55e; }
 .kpi-change.down { color: #ef4444; }
 .kpi-period      { color: var(--text-dim); font-size: 0.75rem; margin-left: 4px; }
