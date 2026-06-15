@@ -188,28 +188,28 @@
       document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">INGRESOS REALES</span>
-            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           </div>
           <div class="kpi-value">${fmt(ingresos)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${DB.ventas.length} ventas totales</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">GANANCIA REAL</span>
-            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
           </div>
           <div class="kpi-value" style="color:${parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444'};">${fmt(ganancia)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">Margen ${margen}%</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">PIEZAS EN STOCK</span>
-            <div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
           </div>
           <div class="kpi-value">${totalPiezas}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">MATERIALES</span>
-            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ef4444':'#a78bfa'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ef4444':'#a78bfa'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
           </div>
           <div class="kpi-value">${totalMateriales}</div>
           <div class="kpi-change neutral" style="color:${critico>0?'#ef4444':'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
