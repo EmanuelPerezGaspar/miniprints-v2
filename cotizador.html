@@ -338,7 +338,23 @@
       padding: 18px 20px;
       margin-bottom: 16px;
     }
-    .ml-price-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .ml-price-row {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      cursor: pointer; user-select: none;
+    }
+    .ml-chevron {
+      width: 18px; height: 18px; flex-shrink: 0;
+      color: #fbbf24; opacity: 0.7;
+      transition: transform 240ms var(--ease-out);
+    }
+    .ml-price-card.open .ml-chevron { transform: rotate(180deg); }
+    .ml-collapsible {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 300ms cubic-bezier(0.4,0,0.2,1), opacity 240ms ease;
+      opacity: 0;
+    }
+    .ml-price-card.open .ml-collapsible { max-height: 800px; opacity: 1; }
     .ml-price-left { flex: 1; }
     .ml-price-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: #d97706; margin-bottom: 4px; }
     .ml-price-val { font-size: 1.6rem; font-weight: 800; color: #fbbf24; line-height: 1; }
@@ -908,17 +924,22 @@
                 </div>
               </div>
 
-              <div class="ml-price-card">
-                <div class="ml-price-row">
+              <div class="ml-price-card" id="ml-card">
+                <div class="ml-price-row" onclick="toggleML()">
                   <div class="ml-price-left">
                     <div class="ml-price-lbl">Precio en Mercado Libre</div>
                     <div class="ml-price-val" id="res-ml-price">$0.00</div>
                     <div class="ml-price-note" id="res-ml-note">por pieza</div>
                   </div>
-                  <div class="ml-price-badge" id="res-ml-badge">ML Clásica</div>
+                  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                    <div class="ml-price-badge" id="res-ml-badge">ML Clásica</div>
+                    <svg class="ml-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
                 </div>
-                <div class="ml-breakdown" id="res-ml-breakdown"></div>
-                <div class="ml-vs-wa" id="res-ml-vswa"></div>
+                <div class="ml-collapsible">
+                  <div class="ml-breakdown" id="res-ml-breakdown"></div>
+                  <div class="ml-vs-wa" id="res-ml-vswa"></div>
+                </div>
               </div>
 
               <div class="confirm-card">
@@ -1595,6 +1616,7 @@
 
       state.lastCalc.precioML     = precioML;
       state.lastCalc.gananciaNeta = gananciaNeta;
+      document.getElementById('ml-card').classList.add('open');
 
       // Materiales table
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
@@ -1725,6 +1747,11 @@
         `<span style="color:var(--primary);">${cantidad}× "${nombre}" en inventario. Materiales descontados.</span>`;
       showToast(`${cantidad}× "${nombre}" agregadas al stock`);
       checkStock();
+    }
+
+    /* ── ML toggle ───────────────────────────── */
+    function toggleML() {
+      document.getElementById('ml-card').classList.toggle('open');
     }
 
     /* ── Export PDF ───────────────────────────── */
