@@ -186,6 +186,19 @@
       return v.fecha.substring(0,7);
     }
 
+    function genDots(count, radius, cx, cy) {
+      const dots = [];
+      for (let i = 0; i < count; i++) {
+        const a = (i / count) * 2 * Math.PI;
+        dots.push({
+          x: Math.round((cx + radius * Math.cos(a)) * 100) / 100,
+          y: Math.round((cy + radius * Math.sin(a)) * 100) / 100,
+          delay: (i * 0.018).toFixed(3)
+        });
+      }
+      return dots;
+    }
+
     function renderKPIs() {
       const ingresos = DB.ventas.reduce((s,v)=>s+v.precio*v.cantidad,0);
       const ganancia = ingresos - DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
@@ -193,21 +206,43 @@
       const totalMateriales = Object.keys(DB.materials).length;
       const critico = Object.values(DB.materials).filter(m=>m.pesoTotal<=200).length;
       const margen = ingresos > 0 ? ((ganancia/ingresos)*100).toFixed(1) : '0';
+      const gananciaColor = parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444';
+
+      const outerDots = genDots(36, 68, 80, 80);
+      const innerDots = genDots(24, 52, 80, 80);
+      const outerSvg = outerDots.map(d=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#22c55e" style="animation-delay:${d.delay}s"/>`).join('');
+      const innerSvg = innerDots.map(d=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#a78bfa" style="animation-delay:${(+d.delay+0.4).toFixed(3)}s"/>`).join('');
 
       document.getElementById('kpi-grid').innerHTML = `
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">INGRESOS REALES</span>
-            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div class="kpi-combined-card">
+          <div class="kc-dots-wrap">
+            <svg class="kc-svg" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+              ${outerSvg}${innerSvg}
+            </svg>
+            <div class="kc-center">
+              <div class="kc-total-label">Total</div>
+              <div class="kc-total-value">${fmt(ingresos)}</div>
+            </div>
+            <div class="kc-fade"></div>
           </div>
-          <div class="kpi-value">${fmt(ingresos)}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">${DB.ventas.length} ventas totales</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">GANANCIA REAL</span>
-            <div class="kpi-icon" style="background:rgba(34,197,94,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+          <div class="kc-bottom">
+            <div class="kc-stat">
+              <div class="kc-stat-header">
+                <div class="kc-stat-bar" style="background:#22c55e;"></div>
+                <span class="kc-stat-label">Ingresos</span>
+              </div>
+              <div class="kc-stat-value">${fmt(ingresos)}</div>
+              <div class="kc-stat-sub">${DB.ventas.length} ventas</div>
+            </div>
+            <div class="kc-stat">
+              <div class="kc-stat-header">
+                <div class="kc-stat-bar" style="background:#a78bfa;"></div>
+                <span class="kc-stat-label">Ganancia</span>
+              </div>
+              <div class="kc-stat-value" style="color:${gananciaColor};">${fmt(ganancia)}</div>
+              <div class="kc-stat-sub">Margen ${margen}%</div>
+            </div>
           </div>
-          <div class="kpi-value" style="color:${parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444'};">${fmt(ganancia)}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">Margen ${margen}%</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">PIEZAS EN STOCK</span>

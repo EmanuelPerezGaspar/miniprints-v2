@@ -704,6 +704,103 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 .kpi-change.down { color: #ef4444; }
 .kpi-period      { color: var(--text-dim); font-size: 0.65rem; margin-left: 4px; }
 
+/* Combined KPI card (Ingresos + Ganancia) */
+.kpi-combined-card {
+  position: relative;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  animation: kpiIn 400ms var(--ease-out) both;
+  transition: border-color var(--transition);
+}
+.kpi-combined-card:hover { border-color: var(--border-strong); }
+.kc-dots-wrap {
+  position: relative;
+  width: 100%;
+}
+.kc-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@keyframes dotIn {
+  from { opacity: 0; }
+  to   { opacity: 0.7; }
+}
+.kc-dot { animation: dotIn 600ms var(--ease-out) both; }
+.kc-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding-bottom: 28%;
+}
+.kc-total-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+@keyframes blurIn {
+  from { opacity: 0; filter: blur(4px); transform: scale(0.9); }
+  to   { opacity: 1; filter: blur(0);   transform: scale(1); }
+}
+.kc-total-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+  animation: blurIn 600ms 500ms var(--ease-out) both;
+}
+.kc-fade {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 55%;
+  background: linear-gradient(to bottom, transparent, rgba(10,15,26,0.96) 80%);
+  pointer-events: none;
+}
+.kc-bottom {
+  padding: 6px 12px 10px;
+  display: flex;
+  gap: 6px;
+}
+.kc-stat { flex: 1; }
+.kc-stat-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+.kc-stat-bar {
+  width: 2px;
+  height: 11px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  animation: kpiIn 400ms 400ms var(--ease-out) both;
+}
+.kc-stat-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.kc-stat-value {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.3px;
+}
+.kc-stat-sub {
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
 /* Charts */
 .charts-row {
   display: grid;
