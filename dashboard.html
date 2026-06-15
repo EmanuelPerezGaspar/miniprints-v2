@@ -269,13 +269,20 @@
               const delay = (i*0.07).toFixed(2);
               return `<div class="psi" style="animation-delay:${delay}s">
                 <div class="psi-left">
-                  <span class="psi-rank">#${i+1}</span>
-                  <div class="psi-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
-                  <span class="psi-name" title="${nombre}">${nombre}</span>
+                  <div class="psi-icon">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                  </div>
+                  <div class="psi-info">
+                    <div class="psi-name" title="${nombre}">${nombre}</div>
+                    <div class="psi-rank">#${i+1} más vendida</div>
+                  </div>
                 </div>
                 <div class="psi-right">
                   <div class="psi-qty">${qty} uds</div>
-                  <div class="psi-pct"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>${pct}%</div>
+                  <div class="psi-pct">
+                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+                    ${pct}%
+                  </div>
                 </div>
               </div>`;
             }).join('')}</div>`;
