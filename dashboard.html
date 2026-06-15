@@ -258,6 +258,28 @@
           </div>
           <div class="kpi-value">${totalPiezas}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
+          ${(()=>{
+            const piezaMap = {};
+            DB.ventas.forEach(v=>{ if(v.pieza) piezaMap[v.pieza]=(piezaMap[v.pieza]||0)+v.cantidad; });
+            const totalVendidas = Object.values(piezaMap).reduce((s,n)=>s+n,0);
+            const top = Object.entries(piezaMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            if(!top.length) return '';
+            return `<div class="pieces-list">${top.map(([nombre,qty],i)=>{
+              const pct = totalVendidas>0?((qty/totalVendidas)*100).toFixed(1):'0';
+              const delay = (i*0.07).toFixed(2);
+              return `<div class="psi" style="animation-delay:${delay}s">
+                <div class="psi-left">
+                  <span class="psi-rank">#${i+1}</span>
+                  <div class="psi-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+                  <span class="psi-name" title="${nombre}">${nombre}</span>
+                </div>
+                <div class="psi-right">
+                  <div class="psi-qty">${qty} uds</div>
+                  <div class="psi-pct"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>${pct}%</div>
+                </div>
+              </div>`;
+            }).join('')}</div>`;
+          })()}
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">MATERIALES</span>

@@ -704,6 +704,41 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 .kpi-change.down { color: #ef4444; }
 .kpi-period      { color: var(--text-dim); font-size: 0.65rem; margin-left: 4px; }
 
+/* Piece stock items inside kpi-card */
+.pieces-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.psi {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-top: 1px solid var(--border);
+  gap: 5px;
+  animation: kpiIn 400ms var(--ease-out) both;
+}
+.psi-left { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.psi-rank { font-size: 0.58rem; color: var(--text-dim); font-weight: 700; width: 12px; flex-shrink: 0; }
+.psi-icon {
+  width: 20px; height: 20px; border-radius: 5px;
+  background: rgba(34,197,94,0.10);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.psi-name {
+  font-size: 0.62rem; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.psi-right { text-align: right; flex-shrink: 0; }
+.psi-qty { font-size: 0.68rem; font-weight: 700; color: var(--text); }
+.psi-pct {
+  font-size: 0.58rem; font-weight: 600; color: #22c55e;
+  display: flex; align-items: center; justify-content: flex-end; gap: 2px;
+}
+
 /* Combined KPI card (Ingresos + Ganancia) */
 .kpi-combined-card {
   position: relative;
