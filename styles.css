@@ -1120,13 +1120,13 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
 @media (max-width: 768px) {
   .dash-sidebar { display: none; }
   .dash-main    { padding: 20px 16px; }
-  .dash-body    { flex-direction: column; }
-  .dash-left    { width: 100%; }
-  .kpi-grid     { flex-direction: row; flex-wrap: wrap; }
-  .kpi-card     { flex: 1 1 calc(50% - 5px); min-width: 140px; }
+  .dash-body         { flex-direction: column; }
+  .dash-left         { width: 100%; }
+  .kpi-grid          { flex-direction: column; }
+  .kpi-card          { width: 100%; }
+  .kpi-combined-card { width: 100%; }
   .goal-input-wrap.open { flex-direction: column; }
-  .goal-save-btn { width: 100%; padding: 8px 10px; font-size: 0.8rem; }
-  .kpi-combined-card { flex: 1 1 100%; }
+  .goal-save-btn     { width: 100%; padding: 8px 10px; font-size: 0.8rem; }
   .hamburger    { display: flex; margin-left: auto; }
   .nav-links    { display: none; }
   .nav-actions  { display: none; }
@@ -1137,7 +1137,7 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
   .inner-page   { padding: 32px 16px; }
 }
 @media (max-width: 480px) {
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-grid { flex-direction: column; }
 }
 /* ── Touch-safe hover transforms ────────────────── */
 @media (hover: hover) and (pointer: fine) {
