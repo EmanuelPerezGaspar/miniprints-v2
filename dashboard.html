@@ -208,12 +208,18 @@
       const margen = ingresos > 0 ? ((ganancia/ingresos)*100).toFixed(1) : '0';
       const gananciaColor = parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444';
 
+      const costoProduccion = DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
+      const coverageRatio  = costoProduccion > 0 ? ingresos / costoProduccion : (ingresos > 0 ? 1 : 0);
+      const coveragePct    = (coverageRatio * 100).toFixed(1);
+      const coverageFrac   = Math.min(coverageRatio, 1);
+      const dotColor       = coverageRatio >= 1 ? '#22c55e' : coverageRatio >= 0.5 ? '#eab308' : '#ef4444';
+
       const outerDots = genDots(36, 68, 80, 80);
       const innerDots = genDots(24, 52, 80, 80);
-      const margenFrac = Math.min(Math.max(parseFloat(margen) / 100, 0), 1);
-      const innerLit   = Math.round(24 * margenFrac);
-      const outerSvg = outerDots.map(d=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#22c55e" style="animation-delay:${d.delay}s"/>`).join('');
-      const innerSvg = innerDots.map((d,i)=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#a78bfa" opacity="${i<innerLit?'0.75':'0.15'}" style="animation-delay:${(+d.delay+0.4).toFixed(3)}s"/>`).join('');
+      const outerLit  = Math.round(36 * coverageFrac);
+      const innerLit  = Math.round(24 * coverageFrac);
+      const outerSvg  = outerDots.map((d,i)=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="${dotColor}" opacity="${i<outerLit?'0.75':'0.15'}" style="animation-delay:${d.delay}s"/>`).join('');
+      const innerSvg  = innerDots.map((d,i)=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="${dotColor}" opacity="${i<innerLit?'0.75':'0.15'}" style="animation-delay:${(+d.delay+0.4).toFixed(3)}s"/>`).join('');
 
       document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi-combined-card">
@@ -222,27 +228,27 @@
               ${outerSvg}${innerSvg}
             </svg>
             <div class="kc-center">
-              <div class="kc-total-label">Total</div>
-              <div class="kc-total-value">${fmt(ingresos)}</div>
+              <div class="kc-total-label">Cobertura</div>
+              <div class="kc-total-value" style="color:${dotColor};">${coveragePct}%</div>
             </div>
             <div class="kc-fade"></div>
           </div>
           <div class="kc-bottom">
             <div class="kc-stat">
               <div class="kc-stat-header">
-                <div class="kc-stat-bar" style="background:#22c55e;"></div>
-                <span class="kc-stat-label">Ingresos</span>
+                <div class="kc-stat-bar" style="background:#a78bfa;"></div>
+                <span class="kc-stat-label">Costo Prod.</span>
               </div>
-              <div class="kc-stat-value">${fmt(ingresos)}</div>
-              <div class="kc-stat-sub">${DB.ventas.length} ventas</div>
+              <div class="kc-stat-value">${fmt(costoProduccion)}</div>
+              <div class="kc-stat-sub">Base 100%</div>
             </div>
             <div class="kc-stat">
               <div class="kc-stat-header">
-                <div class="kc-stat-bar" style="background:#a78bfa;"></div>
-                <span class="kc-stat-label">Ganancia</span>
+                <div class="kc-stat-bar" style="background:${dotColor};"></div>
+                <span class="kc-stat-label">Ingresos</span>
               </div>
-              <div class="kc-stat-value" style="color:${gananciaColor};">${fmt(ganancia)}</div>
-              <div class="kc-stat-sub">Margen ${margen}%</div>
+              <div class="kc-stat-value" style="color:${dotColor};">${fmt(ingresos)}</div>
+              <div class="kc-stat-sub">${DB.ventas.length} ventas</div>
             </div>
           </div>
         </div>
