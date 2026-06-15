@@ -1126,6 +1126,7 @@ tbody td:first-child { color: var(--text); font-weight: 500; }
   .kpi-card     { flex: 1 1 calc(50% - 5px); min-width: 140px; }
   .goal-input-wrap.open { flex-direction: column; }
   .goal-save-btn { width: 100%; padding: 8px 10px; font-size: 0.8rem; }
+  .kpi-combined-card { flex: 1 1 100%; }
   .hamburger    { display: flex; margin-left: auto; }
   .nav-links    { display: none; }
   .nav-actions  { display: none; }
