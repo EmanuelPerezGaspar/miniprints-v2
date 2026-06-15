@@ -686,6 +686,7 @@
                 <div class="field">
                   <label>Margen de falla (%)</label>
                   <input type="number" id="inp-falla" value="10" min="0" max="50" step="1" onchange="saveConfig()" />
+                  <span class="markup-hint" id="falla-hint" style="cursor:pointer;" onclick="applyFallaSuggestion()"></span>
                 </div>
 
                 <div class="field">
@@ -1128,6 +1129,81 @@
       }
     }
 
+    /* ── Falla suggestion por material ───────── */
+    const FALLA_POR_TIPO = {
+      'pla':        5,   // PLA: muy estable
+      'pla+':       6,
+      'petg':       12,  // PETG: algo sensible a humedad
+      'abs':        15,  // ABS: warping frecuente
+      'asa':        15,
+      'tpu':        25,  // TPU/Flexible: difícil de calibrar
+      'flex':       25,
+      'flexible':   25,
+      'pc':         20,  // Policarbonato: altas temp, warping
+      'nylon':      20,
+      'pa':         20,
+      'cf':         18,  // Carbono: abrasivo, desgaste acelerado
+      'carbon':     18,
+      'resina':     30,  // Resina: sensible a UV, soporte
+      'resin':      30,
+      'hips':       12,
+      'asa':        15,
+      'wood':       14,  // Madera: obstrucciones frecuentes
+      'madera':     14,
+      'metal':      18,
+    };
+
+    let _fallaSuggested = null;
+
+    function updateFallaSuggestion() {
+      const hint = document.getElementById('falla-hint');
+      if (!hint) return;
+
+      const isMulti = document.getElementById('chk-multicolor')?.checked;
+      const tipos = [];
+
+      if (!isMulti) {
+        const sel = document.getElementById('single-mat');
+        const mat = DB.materials[sel?.value];
+        if (mat?.tipo) tipos.push(mat.tipo.toLowerCase());
+      } else {
+        document.querySelectorAll('#mats-container .mat-select').forEach(sel => {
+          const mat = DB.materials[sel.value];
+          if (mat?.tipo) tipos.push(mat.tipo.toLowerCase());
+        });
+      }
+
+      if (!tipos.length) { hint.style.display = 'none'; return; }
+
+      // Usa la tasa más alta entre los materiales seleccionados (conservador)
+      let maxFalla = 0;
+      let maxTipo  = '';
+      tipos.forEach(t => {
+        const key = Object.keys(FALLA_POR_TIPO).find(k => t.includes(k));
+        const val = key ? FALLA_POR_TIPO[key] : 10;
+        if (val > maxFalla) { maxFalla = val; maxTipo = t.toUpperCase(); }
+      });
+
+      const actual = parseFloat(document.getElementById('inp-falla').value) || 10;
+      _fallaSuggested = maxFalla;
+
+      if (maxFalla !== actual) {
+        hint.textContent = `${maxTipo} sugiere ${maxFalla}% — clic para aplicar`;
+        hint.style.display = 'block';
+        hint.style.color = maxFalla > actual ? '#f87171' : 'var(--accent)';
+      } else {
+        hint.style.display = 'none';
+      }
+    }
+
+    function applyFallaSuggestion() {
+      if (_fallaSuggested === null) return;
+      document.getElementById('inp-falla').value = _fallaSuggested;
+      saveConfig();
+      document.getElementById('falla-hint').style.display = 'none';
+      showToast(`Margen de falla actualizado a ${_fallaSuggested}%`);
+    }
+
     /* ── Markup suggestion ────────────────────── */
     function updateMarkupSuggestion() {
       const tipo = document.getElementById('inp-tipo-pieza')?.value;
@@ -1162,7 +1238,7 @@
           <div class="grid-3">
             <div class="field">
               <label>Material</label>
-              <select id="single-mat" onchange="state.singleMatId=this.value; checkStock(); debouncedSave()">${matOptions(selId)}</select>
+              <select id="single-mat" onchange="state.singleMatId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
             </div>
             <div class="field">
               <label>Peso a usar (g)</label>
@@ -1196,7 +1272,7 @@
           const d = document.createElement('div');
           d.className = 'mat-row';
           d.innerHTML = `
-            <select class="mat-select" onchange="state.matRows[${i}].matId=this.value; checkStock(); debouncedSave()">${matOptions(row.matId)}</select>
+            <select class="mat-select" onchange="state.matRows[${i}].matId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(row.matId)}</select>
             <input type="number" class="mat-grams" min="0" step="0.1" placeholder="0.0" value="${row.grams}" oninput="state.matRows[${i}].grams=this.value; checkStock(); debouncedSave()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
             <div class="rm-btn" onclick="removeMatRow(${i})">✕</div>`;
           c.appendChild(d);
@@ -1912,6 +1988,7 @@
     renderTimes();
     loadConfig();
     loadDraft();
+    updateFallaSuggestion();
     renderTemplates();
     window.addEventListener('beforeunload', saveDraft);
   </script>
