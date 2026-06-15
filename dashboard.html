@@ -210,8 +210,10 @@
 
       const outerDots = genDots(36, 68, 80, 80);
       const innerDots = genDots(24, 52, 80, 80);
+      const margenFrac = Math.min(Math.max(parseFloat(margen) / 100, 0), 1);
+      const innerLit   = Math.round(24 * margenFrac);
       const outerSvg = outerDots.map(d=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#22c55e" style="animation-delay:${d.delay}s"/>`).join('');
-      const innerSvg = innerDots.map(d=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#a78bfa" style="animation-delay:${(+d.delay+0.4).toFixed(3)}s"/>`).join('');
+      const innerSvg = innerDots.map((d,i)=>`<circle class="kc-dot" cx="${d.x}" cy="${d.y}" r="3" fill="#a78bfa" opacity="${i<innerLit?'0.75':'0.15'}" style="animation-delay:${(+d.delay+0.4).toFixed(3)}s"/>`).join('');
 
       document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi-combined-card">
