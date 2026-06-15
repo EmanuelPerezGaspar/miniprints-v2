@@ -1604,7 +1604,6 @@
       let tpls = [];
       try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
       tpls.unshift(tpl);
-      if (tpls.length > 20) tpls = tpls.slice(0, 20);
       localStorage.setItem('mp_templates', JSON.stringify(tpls));
       renderTemplates();
       showToast(`Plantilla "${nombre}" guardada`);
