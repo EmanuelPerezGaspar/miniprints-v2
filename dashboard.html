@@ -89,60 +89,69 @@
           </div>
         </div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid" id="kpi-grid" role="list" aria-label="Indicadores clave"></div>
+        <!-- Body: KPIs izquierda + contenido derecha -->
+        <div class="dash-body">
 
-        <!-- Charts -->
-        <div class="charts-row">
-          <div class="chart-card">
-            <div class="chart-header">
-              <span class="chart-title">Ingresos — últimos 6 meses</span>
-            </div>
-            <div class="chart-wrap">
-              <canvas id="chartRevenue" aria-label="Gráfico de ingresos mensuales" role="img"></canvas>
-            </div>
-          </div>
-          <div class="chart-card">
-            <div class="chart-header">
-              <span class="chart-title">Piezas más vendidas</span>
-            </div>
-            <div class="chart-wrap">
-              <canvas id="chartStatus" aria-label="Piezas más vendidas" role="img"></canvas>
-            </div>
-          </div>
-        </div>
+          <!-- KPIs columna izquierda -->
+          <div class="kpi-grid" id="kpi-grid" role="list" aria-label="Indicadores clave"></div>
 
-        <!-- Tables -->
-        <div class="tables-row">
-          <div class="table-card">
-            <div class="table-head">
-              <span class="table-title">Ventas recientes</span>
-              <a href="ventas.html" class="link-all">Ver todas →</a>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Pieza</th>
-                    <th scope="col">Cant.</th>
-                    <th scope="col">Precio</th>
-                    <th scope="col">Canal</th>
-                    <th scope="col">Fecha</th>
-                  </tr>
-                </thead>
-                <tbody id="tbody-ventas"></tbody>
-              </table>
-            </div>
-          </div>
+          <!-- Contenido derecha -->
+          <div class="dash-content">
 
-          <div class="table-card">
-            <div class="table-head">
-              <span class="table-title">Stock de materiales</span>
-              <a href="stock-material.html" class="link-all">Ver inventario →</a>
+            <!-- Charts -->
+            <div class="charts-row">
+              <div class="chart-card">
+                <div class="chart-header">
+                  <span class="chart-title">Ingresos — últimos 6 meses</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="chartRevenue" aria-label="Gráfico de ingresos mensuales" role="img"></canvas>
+                </div>
+              </div>
+              <div class="chart-card">
+                <div class="chart-header">
+                  <span class="chart-title">Piezas más vendidas</span>
+                </div>
+                <div class="chart-wrap">
+                  <canvas id="chartStatus" aria-label="Piezas más vendidas" role="img"></canvas>
+                </div>
+              </div>
             </div>
-            <div id="mat-list" class="top-products"></div>
-          </div>
-        </div>
+
+            <!-- Tables -->
+            <div class="tables-row">
+              <div class="table-card">
+                <div class="table-head">
+                  <span class="table-title">Ventas recientes</span>
+                  <a href="ventas.html" class="link-all">Ver todas →</a>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Pieza</th>
+                        <th scope="col">Cant.</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Canal</th>
+                        <th scope="col">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-ventas"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="table-card">
+                <div class="table-head">
+                  <span class="table-title">Stock de materiales</span>
+                  <a href="stock-material.html" class="link-all">Ver inventario →</a>
+                </div>
+                <div id="mat-list" class="top-products"></div>
+              </div>
+            </div>
+
+          </div><!-- /dash-content -->
+        </div><!-- /dash-body -->
       </main>
     </div>
   </div>
