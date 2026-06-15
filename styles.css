@@ -678,7 +678,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 .dash-left {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 22px;
   width: 190px;
   flex-shrink: 0;
 }
