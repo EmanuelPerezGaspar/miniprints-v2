@@ -42,6 +42,15 @@
       color: var(--text-muted);
       border-bottom: 1px solid var(--border);
     }
+    .cfg-chevron {
+      display: none;
+      width: 16px; height: 16px;
+      color: var(--text-muted);
+      transition: transform 240ms var(--ease-out);
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .config-panel.open .cfg-chevron { transform: rotate(180deg); }
     .config-panel-body {
       padding: 16px;
       display: flex;
@@ -603,6 +612,10 @@
       .cot-grid { grid-template-columns: 1fr; }
       .cot-config { position: static; }
       .breakdown-grid { grid-template-columns: 1fr 1fr; }
+      .config-panel-title { cursor: pointer; user-select: none; }
+      .cfg-chevron { display: block; }
+      .config-collapsible { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 320ms cubic-bezier(0.4,0,0.2,1), opacity 240ms ease; }
+      .config-panel.open .config-collapsible { max-height: 900px; opacity: 1; }
     }
     @media (max-width: 600px) {
       .grid-2, .grid-3 { grid-template-columns: 1fr; }
@@ -687,11 +700,13 @@
 
           <!-- Config panel (left) -->
           <div class="cot-config">
-            <div class="config-panel">
-              <div class="config-panel-title">
+            <div class="config-panel" id="cfg-main">
+              <div class="config-panel-title" onclick="toggleConfig('cfg-main')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
                 Configuración
+                <svg class="cfg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
+              <div class="config-collapsible">
               <div class="config-panel-body">
 
                 <div class="field">
@@ -757,18 +772,22 @@
                   </label>
                 </div>
               </div>
+              </div><!-- /config-collapsible -->
             </div>
 
             <!-- Templates panel -->
-            <div class="config-panel">
-              <div class="config-panel-title">
+            <div class="config-panel" id="cfg-tpl">
+              <div class="config-panel-title" onclick="toggleConfig('cfg-tpl')">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Plantillas
+                <svg class="cfg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
+              <div class="config-collapsible">
               <div class="config-panel-body" style="gap:10px;">
                 <div class="tpl-list" id="tpl-list"></div>
                 <button class="add-row-btn" onclick="saveTemplate()">+ Guardar como plantilla</button>
               </div>
+              </div><!-- /config-collapsible -->
             </div>
 
           </div>
@@ -1752,6 +1771,9 @@
     /* ── ML toggle ───────────────────────────── */
     function toggleML() {
       document.getElementById('ml-card').classList.toggle('open');
+    }
+    function toggleConfig(id) {
+      if (window.innerWidth <= 900) document.getElementById(id).classList.toggle('open');
     }
 
     /* ── Export PDF ───────────────────────────── */
