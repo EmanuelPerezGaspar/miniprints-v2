@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -76,18 +76,6 @@
       box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
     }
     .field select option { background: #1e293b; }
-    /* Metric pill */
-    .mpill {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(255,255,255,0.09);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 8px 12px;
-    }
-    .mpill-lbl { font-size: 0.72rem; color: var(--text-dim); }
-    .mpill-val { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
     /* Toggle */
     .toggle-row {
       display: flex;
@@ -287,6 +275,15 @@
       color: var(--primary);
     }
     .rh-printer { margin-top: 6px; font-size: 0.78rem; color: var(--text-dim); }
+    .rh-badges { display:flex; gap:6px; justify-content:center; margin-top:10px; flex-wrap:wrap; }
+    .rh-badge {
+      font-size: 0.68rem; font-weight: 700;
+      padding: 3px 10px; border-radius: 20px;
+    }
+    .rh-badge.canal { background:rgba(167,139,250,0.15); color:var(--accent); border:1px solid rgba(167,139,250,0.25); }
+    .rh-badge.express { background:rgba(59,130,246,0.15); color:#60a5fa; border:1px solid rgba(59,130,246,0.28); }
+    .rh-badge.urgente { background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(239,68,68,0.28); }
+    .rh-badge.tipo { background:rgba(234,179,8,0.12); color:#fbbf24; border:1px solid rgba(234,179,8,0.25); }
     /* Breakdown grid */
     .breakdown-grid {
       display: grid;
@@ -340,11 +337,8 @@
       border-radius: var(--radius);
       padding: 18px 20px;
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
     }
+    .ml-price-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
     .ml-price-left { flex: 1; }
     .ml-price-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: #d97706; margin-bottom: 4px; }
     .ml-price-val { font-size: 1.6rem; font-weight: 800; color: #fbbf24; line-height: 1; }
@@ -358,6 +352,65 @@
       color: #fbbf24;
       white-space: nowrap;
     }
+    .ml-net-margin {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(251,191,36,0.15);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .ml-net-margin strong { color: var(--primary); }
+    /* Stock warning */
+    .stock-warn {
+      background: rgba(239,68,68,0.07);
+      border: 1px solid rgba(239,68,68,0.28);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 0.77rem;
+      color: #f87171;
+      margin-top: 8px;
+      display: none;
+    }
+    /* Price floor warning */
+    .price-floor-warn {
+      background: rgba(234,179,8,0.07);
+      border: 1px solid rgba(234,179,8,0.28);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      font-size: 0.78rem;
+      color: #fbbf24;
+      margin-top: 10px;
+      display: none;
+    }
+    /* Templates */
+    .tpl-list { display:flex; flex-direction:column; gap:6px; }
+    .tpl-item {
+      display:flex; align-items:center; gap:6px;
+      padding:8px 10px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid var(--border);
+      border-radius:var(--radius-sm);
+    }
+    .tpl-name { flex:1; font-size:0.78rem; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .tpl-type { font-size:0.62rem; color:var(--text-dim); padding:2px 6px; background:rgba(255,255,255,0.07); border-radius:10px; flex-shrink:0; }
+    .tpl-load {
+      padding:3px 9px; font-size:0.71rem; font-family:var(--font); font-weight:600; cursor:pointer;
+      border:1px solid rgba(34,197,94,0.30); background:rgba(34,197,94,0.08); color:var(--primary);
+      border-radius:var(--radius-sm); transition:background 160ms; flex-shrink:0;
+    }
+    .tpl-load:hover { background:rgba(34,197,94,0.16); }
+    .tpl-del {
+      width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+      background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.20); border-radius:4px;
+      color:#ef4444; font-size:10px; cursor:pointer; flex-shrink:0; transition:background 160ms;
+    }
+    .tpl-del:hover { background:rgba(239,68,68,0.18); }
+    .tpl-empty { font-size:0.74rem; color:var(--text-dim); text-align:center; padding:8px 0; }
+    /* Markup hint */
+    .markup-hint { font-size:0.69rem; color:var(--accent); margin-top:2px; display:none; }
     @media print {
       .ml-price-card { background: #fffbeb !important; border-color: #fde68a !important; }
       .ml-price-lbl { color: #b45309 !important; }
@@ -545,10 +598,6 @@
   <!-- CONTENT -->
   <div class="page-container">
     <div class="dash-layout">
-
-
-
-      <!-- Main -->
       <main class="dash-main">
         <div class="dash-header">
           <div>
@@ -573,18 +622,43 @@
                 Configuración
               </div>
               <div class="config-panel-body">
-                <div class="mpill">
-                  <span class="mpill-lbl">Electricidad kWh</span>
-                  <span class="mpill-val">$5.00 MXN</span>
+
+                <div class="field">
+                  <label>Electricidad ($/kWh)</label>
+                  <input type="number" id="inp-kwh" value="5.00" min="0.1" step="0.1" onchange="saveConfig()" />
                 </div>
-                <div class="mpill">
-                  <span class="mpill-lbl">Margen de falla</span>
-                  <span class="mpill-val">10%</span>
+
+                <div class="field">
+                  <label>Margen de falla (%)</label>
+                  <input type="number" id="inp-falla" value="10" min="0" max="50" step="1" onchange="saveConfig()" />
                 </div>
+
                 <div class="field">
                   <label>% Ganancia</label>
                   <input type="number" id="inp-margen" value="60" min="0" max="300" step="5" />
+                  <span class="markup-hint" id="markup-hint"></span>
                 </div>
+
+                <div class="field">
+                  <label>Tipo de pieza</label>
+                  <select id="inp-tipo-pieza" onchange="updateMarkupSuggestion()">
+                    <option value="">— General —</option>
+                    <option value="funcional">Funcional / Industrial</option>
+                    <option value="decorativa">Decorativa / Coleccionable</option>
+                    <option value="prototipo">Prototipo (emprendedor)</option>
+                    <option value="repuesto">Repuesto recurrente</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label>Urgencia</label>
+                  <select id="inp-urgencia">
+                    <option value="normal">Normal — sin sobrecargo</option>
+                    <option value="express">Express 2-3 días (+25%)</option>
+                    <option value="urgente">Urgente 24 hrs (+50%)</option>
+                  </select>
+                </div>
+
                 <div class="toggle-row">
                   <span class="toggle-label">Mano de obra</span>
                   <label class="toggle">
@@ -608,6 +682,18 @@
               </div>
             </div>
 
+            <!-- Templates panel -->
+            <div class="config-panel">
+              <div class="config-panel-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Plantillas
+              </div>
+              <div class="config-panel-body" style="gap:10px;">
+                <div class="tpl-list" id="tpl-list"></div>
+                <button class="add-row-btn" onclick="saveTemplate()">+ Guardar como plantilla</button>
+              </div>
+            </div>
+
           </div>
 
           <!-- Form + result (right) -->
@@ -618,11 +704,27 @@
               <div class="grid-2" style="margin-bottom:14px;">
                 <div class="field">
                   <label>Cliente / Modelo</label>
-                  <input type="text" id="inp-cliente" placeholder="Nombre del proyecto..." />
+                  <input type="text" id="inp-cliente" placeholder="Nombre del proyecto..." oninput="debouncedSave()" />
+                </div>
+                <div class="field">
+                  <label>Teléfono (WhatsApp)</label>
+                  <input type="text" id="inp-telefono" placeholder="10 dígitos..." maxlength="15" oninput="debouncedSave()" />
+                </div>
+                <div class="field">
+                  <label>Canal de venta</label>
+                  <select id="inp-canal" onchange="debouncedSave()">
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="mercadolibre">MercadoLibre</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="referido">Referido</option>
+                    <option value="otro">Otro</option>
+                  </select>
                 </div>
                 <div class="field">
                   <label>Piezas obtenidas</label>
-                  <input type="number" id="inp-piezas" value="1" min="1" />
+                  <input type="number" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
                 </div>
               </div>
               <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
@@ -640,10 +742,14 @@
             <!-- Materiales -->
             <div class="section-lbl">Material(es)</div>
             <div class="form-card" id="mats-container"></div>
+            <div class="stock-warn" id="stock-warn"></div>
 
             <!-- Tiempo -->
             <div class="section-lbl">Tiempo de impresión</div>
             <div class="form-card" id="time-container"></div>
+
+            <!-- Precio mínimo warning -->
+            <div class="price-floor-warn" id="price-floor-warn"></div>
 
             <!-- Calcular -->
             <button class="btn-calc" onclick="calcular()">
@@ -661,6 +767,7 @@
                 <div class="rh-unit">MXN</div>
                 <div class="rh-unitprice" id="res-unit" style="display:none;"></div>
                 <div class="rh-printer" id="res-printer"></div>
+                <div class="rh-badges" id="res-badges"></div>
               </div>
 
               <div class="breakdown-grid">
@@ -741,12 +848,15 @@
               </div>
 
               <div class="ml-price-card">
-                <div class="ml-price-left">
-                  <div class="ml-price-lbl">Precio en Mercado Libre</div>
-                  <div class="ml-price-val" id="res-ml-price">$0.00</div>
-                  <div class="ml-price-note" id="res-ml-note">Comisión ~19.1% + envío estimado</div>
+                <div class="ml-price-row">
+                  <div class="ml-price-left">
+                    <div class="ml-price-lbl">Precio en Mercado Libre</div>
+                    <div class="ml-price-val" id="res-ml-price">$0.00</div>
+                    <div class="ml-price-note" id="res-ml-note">Comisión ~15% + imp. ~9% + envío est.</div>
+                  </div>
+                  <div class="ml-price-badge" id="res-ml-badge">ML Clásica</div>
                 </div>
-                <div class="ml-price-badge" id="res-ml-badge">ML Clásica</div>
+                <div class="ml-net-margin" id="res-ml-net"></div>
               </div>
 
               <div class="confirm-card">
@@ -858,8 +968,24 @@
       t._t = setTimeout(() => t.style.display = 'none', dur);
     }
 
-    function today() {
-      return new Date().toISOString().split('T')[0];
+    function today() { return new Date().toISOString().split('T')[0]; }
+
+    /* ── Config ────────────────────────────────── */
+    const CONFIG = { kwh: 5.0, falla: 10, precioMin: 150 };
+
+    function loadConfig() {
+      try {
+        const c = localStorage.getItem('mp_config');
+        if (c) Object.assign(CONFIG, JSON.parse(c));
+      } catch(e) {}
+      document.getElementById('inp-kwh').value   = CONFIG.kwh;
+      document.getElementById('inp-falla').value = CONFIG.falla;
+    }
+
+    function saveConfig() {
+      CONFIG.kwh   = parseFloat(document.getElementById('inp-kwh').value)   || 5.0;
+      CONFIG.falla = parseFloat(document.getElementById('inp-falla').value) || 10;
+      localStorage.setItem('mp_config', JSON.stringify(CONFIG));
     }
 
     /* ── DB ────────────────────────────────────── */
@@ -888,19 +1014,82 @@
       if (!mats.length) return '<option value="">— Sin materiales —</option>';
       return mats.map(m => `<option value="${m.id}"${m.id === selected ? ' selected' : ''}>${matLabel(m)}</option>`).join('');
     }
-    function matId(marca, tipo, color) {
-      return (marca + '-' + tipo + '-' + color).toLowerCase().replace(/\s+/g, '-');
-    }
 
     /* ── Printer ──────────────────────────────── */
     const PRINTERS = {
-      'A1 MINI': { consumo: 280, desgaste: 14999 / 3000 },
-      'A1':      { consumo: 350, desgaste: 18999 / 3000 },
+      'A1 MINI': { consumo: 280,  desgaste: 14999 / 3000 },
+      'A1':      { consumo: 350,  desgaste: 18999 / 3000 },
       'X2D':     { consumo: 1100, desgaste: 25999 / 3000 },
     };
 
     /* ── State ────────────────────────────────── */
-    const state = { matRows: [], timeRows: [], singleMatId: '', singleGrams: '', lastCalc: null };
+    const state = { matRows: [], timeRows: [], singleMatId: '', singleGrams: '', lastCalc: null, pendingCot: null };
+
+    /* ── Auto-save draft (debounced) ─────────── */
+    let _draftTimer = null;
+    function debouncedSave() {
+      clearTimeout(_draftTimer);
+      _draftTimer = setTimeout(saveDraft, 700);
+    }
+
+    /* ── Stock check ──────────────────────────── */
+    function checkStock() {
+      const warn = document.getElementById('stock-warn');
+      if (!warn) return;
+      const isMulti = document.getElementById('chk-multicolor')?.checked;
+      const issues = [];
+
+      if (!isMulti) {
+        const sel = document.getElementById('single-mat');
+        const mid = sel?.value;
+        const mat = DB.materials[mid];
+        const need = parseFloat(document.getElementById('single-grams')?.value) || 0;
+        if (mat && need > 0) {
+          const avail = mat.pesoTotal || 0;
+          if (need > avail) issues.push(`${matLabel(mat)}: necesitas ${need.toFixed(0)}g, tienes ${avail.toFixed(0)}g`);
+        }
+      } else {
+        const sels = document.querySelectorAll('#mats-container .mat-select');
+        const inps = document.querySelectorAll('#mats-container .mat-grams');
+        sels.forEach((sel, i) => {
+          const mat = DB.materials[sel.value];
+          const need = parseFloat(inps[i]?.value) || 0;
+          if (mat && need > 0) {
+            const avail = mat.pesoTotal || 0;
+            if (need > avail) issues.push(`${matLabel(mat)}: necesitas ${need.toFixed(0)}g, tienes ${avail.toFixed(0)}g`);
+          }
+        });
+      }
+
+      if (issues.length) {
+        warn.textContent = '⚠️ Stock insuficiente — ' + issues.join(' · ');
+        warn.style.display = 'block';
+      } else {
+        warn.style.display = 'none';
+      }
+    }
+
+    /* ── Markup suggestion ────────────────────── */
+    function updateMarkupSuggestion() {
+      const tipo = document.getElementById('inp-tipo-pieza')?.value;
+      const hint = document.getElementById('markup-hint');
+      const margenEl = document.getElementById('inp-margen');
+      if (!hint) return;
+      const tips = {
+        funcional:  { label: 'Sugerido: 120–180%', val: 150 },
+        decorativa: { label: 'Sugerido: 80–120%',  val: 100 },
+        prototipo:  { label: 'Sugerido: 150–200%', val: 175 },
+        repuesto:   { label: 'Sugerido: 40–60%',   val: 50  },
+      };
+      if (tipo && tips[tipo]) {
+        hint.textContent = tips[tipo].label;
+        hint.style.display = 'block';
+        margenEl.value = tips[tipo].val;
+      } else {
+        hint.style.display = 'none';
+      }
+      debouncedSave();
+    }
 
     /* ── Render mat rows ──────────────────────── */
     function renderMats() {
@@ -914,27 +1103,25 @@
           <div class="grid-3">
             <div class="field">
               <label>Material</label>
-              <select id="single-mat" onchange="state.singleMatId=this.value">${matOptions(selId)}</select>
+              <select id="single-mat" onchange="state.singleMatId=this.value; checkStock(); debouncedSave()">${matOptions(selId)}</select>
             </div>
             <div class="field">
               <label>Peso a usar (g)</label>
-              <input type="number" id="single-grams" min="0" step="0.1" placeholder="0.0" value="${state.singleGrams}" oninput="state.singleGrams=this.value" />
+              <input type="number" id="single-grams" min="0" step="0.1" placeholder="0.0" value="${state.singleGrams}" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" />
             </div>
             <div class="field">
-              <label>Precio / kg</label>
+              <label>Stock disponible</label>
               <select id="single-mat-price-display" style="pointer-events:none; opacity:0.6;" tabindex="-1">
                 <option id="single-price-opt"></option>
               </select>
             </div>
           </div>`;
-        // set price display
         const mat = DB.materials[selId];
         const opt = document.getElementById('single-price-opt');
-        if (opt && mat) opt.textContent = fmt(mat.costo) + '/kg';
-        // update on change
+        if (opt && mat) opt.textContent = (mat.pesoTotal || 0).toFixed(0) + 'g disponibles';
         document.getElementById('single-mat')?.addEventListener('change', function () {
           const m = DB.materials[this.value];
-          if (opt && m) opt.textContent = fmt(m.costo) + '/kg';
+          if (opt && m) opt.textContent = (m.pesoTotal || 0).toFixed(0) + 'g disponibles';
         });
       } else {
         if (state.matRows.length < 2) {
@@ -950,8 +1137,8 @@
           const d = document.createElement('div');
           d.className = 'mat-row';
           d.innerHTML = `
-            <select class="mat-select" onchange="state.matRows[${i}].matId=this.value">${matOptions(row.matId)}</select>
-            <input type="number" class="mat-grams" min="0" step="0.1" placeholder="0.0" value="${row.grams}" oninput="state.matRows[${i}].grams=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
+            <select class="mat-select" onchange="state.matRows[${i}].matId=this.value; checkStock(); debouncedSave()">${matOptions(row.matId)}</select>
+            <input type="number" class="mat-grams" min="0" step="0.1" placeholder="0.0" value="${row.grams}" oninput="state.matRows[${i}].grams=this.value; checkStock(); debouncedSave()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
             <div class="rm-btn" onclick="removeMatRow(${i})">✕</div>`;
           c.appendChild(d);
         });
@@ -966,7 +1153,7 @@
         };
         c.appendChild(btn);
       }
-
+      checkStock();
     }
 
     function removeMatRow(i) {
@@ -984,9 +1171,9 @@
       if (!isMulti) {
         const prOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
         c.innerHTML = `<div class="grid-3">
-          <div class="field"><label>Impresora</label><select id="single-printer">${prOpts}</select></div>
-          <div class="field"><label>Horas</label><input type="number" id="single-hours" min="0" step="1" placeholder="0" /></div>
-          <div class="field"><label>Minutos</label><input type="number" id="single-minutes" min="0" max="59" step="1" placeholder="0" /></div>
+          <div class="field"><label>Impresora</label><select id="single-printer" onchange="debouncedSave()">${prOpts}</select></div>
+          <div class="field"><label>Horas</label><input type="number" id="single-hours" min="0" step="1" placeholder="0" oninput="debouncedSave()" /></div>
+          <div class="field"><label>Minutos</label><input type="number" id="single-minutes" min="0" max="59" step="1" placeholder="0" oninput="debouncedSave()" /></div>
         </div>`;
       } else {
         const defaultPrinter = state.timeRows[0]?.printer || 'A1 MINI';
@@ -1004,9 +1191,9 @@
           row.printer = rowPrinter;
           const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${rowPrinter===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
-            <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value">${opts}</select>
-            <input type="number" min="0" step="1" placeholder="0" value="${row.h}" oninput="state.timeRows[${i}].h=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
-            <input type="number" min="0" max="59" step="1" placeholder="0" value="${row.m}" oninput="state.timeRows[${i}].m=this.value" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
+            <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value; debouncedSave()">${opts}</select>
+            <input type="number" min="0" step="1" placeholder="0" value="${row.h}" oninput="state.timeRows[${i}].h=this.value; debouncedSave()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
+            <input type="number" min="0" max="59" step="1" placeholder="0" value="${row.m}" oninput="state.timeRows[${i}].m=this.value; debouncedSave()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
             <div class="rm-btn" onclick="removeTimeRow(${i})">✕</div>`;
           c.appendChild(d);
         });
@@ -1035,21 +1222,28 @@
         document.getElementById('chk-mo').checked ? 'flex' : 'none';
     }
 
-    /* ── Constantes Mercado Libre ─────────────── */
-    const ML_FEE  = 0.24;   // 15% comisión Clásica + ~9% impuestos (dato real simulador ML)
-    const ML_SHIP = 68;     // estimado Mercado Envíos (dato real simulador ML, varía por peso/destino)
+    /* ── ML constants ─────────────────────────── */
+    const ML_FEE  = 0.24;
+    const ML_SHIP = 68;
 
     /* ── Calcular ─────────────────────────────── */
     function calcular() {
+      const KWH   = CONFIG.kwh;
+      const FALLA = CONFIG.falla / 100;
+
       const printerName = document.getElementById('single-printer')?.value || 'A1 MINI';
       const printer = PRINTERS[printerName] || PRINTERS['A1 MINI'];
-      const margenPct = (parseFloat(document.getElementById('inp-margen').value) || 60) / 100;
-      const numPiezas = Math.max(1, parseInt(document.getElementById('inp-piezas').value) || 1);
-      const aplicaMO = document.getElementById('chk-mo').checked;
-      const costoMOH = aplicaMO ? (parseFloat(document.getElementById('inp-mo-costo').value) || 0) : 0;
-      const horasMO = aplicaMO ? (parseFloat(document.getElementById('inp-mo-horas').value) || 0) : 0;
-      const aplicaIva = document.getElementById('chk-iva').checked;
-      const KWH = 5.0, FALLA = 0.10;
+      const margenPct   = (parseFloat(document.getElementById('inp-margen').value) || 60) / 100;
+      const numPiezas   = Math.max(1, parseInt(document.getElementById('inp-piezas').value) || 1);
+      const aplicaMO    = document.getElementById('chk-mo').checked;
+      const costoMOH    = aplicaMO ? (parseFloat(document.getElementById('inp-mo-costo').value) || 0) : 0;
+      const horasMO     = aplicaMO ? (parseFloat(document.getElementById('inp-mo-horas').value) || 0) : 0;
+      const aplicaIva   = document.getElementById('chk-iva').checked;
+      const urgencia    = document.getElementById('inp-urgencia')?.value || 'normal';
+      const tipoPieza   = document.getElementById('inp-tipo-pieza')?.value || '';
+      const canal       = document.getElementById('inp-canal')?.value || 'whatsapp';
+      const telefono    = document.getElementById('inp-telefono')?.value.trim() || '';
+      const urgFactor   = urgencia === 'express' ? 1.25 : urgencia === 'urgente' ? 1.50 : 1.0;
 
       // Materials
       let costoMat = 0;
@@ -1058,10 +1252,10 @@
 
       if (!isMulti) {
         const selEl = document.getElementById('single-mat');
-        const mid = selEl ? selEl.value : '';
-        const mat = DB.materials[mid];
+        const mid   = selEl ? selEl.value : '';
+        const mat   = DB.materials[mid];
         const grams = parseFloat(document.getElementById('single-grams')?.value) || 0;
-        const pk = mat ? mat.costo : 0;
+        const pk    = mat ? mat.costo : 0;
         const costo = (grams / 1000) * pk;
         costoMat = costo;
         detMat.push({ nombre: mat ? matLabel(mat) : (mid || 'Sin material'), grams, precioKg: pk, costo, matId: mid });
@@ -1069,9 +1263,9 @@
         const sels = document.querySelectorAll('#mats-container .mat-select');
         const inps = document.querySelectorAll('#mats-container .mat-grams');
         sels.forEach((sel, i) => {
-          const mat = DB.materials[sel.value];
+          const mat   = DB.materials[sel.value];
           const grams = parseFloat(inps[i]?.value) || 0;
-          const pk = mat ? mat.costo : 0;
+          const pk    = mat ? mat.costo : 0;
           const costo = (grams / 1000) * pk;
           costoMat += costo;
           detMat.push({ nombre: mat ? matLabel(mat) : sel.value, grams, precioKg: pk, costo, matId: sel.value });
@@ -1082,15 +1276,16 @@
       let tiempo = 0, costoElec = 0, costoMaq = 0;
       const isMultiImp = document.getElementById('chk-multi-imp').checked;
       const detTiempos = [];
+
       if (!isMultiImp) {
-        tiempo = (parseFloat(document.getElementById('single-hours')?.value) || 0) +
-                 (parseFloat(document.getElementById('single-minutes')?.value) || 0) / 60;
+        tiempo    = (parseFloat(document.getElementById('single-hours')?.value) || 0) +
+                   (parseFloat(document.getElementById('single-minutes')?.value) || 0) / 60;
         costoElec = tiempo * (printer.consumo / 1000) * KWH;
         costoMaq  = tiempo * printer.desgaste;
         detTiempos.push({ printer: printerName, t: tiempo, consumo: printer.consumo, desgaste: printer.desgaste });
       } else {
         state.timeRows.forEach(r => {
-          const t = (parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60;
+          const t  = (parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60;
           const pr = PRINTERS[r.printer] || PRINTERS['A1 MINI'];
           costoElec += t * (pr.consumo / 1000) * KWH;
           costoMaq  += t * pr.desgaste;
@@ -1098,43 +1293,60 @@
           if (t > 0) detTiempos.push({ printer: r.printer || 'A1 MINI', t, consumo: pr.consumo, desgaste: pr.desgaste });
         });
       }
-      const costoMO = horasMO * costoMOH;
-      const costoBase = costoMat + costoElec + costoMaq + costoMO;
-      const margenFalla = costoBase * FALLA;
+
+      const costoMO       = horasMO * costoMOH;
+      const costoBase     = costoMat + costoElec + costoMaq + costoMO;
+      const margenFalla   = costoBase * FALLA;
       const subtotalFalla = costoBase + margenFalla;
-      const ganancia = subtotalFalla * margenPct;
-      const baseIva = subtotalFalla + ganancia;
-      const ivaMonto = aplicaIva ? baseIva * 0.16 : 0;
-      const precioFinal = subtotalFalla + ganancia + ivaMonto;
-      const xUnidad = precioFinal / numPiezas;
+      const ganancia      = subtotalFalla * margenPct;
+      const baseConGanancia = subtotalFalla + ganancia;
+      const baseUrgencia  = baseConGanancia * urgFactor;
+      const urgenciaMonto = baseUrgencia - baseConGanancia;
+      const ivaMonto      = aplicaIva ? baseUrgencia * 0.16 : 0;
+      const precioFinal   = baseUrgencia + ivaMonto;
+      const xUnidad       = precioFinal / numPiezas;
 
       const printerDisplay = isMultiImp
         ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
         : printerName;
-      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, tiempo, printer: printerDisplay };
 
-      // Save quotation
-      const cot = {
-        id: Date.now(),
-        fecha: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
-        cliente: document.getElementById('inp-cliente').value.trim() || 'Sin nombre',
-        total: precioFinal,
+      // Store pending cotización (NOT saved yet — only when user confirms)
+      state.pendingCot = {
+        id:        Date.now(),
+        fecha:     new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }),
+        cliente:   document.getElementById('inp-cliente').value.trim() || 'Sin nombre',
+        telefono,
+        canal,
+        tipo_pieza: tipoPieza,
+        urgencia,
+        total:     precioFinal,
         costo_base: costoBase,
         ganancia,
-        iva: ivaMonto,
+        iva:       ivaMonto,
+        fue_aceptada: null,
       };
-      DB.cotizaciones.unshift(cot);
-      saveKey('cotizaciones');
 
-      // Render result
+      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, urgencia, tiempo, printer: printerDisplay, canal, telefono, tipoPieza };
+
+      // ── Render result ──────────────────────────
       const cliente = document.getElementById('inp-cliente').value.trim();
       const rc = document.getElementById('res-cliente');
       if (cliente) { rc.textContent = cliente; rc.style.display = 'block'; } else { rc.style.display = 'none'; }
 
       document.getElementById('res-total').textContent = fmt(precioFinal);
+
+      // Badges
+      const badges = [];
+      const canalLabels = { whatsapp:'WhatsApp', instagram:'Instagram', mercadolibre:'ML', facebook:'Facebook', tiktok:'TikTok', referido:'Referido', otro:'Otro' };
+      badges.push(`<span class="rh-badge canal">${canalLabels[canal] || canal}</span>`);
+      if (urgencia === 'express') badges.push('<span class="rh-badge express">Express +25%</span>');
+      if (urgencia === 'urgente') badges.push('<span class="rh-badge urgente">Urgente +50%</span>');
+      const tipoLabels = { funcional:'Funcional', decorativa:'Decorativa', prototipo:'Prototipo', repuesto:'Repuesto' };
+      if (tipoPieza) badges.push(`<span class="rh-badge tipo">${tipoLabels[tipoPieza] || tipoPieza}</span>`);
+      document.getElementById('res-badges').innerHTML = badges.join('');
+
       const ru = document.getElementById('res-unit');
       const bcUnit = document.getElementById('bc-unit');
-      const ruCard = document.getElementById('res-unit-card');
       if (numPiezas > 1) {
         ru.textContent = fmt(xUnidad) + ' c/u · ' + numPiezas + ' piezas';
         ru.style.display = 'inline-block';
@@ -1147,6 +1359,7 @@
         bcUnit.style.display = 'none';
       }
       document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
+
       animateBmValue(document.getElementById('res-costo'), subtotalFalla, 800);
       document.getElementById('res-costo-sub').textContent = `${((subtotalFalla / precioFinal) * 100).toFixed(0)}%`;
       animateBmBar(document.getElementById('res-costo-bar'), (subtotalFalla / precioFinal) * 100);
@@ -1157,17 +1370,22 @@
 
       animateBmValue(document.getElementById('res-iva'), aplicaIva ? ivaMonto : 0, 800);
       document.getElementById('res-iva-hint').textContent = aplicaIva ? 'tasa 16%' : 'exento';
-      document.getElementById('res-iva-sub').textContent = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}%` : '—';
+      document.getElementById('res-iva-sub').textContent  = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}%` : '—';
       animateBmBar(document.getElementById('res-iva-bar'), aplicaIva ? (ivaMonto / precioFinal) * 100 : 0);
 
-      // Precio Mercado Libre (por pieza — cada venta ML es 1 pieza con su envío)
-      const precioML = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
+      // ML price — calculated per unit (cada venta ML es 1 pieza con su propio envío)
+      const precioML   = Math.ceil((xUnidad + ML_SHIP) / (1 - ML_FEE));
+      const gananciaNeta = precioML - ML_SHIP - precioML * ML_FEE - xUnidad;
       document.getElementById('res-ml-price').textContent = fmt(precioML);
-      document.getElementById('res-ml-note').textContent = numPiezas > 1
-        ? `Precio por pieza · ${numPiezas} piezas = ${fmt(precioML * numPiezas)} · Comisión ~15% + imp. ~9% + envío est. $${ML_SHIP}`
-        : `Comisión ~15% + imp. ~9% + envío est. $${ML_SHIP} · Tu ganancia neta: ${fmt(precioFinal)}`;
+      document.getElementById('res-ml-note').textContent  = numPiezas > 1
+        ? `Precio por pieza · Comisión ~15% + imp. ~9% + envío $${ML_SHIP}`
+        : `Comisión ~15% + imp. ~9% + envío est. $${ML_SHIP}`;
+      document.getElementById('res-ml-net').innerHTML =
+        `Tu ganancia neta ML: <strong>${fmt(gananciaNeta)}</strong> por pieza &nbsp;·&nbsp; ` +
+        `Margen real: <strong>${((gananciaNeta / precioML) * 100).toFixed(0)}%</strong>`;
       state.lastCalc.precioML = precioML;
 
+      // Materiales table
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
         `<tr>
           <td>${d.nombre}</td>
@@ -1176,6 +1394,7 @@
           <td style="text-align:right;color:var(--primary);font-weight:600;">${fmt(d.costo)}</td>
         </tr>`).join('');
 
+      // Costos table
       const printerGroups = {};
       detTiempos.forEach(d => {
         if (!printerGroups[d.printer]) printerGroups[d.printer] = { t: 0, consumo: d.consumo, desgaste: d.desgaste };
@@ -1183,7 +1402,7 @@
       });
       const filasElec = isMultiImp
         ? Object.entries(printerGroups).map(([name, v]) => [`Electricidad ${name} (${v.t.toFixed(2)}h · ${v.consumo}W)`, fmt(v.t * (v.consumo / 1000) * KWH)])
-        : [[`Electricidad (${tiempo.toFixed(2)}h · ${printer.consumo}W)`, fmt(costoElec)]];
+        : [[`Electricidad (${tiempo.toFixed(2)}h · ${printer.consumo}W · $${KWH}/kWh)`, fmt(costoElec)]];
       const filasMaq = isMultiImp
         ? Object.entries(printerGroups).map(([name, v]) => [`Desgaste ${name} (${v.t.toFixed(2)}h)`, fmt(v.t * v.desgaste)])
         : [[`Desgaste máquina (${tiempo.toFixed(2)}h)`, fmt(costoMaq)]];
@@ -1193,10 +1412,11 @@
         ...filasElec,
         ...filasMaq,
         ...(aplicaMO ? [[`Mano de obra (${horasMO}h × $${costoMOH})`, fmt(costoMO)]] : []),
-        ['+ Margen de falla (10%)', fmt(margenFalla)],
+        [`+ Margen de falla (${CONFIG.falla}%)`, fmt(margenFalla)],
         ['─────', ''],
         ['= Costo de producción', fmt(subtotalFalla)],
         [`+ Ganancia (${(margenPct * 100).toFixed(0)}%)`, fmt(ganancia)],
+        ...(urgencia !== 'normal' ? [[`+ Sobrecargo urgencia (${urgencia === 'express' ? '25' : '50'}%)`, fmt(urgenciaMonto)]] : []),
         ...(aplicaIva ? [[`+ IVA 16%`, fmt(ivaMonto)]] : []),
         ['─────', ''],
         ['= Total a cobrar', fmt(precioFinal)],
@@ -1206,6 +1426,15 @@
           <td style="color:${c.startsWith('=') ? 'var(--text)' : c.startsWith('─') ? 'transparent' : 'var(--text-muted)'}; font-weight:${c.startsWith('=') ? '700' : '400'};">${c}</td>
           <td style="text-align:right;color:${c.startsWith('=') ? 'var(--primary)' : 'var(--text-muted)'};font-weight:${c.startsWith('=') ? '700' : '400'};">${v}</td>
         </tr>`).join('');
+
+      // Precio mínimo warning
+      const floorWarn = document.getElementById('price-floor-warn');
+      if (precioFinal < CONFIG.precioMin) {
+        floorWarn.textContent = `⚠️ El precio total (${fmt(precioFinal)}) está por debajo del mínimo sugerido de ${fmt(CONFIG.precioMin)}. Considera ajustar el margen.`;
+        floorWarn.style.display = 'block';
+      } else {
+        floorWarn.style.display = 'none';
+      }
 
       document.getElementById('confirm-msg').textContent = '';
       const panel = document.getElementById('result-panel');
@@ -1217,11 +1446,18 @@
     /* ── Confirm / process print ──────────────── */
     function confirmarImpresion(imprimir) {
       if (!imprimir) {
+        // Save as quote only (not confirmed)
+        if (state.pendingCot) {
+          const cot = { ...state.pendingCot, fue_aceptada: false };
+          DB.cotizaciones.unshift(cot);
+          saveKey('cotizaciones');
+          state.pendingCot = null;
+        }
         document.getElementById('confirm-msg').textContent = 'Guardado como cotización.';
         return;
       }
       const cv = document.getElementById('inp-cliente').value.trim();
-      document.getElementById('modal-nombre').value = cv || '';
+      document.getElementById('modal-nombre').value   = cv || '';
       document.getElementById('modal-cantidad').value = state.lastCalc?.numPiezas || 1;
       document.getElementById('modal-imp').classList.add('open');
     }
@@ -1229,16 +1465,16 @@
     function closeModal() { document.getElementById('modal-imp').classList.remove('open'); }
 
     function procesarImpresion() {
-      const nombre = document.getElementById('modal-nombre').value.trim();
+      const nombre   = document.getElementById('modal-nombre').value.trim();
       const cantidad = parseInt(document.getElementById('modal-cantidad').value) || 1;
       if (!nombre) return showToast('Escribe el nombre de la pieza');
 
-      const isMulti = document.getElementById('chk-multicolor').checked;
+      const isMulti  = document.getElementById('chk-multicolor').checked;
       const matsUsados = [];
 
       if (!isMulti) {
-        const sel = document.getElementById('single-mat');
-        const mid = sel ? sel.value : '';
+        const sel  = document.getElementById('single-mat');
+        const mid  = sel ? sel.value : '';
         const grams = parseFloat(document.getElementById('single-grams')?.value) || 0;
         if (mid && grams > 0) matsUsados.push({ matId: mid, grams });
       } else {
@@ -1250,9 +1486,10 @@
         });
       }
 
+      // Descontar material × cantidad de piezas confirmadas
       matsUsados.forEach(m => {
         if (DB.materials[m.matId]) {
-          DB.materials[m.matId].pesoTotal = Math.max(0, DB.materials[m.matId].pesoTotal - m.grams);
+          DB.materials[m.matId].pesoTotal = Math.max(0, (DB.materials[m.matId].pesoTotal || 0) - m.grams * cantidad);
         }
       });
       saveKey('materials');
@@ -1264,10 +1501,19 @@
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       saveKey('piezas');
 
+      // Save cotización as confirmed
+      if (state.pendingCot) {
+        const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad };
+        DB.cotizaciones.unshift(cot);
+        saveKey('cotizaciones');
+        state.pendingCot = null;
+      }
+
       closeModal();
       document.getElementById('confirm-msg').innerHTML =
         `<span style="color:var(--primary);">${cantidad}× "${nombre}" en inventario. Materiales descontados.</span>`;
       showToast(`${cantidad}× "${nombre}" agregadas al stock`);
+      checkStock();
     }
 
     /* ── Export PDF ───────────────────────────── */
@@ -1279,39 +1525,166 @@
     /* ── Send WhatsApp ────────────────────────── */
     function sendWhatsApp() {
       if (!state.lastCalc) { showToast('Calcula primero'); return; }
-      const c = state.lastCalc;
+      const c      = state.lastCalc;
       const cliente = document.getElementById('inp-cliente').value.trim();
+      const tel    = c.telefono;
+      const urgLabels = { express: '⚡ Express (2-3 días)', urgente: '🔥 Urgente (24 hrs)' };
+
       let msg = '🖨️ *Cotización MiniPrints*\n';
-      if (cliente) msg += `👤 Cliente: ${cliente}\n`;
-      msg += `🖥️ Impresora: ${c.printer}\n`;
-      msg += `📦 Piezas: ${c.numPiezas}\n\n`;
-      msg += `💰 *Total: ${fmt(c.precioFinal)}*\n`;
+      if (cliente)              msg += `👤 Cliente: ${cliente}\n`;
+      if (c.urgencia !== 'normal') msg += `${urgLabels[c.urgencia] || ''}\n`;
+      msg += `\n🖥️ Impresora: ${c.printer}\n`;
+      msg += `📦 Piezas: ${c.numPiezas}\n`;
+
+      if (c.detMat?.length) {
+        msg += `\n🧵 Material(es):\n`;
+        c.detMat.forEach(m => {
+          msg += `• ${m.nombre}: ${parseFloat(m.grams).toFixed(1)}g\n`;
+        });
+      }
+
+      msg += `\n💰 *Total: ${fmt(c.precioFinal)}*\n`;
       if (c.numPiezas > 1) msg += `   ↳ ${fmt(c.precioFinal / c.numPiezas)} por pieza\n`;
       msg += `\n📊 Desglose:\n`;
       msg += `• Costo de producción: ${fmt(c.subtotalFalla)}\n`;
       msg += `• Ganancia: ${fmt(c.ganancia)}\n`;
-      if (c.ivaMonto > 0) msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
-      if (c.precioML) msg += `\n🛒 Precio en Mercado Libre: ${fmt(c.precioML)}\n`;
-      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank');
+      if (c.ivaMonto > 0)      msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
+      if (c.urgenciaMonto > 0) msg += `• Sobrecargo urgencia: ${fmt(c.urgenciaMonto)}\n`;
+      if (c.precioML)          msg += `\n🛒 Precio sugerido Mercado Libre: ${fmt(c.precioML)} por pieza\n`;
+      msg += `\n¿Tienes alguna duda? Con gusto te ayudo 🙌\n_Si me recomiendas con alguien, tu siguiente pedido tiene envío gratis_ 🎁`;
+
+      const waUrl = tel
+        ? `https://wa.me/52${tel.replace(/\D/g,'')}?text=` + encodeURIComponent(msg)
+        : `https://wa.me/?text=` + encodeURIComponent(msg);
+
+      window.open(waUrl, '_blank');
+    }
+
+    /* ── Templates ────────────────────────────── */
+    function renderTemplates() {
+      const list = document.getElementById('tpl-list');
+      if (!list) return;
+      let tpls = [];
+      try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
+      if (!tpls.length) {
+        list.innerHTML = '<div class="tpl-empty">Sin plantillas guardadas</div>';
+        return;
+      }
+      const tipoLabels = { funcional:'Func', decorativa:'Decor', prototipo:'Proto', repuesto:'Rep' };
+      list.innerHTML = tpls.map((t, i) => `
+        <div class="tpl-item">
+          <span class="tpl-name" title="${t.nombre || ''}">${t.nombre || 'Sin nombre'}</span>
+          ${t.tipo ? `<span class="tpl-type">${tipoLabels[t.tipo] || t.tipo}</span>` : ''}
+          <button class="tpl-load" onclick="loadTemplate(${i})">Cargar</button>
+          <div class="tpl-del" onclick="deleteTemplate(${i})" title="Eliminar">✕</div>
+        </div>`).join('');
+    }
+
+    function saveTemplate() {
+      const nombre = document.getElementById('inp-cliente').value.trim() ||
+                     prompt('Nombre para esta plantilla:');
+      if (!nombre) return;
+      const tpl = {
+        nombre,
+        tipo:          document.getElementById('inp-tipo-pieza')?.value  || '',
+        urgencia:      document.getElementById('inp-urgencia')?.value    || 'normal',
+        canal:         document.getElementById('inp-canal')?.value       || 'whatsapp',
+        margen:        document.getElementById('inp-margen')?.value      || '60',
+        piezas:        document.getElementById('inp-piezas')?.value      || '1',
+        multicolor:    document.getElementById('chk-multicolor')?.checked || false,
+        multiImp:      document.getElementById('chk-multi-imp')?.checked  || false,
+        mo:            document.getElementById('chk-mo')?.checked         || false,
+        moCosto:       document.getElementById('inp-mo-costo')?.value    || '20',
+        moHoras:       document.getElementById('inp-mo-horas')?.value    || '1',
+        iva:           document.getElementById('chk-iva')?.checked        || false,
+        singleMatId:   state.singleMatId,
+        singleGrams:   state.singleGrams,
+        singlePrinter: document.getElementById('single-printer')?.value  || 'A1 MINI',
+        singleHours:   document.getElementById('single-hours')?.value    || '',
+        singleMins:    document.getElementById('single-minutes')?.value  || '',
+        matRows:       JSON.parse(JSON.stringify(state.matRows)),
+        timeRows:      JSON.parse(JSON.stringify(state.timeRows)),
+      };
+      let tpls = [];
+      try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
+      tpls.unshift(tpl);
+      if (tpls.length > 20) tpls = tpls.slice(0, 20);
+      localStorage.setItem('mp_templates', JSON.stringify(tpls));
+      renderTemplates();
+      showToast(`Plantilla "${nombre}" guardada`);
+    }
+
+    function loadTemplate(i) {
+      let tpls = [];
+      try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
+      const t = tpls[i]; if (!t) return;
+
+      if (t.singleMatId)    state.singleMatId = t.singleMatId;
+      if (t.singleGrams)    state.singleGrams = t.singleGrams;
+      if (t.matRows?.length)  state.matRows  = t.matRows;
+      if (t.timeRows?.length) state.timeRows = t.timeRows;
+
+      document.getElementById('chk-multicolor').checked = t.multicolor || false;
+      document.getElementById('chk-multi-imp').checked  = t.multiImp   || false;
+      renderMats();
+      renderTimes();
+
+      document.getElementById('inp-cliente').value = t.nombre || '';
+      document.getElementById('inp-margen').value  = t.margen || '60';
+      document.getElementById('inp-piezas').value  = t.piezas || '1';
+      document.getElementById('chk-iva').checked   = t.iva || false;
+      document.getElementById('chk-mo').checked    = t.mo  || false;
+      if (t.mo) {
+        document.getElementById('mo-fields').style.display = 'flex';
+        document.getElementById('inp-mo-costo').value = t.moCosto || '20';
+        document.getElementById('inp-mo-horas').value = t.moHoras || '1';
+      }
+      const tp = document.getElementById('inp-tipo-pieza');
+      const ug = document.getElementById('inp-urgencia');
+      const ca = document.getElementById('inp-canal');
+      if (tp) { tp.value = t.tipo    || ''; updateMarkupSuggestion(); }
+      if (ug)   ug.value = t.urgencia || 'normal';
+      if (ca)   ca.value = t.canal    || 'whatsapp';
+      if (!t.multiImp) {
+        const h = document.getElementById('single-hours');   if (h) h.value = t.singleHours || '';
+        const m = document.getElementById('single-minutes'); if (m) m.value = t.singleMins  || '';
+        const p = document.getElementById('single-printer'); if (p) p.value = t.singlePrinter || 'A1 MINI';
+      }
+      document.getElementById('result-panel').style.display = 'none';
+      showToast(`Plantilla "${t.nombre}" cargada`);
+    }
+
+    function deleteTemplate(i) {
+      let tpls = [];
+      try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
+      const nombre = tpls[i]?.nombre || 'plantilla';
+      tpls.splice(i, 1);
+      localStorage.setItem('mp_templates', JSON.stringify(tpls));
+      renderTemplates();
+      showToast(`"${nombre}" eliminada`);
     }
 
     /* ── Draft persistence ───────────────────── */
     function saveDraft() {
       const draft = {
-        cliente:       document.getElementById('inp-cliente')?.value || '',
-        piezas:        document.getElementById('inp-piezas')?.value || '1',
+        cliente:       document.getElementById('inp-cliente')?.value      || '',
+        telefono:      document.getElementById('inp-telefono')?.value     || '',
+        canal:         document.getElementById('inp-canal')?.value        || 'whatsapp',
+        piezas:        document.getElementById('inp-piezas')?.value       || '1',
         multicolor:    document.getElementById('chk-multicolor')?.checked || false,
-        multiImp:      document.getElementById('chk-multi-imp')?.checked || false,
-        margen:        document.getElementById('inp-margen')?.value || '60',
-        mo:            document.getElementById('chk-mo')?.checked || false,
-        moCosto:       document.getElementById('inp-mo-costo')?.value || '20',
-        moHoras:       document.getElementById('inp-mo-horas')?.value || '1',
-        iva:           document.getElementById('chk-iva')?.checked || false,
+        multiImp:      document.getElementById('chk-multi-imp')?.checked  || false,
+        margen:        document.getElementById('inp-margen')?.value       || '60',
+        tipoPieza:     document.getElementById('inp-tipo-pieza')?.value   || '',
+        urgencia:      document.getElementById('inp-urgencia')?.value     || 'normal',
+        mo:            document.getElementById('chk-mo')?.checked         || false,
+        moCosto:       document.getElementById('inp-mo-costo')?.value     || '20',
+        moHoras:       document.getElementById('inp-mo-horas')?.value     || '1',
+        iva:           document.getElementById('chk-iva')?.checked        || false,
         singleMatId:   state.singleMatId,
         singleGrams:   state.singleGrams,
-        singleHours:   document.getElementById('single-hours')?.value || '',
-        singleMins:    document.getElementById('single-minutes')?.value || '',
-        singlePrinter: document.getElementById('single-printer')?.value || 'A1 MINI',
+        singleHours:   document.getElementById('single-hours')?.value     || '',
+        singleMins:    document.getElementById('single-minutes')?.value   || '',
+        singlePrinter: document.getElementById('single-printer')?.value   || 'A1 MINI',
         matRows:       state.matRows,
         timeRows:      state.timeRows,
       };
@@ -1324,26 +1697,30 @@
         if (!raw) return;
         const d = JSON.parse(raw);
 
-        if (d.singleMatId) state.singleMatId = d.singleMatId;
-        if (d.singleGrams) state.singleGrams = d.singleGrams;
-        if (d.matRows?.length)  state.matRows  = d.matRows;
-        if (d.timeRows?.length) state.timeRows = d.timeRows.map(r => ({ ...r, printer: r.printer || 'A1 MINI' }));
+        if (d.singleMatId)      state.singleMatId = d.singleMatId;
+        if (d.singleGrams)      state.singleGrams = d.singleGrams;
+        if (d.matRows?.length)  state.matRows     = d.matRows;
+        if (d.timeRows?.length) state.timeRows    = d.timeRows.map(r => ({ ...r, printer: r.printer || 'A1 MINI' }));
 
         document.getElementById('chk-multicolor').checked = d.multicolor || false;
         document.getElementById('chk-multi-imp').checked  = d.multiImp   || false;
         renderMats();
         renderTimes();
 
-        document.getElementById('inp-cliente').value = d.cliente || '';
-        document.getElementById('inp-piezas').value  = d.piezas  || '1';
-        document.getElementById('inp-margen').value  = d.margen  || '60';
-        document.getElementById('chk-iva').checked   = d.iva     || false;
-        document.getElementById('chk-mo').checked    = d.mo      || false;
+        document.getElementById('inp-cliente').value  = d.cliente   || '';
+        document.getElementById('inp-telefono').value = d.telefono  || '';
+        document.getElementById('inp-piezas').value   = d.piezas    || '1';
+        document.getElementById('inp-margen').value   = d.margen    || '60';
+        document.getElementById('chk-iva').checked    = d.iva       || false;
+        document.getElementById('chk-mo').checked     = d.mo        || false;
         if (d.mo) {
           document.getElementById('mo-fields').style.display = 'flex';
           document.getElementById('inp-mo-costo').value = d.moCosto || '20';
           document.getElementById('inp-mo-horas').value = d.moHoras || '1';
         }
+        const ca = document.getElementById('inp-canal');        if (ca) ca.value = d.canal     || 'whatsapp';
+        const tp = document.getElementById('inp-tipo-pieza');   if (tp) { tp.value = d.tipoPieza || ''; updateMarkupSuggestion(); }
+        const ug = document.getElementById('inp-urgencia');     if (ug)  ug.value = d.urgencia  || 'normal';
         if (!d.multiImp) {
           const h = document.getElementById('single-hours');   if (h) h.value = d.singleHours || '';
           const m = document.getElementById('single-minutes'); if (m) m.value = d.singleMins  || '';
@@ -1353,10 +1730,12 @@
     }
 
     function clearDraft() {
+      if (!confirm('¿Iniciar nueva cotización? Los datos actuales se perderán.')) return;
       localStorage.removeItem('mp_cot_draft');
-      state.matRows    = [];
-      state.timeRows   = [];
-      state.lastCalc   = null;
+      state.matRows     = [];
+      state.timeRows    = [];
+      state.lastCalc    = null;
+      state.pendingCot  = null;
       state.singleMatId = '';
       state.singleGrams = '';
       document.getElementById('chk-multicolor').checked = false;
@@ -1364,12 +1743,18 @@
       document.getElementById('chk-mo').checked         = false;
       document.getElementById('chk-iva').checked        = false;
       document.getElementById('mo-fields').style.display = 'none';
-      document.getElementById('inp-cliente').value  = '';
-      document.getElementById('inp-piezas').value   = '1';
-      document.getElementById('inp-margen').value   = '60';
-      document.getElementById('inp-mo-costo').value = '20';
-      document.getElementById('inp-mo-horas').value = '1';
-      document.getElementById('result-panel').style.display = 'none';
+      document.getElementById('inp-cliente').value   = '';
+      document.getElementById('inp-telefono').value  = '';
+      document.getElementById('inp-piezas').value    = '1';
+      document.getElementById('inp-margen').value    = '60';
+      document.getElementById('inp-mo-costo').value  = '20';
+      document.getElementById('inp-mo-horas').value  = '1';
+      const ca = document.getElementById('inp-canal');       if (ca) ca.value = 'whatsapp';
+      const tp = document.getElementById('inp-tipo-pieza');  if (tp) { tp.value = ''; updateMarkupSuggestion(); }
+      const ug = document.getElementById('inp-urgencia');    if (ug)  ug.value = 'normal';
+      document.getElementById('result-panel').style.display    = 'none';
+      document.getElementById('stock-warn').style.display      = 'none';
+      document.getElementById('price-floor-warn').style.display = 'none';
       renderMats();
       renderTimes();
       showToast('Nueva cotización lista');
@@ -1377,7 +1762,7 @@
 
     /* ── Nav mobile ───────────────────────────── */
     function toggleMobile() {
-      const btn = document.getElementById('hamburger');
+      const btn  = document.getElementById('hamburger');
       const menu = document.getElementById('mobileMenu');
       const open = menu.classList.toggle('open');
       btn.classList.toggle('open', open);
@@ -1391,7 +1776,9 @@
     loadDB();
     renderMats();
     renderTimes();
+    loadConfig();
     loadDraft();
+    renderTemplates();
     window.addEventListener('beforeunload', saveDraft);
   </script>
   <script src="glass.js"></script>
