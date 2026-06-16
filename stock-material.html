@@ -29,7 +29,7 @@
     .msg { font-size: 0.8rem; margin-top: 6px; min-height: 20px; }
     /* Material items */
     .mat-item {
-      display: grid; grid-template-columns: 1fr 90px 90px 80px auto;
+      display: grid; grid-template-columns: 1fr auto auto;
       gap: 12px; align-items: center;
       padding: 16px 20px; margin-bottom: 10px;
       background: var(--surface); border: 1px solid var(--border);
@@ -39,7 +39,7 @@
     .mat-info {}
     .mat-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
     .mat-sub { font-size: 0.75rem; color: var(--text-dim); }
-    .mat-stat { text-align: center; }
+    .mat-stat { text-align: center; min-width: 80px; }
     .mat-stat-val { font-size: 0.95rem; font-weight: 800; }
     .mat-stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-top: 2px; }
     .pbar { height: 5px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden; margin-top: 5px; width: 100%; max-width: 80px; }
@@ -50,10 +50,17 @@
     .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
     .empty-state svg { margin: 0 auto 12px; opacity: 0.4; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    .mat-stats { display: flex; gap: 18px; }
     @media (max-width: 800px) {
       .grid-5 { grid-template-columns: 1fr 1fr; }
-      .mat-item { grid-template-columns: 1fr auto; }
-      .mat-stat { display: none; }
+      .mat-item {
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "info actions" "stats stats";
+      }
+      .mat-info    { grid-area: info; }
+      .mat-actions { grid-area: actions; }
+      .mat-stats   { grid-area: stats; margin-top: 10px; gap: 22px; }
+      .mat-stat    { text-align: left; }
     }
   </style>
 </head>
@@ -326,19 +333,21 @@
               <span class="badge ${badgeCls}">${badgeTxt}</span>
             </div>
           </div>
-          <div class="mat-stat">
-            <input type="number" value="${m.pesoTotal}" min="0" style="width:72px;padding:4px 6px;font-size:0.82rem;text-align:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);outline:none;" onchange="editarPeso('${m.id}', this.value)" />
-            <div class="mat-stat-lbl">g stock</div>
+          <div class="mat-stats">
+            <div class="mat-stat">
+              <input type="number" value="${m.pesoTotal}" min="0" style="width:72px;padding:4px 6px;font-size:0.82rem;text-align:center;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font);outline:none;" onchange="editarPeso('${m.id}', this.value)" />
+              <div class="mat-stat-lbl">g stock</div>
+            </div>
+            <div class="mat-stat">
+              <div class="mat-stat-val">${fmt(m.costo)}</div>
+              <div class="mat-stat-lbl">$/kg</div>
+            </div>
+            <div class="mat-stat">
+              <div class="mat-stat-val" style="color:var(--primary);">${fmt(valorMat)}</div>
+              <div class="mat-stat-lbl">valor</div>
+            </div>
           </div>
-          <div class="mat-stat">
-            <div class="mat-stat-val">${fmt(m.costo)}</div>
-            <div class="mat-stat-lbl">$/kg</div>
-          </div>
-          <div class="mat-stat">
-            <div class="mat-stat-val" style="color:var(--primary);">${fmt(valorMat)}</div>
-            <div class="mat-stat-lbl">valor</div>
-          </div>
-          <div style="display:flex;gap:6px;">
+          <div class="mat-actions" style="display:flex;gap:6px;">
             <button class="btn btn-ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="eliminarMaterial('${m.id}')">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
