@@ -1,7 +1,10 @@
 // MiniPrints v2 — sincronización entre dispositivos (Firebase Firestore)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  doc, getDoc, setDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC64TanRR3eG1X5X7lUEoVjLTQGSRZr3Vg",
@@ -17,27 +20,39 @@ const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotiza
 
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db   = getFirestore(app);
+
+// Persistencia offline: los writes pendientes se guardan en IndexedDB y se
+// reenvían automáticamente aunque la página se recargue antes de que lleguen.
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 const docRef = doc(db, 'negocio', 'data');
 
 let applyingRemote = false;
 let pushTimer = null;
 
-function schedulePush() {
+function flushPush() {
   clearTimeout(pushTimer);
-  pushTimer = setTimeout(() => {
-    const payload = {};
-    SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-    setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
-  }, 400);
+  const payload = {};
+  SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
+  setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
 }
 
-// Auto-push transparente: cualquier guardado a una key sincronizada dispara el push
+function schedulePush() {
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(flushPush, 150);
+}
+
+// Intercepta cualquier escritura a localStorage y dispara push
 const _origSetItem = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(key, value) {
   _origSetItem(key, value);
   if (!applyingRemote && SYNC_KEYS.includes(key)) schedulePush();
 };
+
+// Flush inmediato cuando la página se oculta o cierra (crítico en móvil)
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
+window.addEventListener('pagehide', flushPush);
 
 function applyRemoteData(data) {
   applyingRemote = true;
@@ -85,6 +100,7 @@ function showPinGate(onUnlock) {
 async function initSync() {
   try {
     await signInAnonymously(auth);
+    // getDoc lee desde caché local primero (incluye writes pendientes no enviados aún)
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       applyRemoteData(snap.data());
