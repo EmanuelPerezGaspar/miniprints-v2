@@ -193,6 +193,10 @@
             <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
           </div>
           <div class="btn-row">
+            <select id="venta-estatus" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
+              <option value="pagado">Pagado</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
             <button class="btn btn-primary" id="btn-registrar" onclick="registrarOrden()" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
               Registrar orden
@@ -214,7 +218,7 @@
                   <th style="text-align:right;">Cant.</th>
                   <th style="text-align:right;">Precio unit.</th>
                   <th style="text-align:right;">Total</th>
-                  <th></th>
+                  <th>Estatus</th><th></th>
                 </tr>
               </thead>
               <tbody id="ventas-tbody"></tbody>
@@ -239,6 +243,7 @@
     function ventaItems(v) {
       return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }];
     }
+    function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
 
     function loadDB() {
       try { const p = localStorage.getItem('mp_piezas'); if (p) DB.piezas = JSON.parse(p); } catch(e) {}
@@ -324,9 +329,10 @@
     async function registrarOrden() {
       if (!carrito.length) return;
       const fecha = document.getElementById('venta-fecha').value || today();
-      const canal      = document.getElementById('venta-canal').value;
-      const metodoPago = document.getElementById('venta-metodo').value;
-      const notas      = document.getElementById('venta-notas').value.trim();
+      const canal       = document.getElementById('venta-canal').value;
+      const metodoPago  = document.getElementById('venta-metodo').value;
+      const notas       = document.getElementById('venta-notas').value.trim();
+      const estatusPago = document.getElementById('venta-estatus').value;
 
       carrito.forEach(it => {
         DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) - it.cantidad;
@@ -340,6 +346,7 @@
         fecha,
         canal,
         metodoPago,
+        estatusPago,
         notas,
         items: carrito.map(it => ({ pieza: it.pieza, cantidad: it.cantidad, precio: it.precio }))
       };
@@ -352,6 +359,15 @@
       refreshPiezaSelect();
       document.getElementById('venta-fecha').value = today();
       showToast(`Orden registrada: ${fmt(total)}`);
+    }
+
+    function marcarPagado(id) {
+      const v = DB.ventas.find(x => x.id === id);
+      if (!v) return;
+      v.estatusPago = 'pagado';
+      saveVentas();
+      renderVentas();
+      showToast('Orden marcada como pagada');
     }
 
     async function eliminarVenta(id) {
@@ -382,14 +398,18 @@
       }
       empty.style.display = 'none';
 
-      const tot  = DB.ventas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
-      const unds = DB.ventas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
-      const tkProm = DB.ventas.length ? tot / DB.ventas.length : 0;
+      const pagadas    = DB.ventas.filter(ventaPagada);
+      const pendientes = DB.ventas.filter(v => !ventaPagada(v));
+      const tot     = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      const unds    = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
+      const porCobrar = pendientes.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      const tkProm  = pagadas.length ? tot / pagadas.length : 0;
       pills.innerHTML = `
         <div class="pill"><span class="pill-lbl">Total ingresos</span><span class="pill-val green">${fmt(tot)}</span></div>
         <div class="pill"><span class="pill-lbl">Unidades</span><span class="pill-val">${unds}</span></div>
         <div class="pill"><span class="pill-lbl">Transacciones</span><span class="pill-val">${DB.ventas.length}</span></div>
-        <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>`;
+        <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>
+        ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:#eab308;">${fmt(porCobrar)}</span></div>` : ''}`;
 
       const canalColor = { 'WhatsApp': '#22c55e', 'Instagram': '#a78bfa', 'MercadoLibre': '#eab308', 'Facebook': '#3b82f6', 'Directo': '#64748b', 'Tienda local': '#f97316' };
       tbody.innerHTML = DB.ventas.map(v => {
@@ -401,15 +421,23 @@
           ? items[0].pieza
           : items.map(it => `${it.pieza.split(' ')[0]} ×${it.cantidad}`).join(' · ');
         const titleAttr = items.length > 1 ? ` title="${items.map(it => it.pieza + ' ×' + it.cantidad).join(', ')}"` : '';
-        return `<tr>
+        const pagada = ventaPagada(v);
+        const estatusBadge = pagada
+          ? `<span style="font-size:0.7rem;background:#22c55e22;color:#22c55e;padding:2px 8px;border-radius:99px;font-weight:700;">Pagado</span>`
+          : `<span style="font-size:0.7rem;background:#eab30822;color:#eab308;padding:2px 8px;border-radius:99px;font-weight:700;">Pendiente</span>`;
+        return `<tr style="${pagada ? '' : 'opacity:0.8;'}">
           <td style="color:var(--text-dim);">${v.fecha}</td>
           <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${v.notas}</div>` : ''}</td>
           <td><span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:700;">${v.canal || 'Directo'}</span></td>
           <td style="color:var(--text-dim);font-size:0.82rem;">${v.metodoPago || '—'}</td>
           <td style="text-align:right;">${cantV}</td>
           <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
-          <td style="text-align:right;color:#22c55e;font-weight:700;">${fmt(totalV)}</td>
-          <td>
+          <td style="text-align:right;color:${pagada ? '#22c55e' : '#eab308'};font-weight:700;">${fmt(totalV)}</td>
+          <td>${estatusBadge}</td>
+          <td style="display:flex;gap:4px;">
+            ${!pagada ? `<button class="btn btn-ghost" style="padding:5px 9px;color:#22c55e;" onclick="marcarPagado(${v.id})" title="Marcar como pagado">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>` : ''}
             <button class="btn btn-ghost" style="padding:5px 9px;" onclick="eliminarVenta(${v.id})">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
             </button>

@@ -194,6 +194,7 @@
 
     const DB = { materials: {}, piezas: {}, ventas: [], cotizaciones: [] };
     function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
+    function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
     function loadDB() {
       try { const m = localStorage.getItem('mp_materials');    if (m) DB.materials    = JSON.parse(m); } catch(e){}
       try { const p = localStorage.getItem('mp_piezas');       if (p) DB.piezas       = JSON.parse(p); } catch(e){}
@@ -225,7 +226,7 @@
     }
 
     function renderKPIs() {
-      const ingresos = DB.ventas.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
+      const ingresos = DB.ventas.filter(ventaPagada).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const ganancia = ingresos - DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
       const totalPiezas = Object.values(DB.piezas).reduce((s,n)=>s+n,0);
       const totalMateriales = Object.keys(DB.materials).length;
@@ -357,12 +358,13 @@
       const now = getMesActual(), prev = getMesAnterior();
       const vEste = DB.ventas.filter(v=>mesKey(v)===now);
       const vPrev = DB.ventas.filter(v=>mesKey(v)===prev);
-      const ingEste = vEste.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
-      const ingPrev = vPrev.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
+      const ingEste = vEste.filter(ventaPagada).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
+      const ingPrev = vPrev.filter(ventaPagada).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const tendPct  = ingPrev>0 ? ((ingEste-ingPrev)/ingPrev*100) : null;
       const tendUp   = tendPct!==null && tendPct>=0;
 
-      const ticket = DB.ventas.length ? DB.ventas.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0)/DB.ventas.length : 0;
+      const ventasPag = DB.ventas.filter(ventaPagada);
+      const ticket = ventasPag.length ? ventasPag.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0)/ventasPag.length : 0;
 
       const cotEste = DB.cotizaciones.filter(c=>{ try{ return (c.fecha||'').slice(0,7)===now; }catch(e){ return false; }});
       const totalCot = cotEste.reduce((s,c)=>s+(c.total||0),0);
@@ -399,7 +401,7 @@
     // ── Meta mensual ─────────────────────────────────
     function renderGoal() {
       const meta   = parseFloat(localStorage.getItem('mp_meta_mensual')||'0');
-      const ingEste = DB.ventas.filter(v=>mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
+      const ingEste = DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const pct    = meta>0 ? Math.min(ingEste/meta*100,100) : 0;
       const barClr = pct>=100?'#22c55e':pct>=60?'#eab308':'#ef4444';
       document.getElementById('goal-card').innerHTML = `
@@ -487,7 +489,7 @@
       if (chartRev) { chartRev.destroy(); chartRev = null; }
       const meses = [];
       for (let i=5;i>=0;i--) { const d=new Date();d.setMonth(d.getMonth()-i);meses.push(d.toISOString().slice(0,7)); }
-      const ingPorMes = meses.map(m=>DB.ventas.filter(v=>mesKey(v)===m).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0));
+      const ingPorMes = meses.map(m=>DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===m).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0));
       const labM = meses.map(m=>{const d=new Date(m+'-01');return d.toLocaleDateString('es-MX',{month:'short',year:'2-digit'});});
       chartRev = new Chart(document.getElementById('chartRevenue'),{
         type:'line',
@@ -498,7 +500,7 @@
       // Canal donut chart
       if (chartCanal) { chartCanal.destroy(); chartCanal = null; }
       const canalData = {};
-      DB.ventas.forEach(v=>{ const c=v.canal||'Otro'; const tot=ventaItems(v).reduce((s,it)=>s+it.precio*it.cantidad,0); canalData[c]=(canalData[c]||0)+tot; });
+      DB.ventas.filter(ventaPagada).forEach(v=>{ const c=v.canal||'Otro'; const tot=ventaItems(v).reduce((s,it)=>s+it.precio*it.cantidad,0); canalData[c]=(canalData[c]||0)+tot; });
       const canalClr = {WhatsApp:'#22c55e',Instagram:'#a78bfa',MercadoLibre:'#eab308',Facebook:'#3b82f6',TikTok:'#06b6d4',Otro:'#94a3b8'};
       const cLabs = Object.keys(canalData), cVals = Object.values(canalData);
       if (cLabs.length) {

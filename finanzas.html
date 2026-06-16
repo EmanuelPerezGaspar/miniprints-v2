@@ -173,6 +173,7 @@
   <script>
     const DB = { materials: {}, ventas: [], cotizaciones: [] };
     function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
+    function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
     let chartGan = null, chartIng = null;
 
     function loadDB() {
@@ -197,7 +198,7 @@
 
     function renderKPIs() {
       const ventas = DB.ventas, cots = DB.cotizaciones;
-      const ingresos    = ventas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      const ingresos    = ventas.filter(ventaPagada).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
       const costosProd  = cots.reduce((s, c) => s + (c.costo_base || 0), 0);
       const ganEsp      = cots.reduce((s, c) => s + (c.ganancia || 0), 0);
       const ganReal     = ingresos - costosProd;
@@ -249,7 +250,7 @@
         cotsByCliente[k].costoProd += (c.costo_base || 0);
       });
       const ventasByPieza = {};
-      DB.ventas.forEach(v => { ventaItems(v).forEach(it => { ventasByPieza[it.pieza] = (ventasByPieza[it.pieza] || 0) + it.precio * it.cantidad; }); });
+      DB.ventas.filter(ventaPagada).forEach(v => { ventaItems(v).forEach(it => { ventasByPieza[it.pieza] = (ventasByPieza[it.pieza] || 0) + it.precio * it.cantidad; }); });
       const piezasLabels = [...new Set([...Object.keys(cotsByCliente), ...Object.keys(ventasByPieza)])].slice(0, 8);
       const canvasGan = document.getElementById('chart-gan');
       if (piezasLabels.length) {
@@ -282,7 +283,7 @@
         const d = new Date(); d.setMonth(d.getMonth() - i);
         meses.push(d.toISOString().slice(0, 7));
       }
-      const ingPorMes = meses.map(m => DB.ventas.filter(v => mesDeVenta(v) === m).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0));
+      const ingPorMes = meses.map(m => DB.ventas.filter(v => ventaPagada(v) && mesDeVenta(v) === m).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0));
       const labelsM = meses.map(m => { const d = new Date(m + '-01'); return d.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }); });
       chartIng = new Chart(document.getElementById('chart-ing'), {
         type: 'line',
@@ -314,7 +315,7 @@
         cotsByCliente[k].ganEsp += (c.ganancia || 0);
       });
       const ventasByPieza = {};
-      DB.ventas.forEach(v => {
+      DB.ventas.filter(ventaPagada).forEach(v => {
         ventaItems(v).forEach(it => {
           if (!ventasByPieza[it.pieza]) ventasByPieza[it.pieza] = 0;
           ventasByPieza[it.pieza] += it.precio * it.cantidad;
