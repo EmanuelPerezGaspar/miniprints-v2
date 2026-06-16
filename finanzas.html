@@ -23,6 +23,7 @@
   </style>
 </head>
 <body>
+  <script type="module" src="firebase-sync.js"></script>
   <div id="shapes-bg" aria-hidden="true">
     <div id="shapes-ambient"></div>
     <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
@@ -374,8 +375,9 @@
       document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
     });
 
-    loadDB();
-    renderAll();
+    function mpInit() { loadDB(); renderAll(); }
+    window.addEventListener('mp-sync-ready', mpInit, { once: true });
+    window.addEventListener('mp-sync-update', mpInit);
   </script>
   <script src="glass.js"></script>
 </body>

@@ -624,6 +624,7 @@
   </style>
 </head>
 <body>
+  <script type="module" src="firebase-sync.js"></script>
   <div id="shapes-bg" aria-hidden="true">
     <div id="shapes-ambient"></div>
     <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
@@ -2032,13 +2033,17 @@
     });
 
     /* ── Init ─────────────────────────────────── */
-    loadDB();
-    renderMats();
-    renderTimes();
-    loadConfig();
-    loadDraft();
-    updateFallaSuggestion();
-    renderTemplates();
+    function mpInit() {
+      loadDB();
+      renderMats();
+      renderTimes();
+      loadConfig();
+      loadDraft();
+      updateFallaSuggestion();
+      renderTemplates();
+    }
+    window.addEventListener('mp-sync-ready', mpInit, { once: true });
+    window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
   <script src="glass.js"></script>
