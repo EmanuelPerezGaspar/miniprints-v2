@@ -50,6 +50,13 @@
     .carrito-subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
     .cs-lbl { color: var(--text-dim); font-size: 0.85rem; }
     .cs-val { font-weight: 800; color: #22c55e; font-size: 1.05rem; }
+    #modal-pago { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1000; align-items:center; justify-content:center; }
+    #modal-pago.open { display:flex; }
+    .modal-box { background:#1e293b; border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; width:300px; max-width:92vw; }
+    .modal-title { font-size:0.95rem; font-weight:700; margin-bottom:18px; }
+    .metodo-btn { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.875rem; padding:11px 14px; cursor:pointer; text-align:left; margin-bottom:8px; transition:border-color 180ms,background 180ms; display:block; }
+    .metodo-btn:hover { border-color:var(--primary); background:rgba(34,197,94,0.08); }
+    .modal-cancel { background:none; border:none; color:var(--text-dim); font-size:0.82rem; cursor:pointer; margin-top:4px; width:100%; text-align:center; padding:6px; }
   </style>
 </head>
 <body>
@@ -181,7 +188,7 @@
                 <option value="Otro">Otro</option>
               </select>
             </div>
-            <div class="field">
+            <div class="field" id="campo-metodo">
               <label>Método de pago</label>
               <select id="venta-metodo">
                 <option value="Efectivo">Efectivo</option>
@@ -193,7 +200,7 @@
             <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
           </div>
           <div class="btn-row">
-            <select id="venta-estatus" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
+            <select id="venta-estatus" onchange="toggleMetodoPago()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
               <option value="pagado">Pagado</option>
               <option value="pendiente">Pendiente</option>
             </select>
@@ -234,6 +241,15 @@
     </div>
   </div>
 
+  <div id="modal-pago">
+    <div class="modal-box">
+      <div class="modal-title">¿Cómo se recibió el pago?</div>
+      <button class="metodo-btn" onclick="confirmarPago('Efectivo')">💵 Efectivo</button>
+      <button class="metodo-btn" onclick="confirmarPago('Transferencia')">🏦 Transferencia</button>
+      <button class="metodo-btn" onclick="confirmarPago('Tarjeta')">💳 Tarjeta</button>
+      <button class="modal-cancel" onclick="cerrarModalPago()">Cancelar</button>
+    </div>
+  </div>
   <div id="toast"></div>
 
   <script>
@@ -330,9 +346,9 @@
       if (!carrito.length) return;
       const fecha = document.getElementById('venta-fecha').value || today();
       const canal       = document.getElementById('venta-canal').value;
-      const metodoPago  = document.getElementById('venta-metodo').value;
-      const notas       = document.getElementById('venta-notas').value.trim();
       const estatusPago = document.getElementById('venta-estatus').value;
+      const metodoPago  = estatusPago === 'pendiente' ? null : document.getElementById('venta-metodo').value;
+      const notas       = document.getElementById('venta-notas').value.trim();
 
       carrito.forEach(it => {
         DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) - it.cantidad;
@@ -361,13 +377,29 @@
       showToast(`Orden registrada: ${fmt(total)}`);
     }
 
+    let _pendingPagoId = null;
+
     function marcarPagado(id) {
-      const v = DB.ventas.find(x => x.id === id);
-      if (!v) return;
-      v.estatusPago = 'pagado';
-      saveVentas();
-      renderVentas();
-      showToast('Orden marcada como pagada');
+      _pendingPagoId = id;
+      document.getElementById('modal-pago').classList.add('open');
+    }
+
+    function cerrarModalPago() {
+      _pendingPagoId = null;
+      document.getElementById('modal-pago').classList.remove('open');
+    }
+
+    function confirmarPago(metodo) {
+      if (!_pendingPagoId) return;
+      const v = DB.ventas.find(x => x.id === _pendingPagoId);
+      if (v) { v.estatusPago = 'pagado'; v.metodoPago = metodo; saveVentas(); renderVentas(); }
+      cerrarModalPago();
+      showToast(`Pago registrado — ${metodo}`);
+    }
+
+    function toggleMetodoPago() {
+      const pendiente = document.getElementById('venta-estatus').value === 'pendiente';
+      document.getElementById('campo-metodo').style.display = pendiente ? 'none' : '';
     }
 
     async function eliminarVenta(id) {
