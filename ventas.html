@@ -407,7 +407,7 @@
         const titleAttr = items.length > 1 ? ` title="${items.map(it => it.pieza + ' ×' + it.cantidad).join(', ')}"` : '';
         return `<tr>
           <td style="color:var(--text-dim);">${v.fecha}</td>
-          <td${titleAttr}>${piezaLbl}</td>
+          <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${v.notas}</div>` : ''}</td>
           <td><span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:700;">${v.canal || 'Directo'}</span></td>
           <td style="text-align:right;">${cantV}</td>
           <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
