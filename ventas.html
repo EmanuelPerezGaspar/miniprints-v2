@@ -40,6 +40,16 @@
     .pill-val.green { color: #22c55e; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
     @media (max-width: 800px) { .grid-4 { grid-template-columns: 1fr 1fr; } .grid-3 { grid-template-columns: 1fr; } }
+    .carrito-section { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin: 12px 0; display: none; }
+    .carrito-section.visible { display: block; }
+    .carrito-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; }
+    .carrito-item:last-child { border-bottom: none; }
+    .ci-name { flex: 1; font-weight: 600; }
+    .ci-meta { color: var(--text-dim); min-width: 130px; text-align: right; }
+    .ci-total { color: #22c55e; font-weight: 700; min-width: 80px; text-align: right; }
+    .carrito-subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
+    .cs-lbl { color: var(--text-dim); font-size: 0.85rem; }
+    .cs-val { font-weight: 800; color: #22c55e; font-size: 1.05rem; }
   </style>
 </head>
 <body>
@@ -144,9 +154,21 @@
             </div>
             <div class="field"><label>Cantidad</label><input type="number" id="venta-cantidad" value="1" min="1" /></div>
             <div class="field"><label>Precio unitario ($)</label><input type="number" id="venta-precio" placeholder="0.00" min="0" step="0.01" /></div>
-            <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
+            <div class="field" style="align-self:flex-end;">
+              <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="agregarAlCarrito()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Agregar al pedido
+              </button>
+            </div>
           </div>
-          <div class="grid-3">
+          <div id="carrito-section" class="carrito-section">
+            <div id="carrito-list"></div>
+            <div class="carrito-subtotal">
+              <span class="cs-lbl">Total del pedido:</span>
+              <span class="cs-val" id="carrito-total-val">$0.00</span>
+            </div>
+          </div>
+          <div class="grid-4" style="margin-top:12px;">
             <div class="field">
               <label>Canal de venta</label>
               <select id="venta-canal">
@@ -172,11 +194,12 @@
               </select>
             </div>
             <div class="field"><label>Notas (opcional)</label><input type="text" id="venta-notas" placeholder="Observaciones..." /></div>
+            <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
           </div>
           <div class="btn-row">
-            <button class="btn btn-primary" onclick="registrarVenta()">
+            <button class="btn btn-primary" id="btn-registrar" onclick="registrarOrden()" disabled>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Registrar venta
+              Registrar orden
             </button>
           </div>
         </div>
@@ -215,6 +238,11 @@
 
   <script>
     const DB = { piezas: {}, ventas: [] };
+    let carrito = [];
+
+    function ventaItems(v) {
+      return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }];
+    }
 
     function loadDB() {
       try { const p = localStorage.getItem('mp_piezas'); if (p) DB.piezas = JSON.parse(p); } catch(e) {}
@@ -232,60 +260,123 @@
 
     function refreshPiezaSelect() {
       const sel = document.getElementById('venta-pieza');
+      const reservado = {};
+      carrito.forEach(it => { reservado[it.pieza] = (reservado[it.pieza] || 0) + it.cantidad; });
       const piezas = Object.keys(DB.piezas);
       sel.innerHTML = '<option value="">— Selecciona pieza —</option>' +
-        piezas.map(p => `<option value="${p}">${p} (${DB.piezas[p]} disp.)</option>`).join('');
+        piezas.map(p => {
+          const disp = (DB.piezas[p] || 0) - (reservado[p] || 0);
+          return disp > 0 ? `<option value="${p}">${p} (${disp} disp.)</option>` : '';
+        }).join('');
     }
 
-    async function registrarVenta() {
+    function agregarAlCarrito() {
       const pieza    = document.getElementById('venta-pieza').value;
       const cantidad = parseInt(document.getElementById('venta-cantidad').value) || 0;
       const precio   = parseFloat(document.getElementById('venta-precio').value) || 0;
-      const fecha    = document.getElementById('venta-fecha').value || today();
-      const canal    = document.getElementById('venta-canal').value;
-      const cat      = document.getElementById('venta-categoria').value;
-      const notas    = document.getElementById('venta-notas').value.trim();
 
-      if (!pieza)      return showToast('Selecciona una pieza');
+      if (!pieza)        return showToast('Selecciona una pieza');
       if (cantidad <= 0) return showToast('Cantidad inválida');
       if (precio <= 0)   return showToast('Ingresa el precio de venta');
-      if ((DB.piezas[pieza] || 0) < cantidad)
-        return showToast(`Solo hay ${DB.piezas[pieza] || 0} piezas disponibles`);
 
-      DB.piezas[pieza] -= cantidad;
-      if (DB.piezas[pieza] <= 0) delete DB.piezas[pieza];
-      savePiezas();
+      const reservado = carrito.filter(it => it.pieza === pieza).reduce((s, it) => s + it.cantidad, 0);
+      const disponible = (DB.piezas[pieza] || 0) - reservado;
+      if (disponible < cantidad)
+        return showToast(`Solo hay ${disponible} disponibles de "${pieza}"`);
 
-      const venta = { id: Date.now(), fecha, pieza, cantidad, precio, canal, categoria: cat, notas };
-      DB.ventas.unshift(venta);
-      saveVentas();
-
-      renderVentas();
-      refreshPiezaSelect();
+      carrito.push({ pieza, cantidad, precio });
+      renderCarrito();
       document.getElementById('venta-pieza').value    = '';
       document.getElementById('venta-cantidad').value = 1;
       document.getElementById('venta-precio').value   = '';
-      document.getElementById('venta-fecha').value    = today();
-      showToast(`Venta registrada: ${fmt(precio * cantidad)}`);
+      refreshPiezaSelect();
+    }
+
+    function quitarDelCarrito(i) {
+      carrito.splice(i, 1);
+      renderCarrito();
+      refreshPiezaSelect();
+    }
+
+    function renderCarrito() {
+      const section = document.getElementById('carrito-section');
+      const list    = document.getElementById('carrito-list');
+      const totalEl = document.getElementById('carrito-total-val');
+      const btnReg  = document.getElementById('btn-registrar');
+
+      if (!carrito.length) {
+        section.classList.remove('visible');
+        btnReg.disabled = true;
+        return;
+      }
+      section.classList.add('visible');
+      btnReg.disabled = false;
+
+      const total = carrito.reduce((s, it) => s + it.precio * it.cantidad, 0);
+      totalEl.textContent = fmt(total);
+      list.innerHTML = carrito.map((it, i) => `
+        <div class="carrito-item">
+          <span class="ci-name">${it.pieza}</span>
+          <span class="ci-meta">${it.cantidad} × ${fmt(it.precio)}</span>
+          <span class="ci-total">${fmt(it.precio * it.cantidad)}</span>
+          <button class="btn btn-ghost" style="padding:3px 8px;" onclick="quitarDelCarrito(${i})" title="Quitar">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>`).join('');
+    }
+
+    async function registrarOrden() {
+      if (!carrito.length) return;
+      const fecha = document.getElementById('venta-fecha').value || today();
+      const canal = document.getElementById('venta-canal').value;
+      const cat   = document.getElementById('venta-categoria').value;
+      const notas = document.getElementById('venta-notas').value.trim();
+
+      carrito.forEach(it => {
+        DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) - it.cantidad;
+        if (DB.piezas[it.pieza] <= 0) delete DB.piezas[it.pieza];
+      });
+      savePiezas();
+
+      const total = carrito.reduce((s, it) => s + it.precio * it.cantidad, 0);
+      const venta = {
+        id: Date.now(),
+        fecha,
+        canal,
+        categoria: cat,
+        notas,
+        items: carrito.map(it => ({ pieza: it.pieza, cantidad: it.cantidad, precio: it.precio }))
+      };
+      DB.ventas.unshift(venta);
+      saveVentas();
+
+      carrito = [];
+      renderCarrito();
+      renderVentas();
+      refreshPiezaSelect();
+      document.getElementById('venta-fecha').value = today();
+      showToast(`Orden registrada: ${fmt(total)}`);
     }
 
     async function eliminarVenta(id) {
       const v = DB.ventas.find(x => x.id === id);
       if (!v) return;
-      if (!confirm(`Eliminar venta de "${v.pieza}"?`)) return;
-      DB.piezas[v.pieza] = (DB.piezas[v.pieza] || 0) + v.cantidad;
+      const items = ventaItems(v);
+      const label = items.length === 1 ? `"${items[0].pieza}"` : `${items.length} piezas`;
+      if (!confirm(`Eliminar orden de ${label}?`)) return;
+      items.forEach(it => { DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) + it.cantidad; });
       savePiezas();
       DB.ventas = DB.ventas.filter(x => x.id !== id);
       saveVentas();
       renderVentas();
       refreshPiezaSelect();
-      showToast(`Venta eliminada — "${v.pieza}" restaurada al stock`);
+      showToast('Orden eliminada — stock restaurado');
     }
 
     function renderVentas() {
-      const tbody  = document.getElementById('ventas-tbody');
-      const empty  = document.getElementById('ventas-empty');
-      const pills  = document.getElementById('summary-pills');
+      const tbody = document.getElementById('ventas-tbody');
+      const empty = document.getElementById('ventas-empty');
+      const pills = document.getElementById('summary-pills');
 
       if (!DB.ventas.length) {
         tbody.innerHTML = '';
@@ -295,8 +386,8 @@
       }
       empty.style.display = 'none';
 
-      const tot  = DB.ventas.reduce((s, v) => s + v.precio * v.cantidad, 0);
-      const unds = DB.ventas.reduce((s, v) => s + v.cantidad, 0);
+      const tot  = DB.ventas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      const unds = DB.ventas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
       const tkProm = DB.ventas.length ? tot / DB.ventas.length : 0;
       pills.innerHTML = `
         <div class="pill"><span class="pill-lbl">Total ingresos</span><span class="pill-val green">${fmt(tot)}</span></div>
@@ -305,16 +396,22 @@
         <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>`;
 
       const canalColor = { 'WhatsApp': '#22c55e', 'Instagram': '#a78bfa', 'MercadoLibre': '#eab308', 'Facebook': '#3b82f6', 'Directo': '#64748b', 'Tienda local': '#f97316' };
-
       tbody.innerHTML = DB.ventas.map(v => {
-        const color = canalColor[v.canal] || '#64748b';
+        const items  = ventaItems(v);
+        const color  = canalColor[v.canal] || '#64748b';
+        const totalV = items.reduce((s, it) => s + it.precio * it.cantidad, 0);
+        const cantV  = items.reduce((s, it) => s + it.cantidad, 0);
+        const piezaLbl = items.length === 1
+          ? items[0].pieza
+          : items.map(it => `${it.pieza.split(' ')[0]} ×${it.cantidad}`).join(' · ');
+        const titleAttr = items.length > 1 ? ` title="${items.map(it => it.pieza + ' ×' + it.cantidad).join(', ')}"` : '';
         return `<tr>
           <td style="color:var(--text-dim);">${v.fecha}</td>
-          <td>${v.pieza}</td>
+          <td${titleAttr}>${piezaLbl}</td>
           <td><span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:700;">${v.canal || 'Directo'}</span></td>
-          <td style="text-align:right;">${v.cantidad}</td>
-          <td style="text-align:right;color:var(--text-muted);">${fmt(v.precio)}</td>
-          <td style="text-align:right;color:#22c55e;font-weight:700;">${fmt(v.precio * v.cantidad)}</td>
+          <td style="text-align:right;">${cantV}</td>
+          <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
+          <td style="text-align:right;color:#22c55e;font-weight:700;">${fmt(totalV)}</td>
           <td>
             <button class="btn btn-ghost" style="padding:5px 9px;" onclick="eliminarVenta(${v.id})">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>

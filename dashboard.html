@@ -193,6 +193,7 @@
     });
 
     const DB = { materials: {}, piezas: {}, ventas: [], cotizaciones: [] };
+    function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
     function loadDB() {
       try { const m = localStorage.getItem('mp_materials');    if (m) DB.materials    = JSON.parse(m); } catch(e){}
       try { const p = localStorage.getItem('mp_piezas');       if (p) DB.piezas       = JSON.parse(p); } catch(e){}
@@ -224,7 +225,7 @@
     }
 
     function renderKPIs() {
-      const ingresos = DB.ventas.reduce((s,v)=>s+v.precio*v.cantidad,0);
+      const ingresos = DB.ventas.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const ganancia = ingresos - DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
       const totalPiezas = Object.values(DB.piezas).reduce((s,n)=>s+n,0);
       const totalMateriales = Object.keys(DB.materials).length;
@@ -284,7 +285,7 @@
           <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
           ${(()=>{
             const piezaMap = {};
-            DB.ventas.forEach(v=>{ if(v.pieza) piezaMap[v.pieza]=(piezaMap[v.pieza]||0)+v.cantidad; });
+            DB.ventas.forEach(v=>{ ventaItems(v).forEach(it=>{ piezaMap[it.pieza]=(piezaMap[it.pieza]||0)+it.cantidad; }); });
             const totalVendidas = Object.values(piezaMap).reduce((s,n)=>s+n,0);
             const top = Object.entries(piezaMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
             if(!top.length) return '';
@@ -329,13 +330,22 @@
       const recientes = [...DB.ventas].reverse().slice(0,7);
       const canalColor = {WhatsApp:'#22c55e',Instagram:'#a78bfa',MercadoLibre:'#eab308',Facebook:'#3b82f6',TikTok:'#06b6d4',Otro:'#94a3b8'};
       document.getElementById('tbody-ventas').innerHTML = recientes.length
-        ? recientes.map(v=>`<tr>
-            <td>${v.pieza||'—'}</td>
-            <td>${v.cantidad}</td>
-            <td style="color:#22c55e;font-weight:600;">${fmt(v.precio*v.cantidad)}</td>
-            <td><span class="badge" style="background:rgba(${canalColor[v.canal]||'148,163,184'},0.12);color:${canalColor[v.canal]||'#94a3b8'};border:none;">${v.canal||'—'}</span></td>
-            <td style="color:var(--text-dim);font-size:0.8rem;">${v.fecha||'—'}</td>
-          </tr>`).join('')
+        ? recientes.map(v=>{
+            const items  = ventaItems(v);
+            const totalV = items.reduce((s,it)=>s+it.precio*it.cantidad,0);
+            const cantV  = items.reduce((s,it)=>s+it.cantidad,0);
+            const piezaLbl = items.length===1
+              ? (items[0].pieza||'—')
+              : items.map(it=>it.pieza.split(' ')[0]+'×'+it.cantidad).join(' · ');
+            const titleAttr = items.length>1 ? ` title="${items.map(it=>it.pieza+' ×'+it.cantidad).join(', ')}"` : '';
+            return `<tr>
+              <td${titleAttr}>${piezaLbl}</td>
+              <td>${cantV}</td>
+              <td style="color:#22c55e;font-weight:600;">${fmt(totalV)}</td>
+              <td><span class="badge" style="background:rgba(${canalColor[v.canal]||'148,163,184'},0.12);color:${canalColor[v.canal]||'#94a3b8'};border:none;">${v.canal||'—'}</span></td>
+              <td style="color:var(--text-dim);font-size:0.8rem;">${v.fecha||'—'}</td>
+            </tr>`;
+          }).join('')
         : `<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-dim);">Sin ventas registradas — <a href="ventas.html" style="color:var(--primary);">Registrar venta</a></td></tr>`;
     }
 
@@ -347,12 +357,12 @@
       const now = getMesActual(), prev = getMesAnterior();
       const vEste = DB.ventas.filter(v=>mesKey(v)===now);
       const vPrev = DB.ventas.filter(v=>mesKey(v)===prev);
-      const ingEste = vEste.reduce((s,v)=>s+v.precio*v.cantidad,0);
-      const ingPrev = vPrev.reduce((s,v)=>s+v.precio*v.cantidad,0);
+      const ingEste = vEste.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
+      const ingPrev = vPrev.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const tendPct  = ingPrev>0 ? ((ingEste-ingPrev)/ingPrev*100) : null;
       const tendUp   = tendPct!==null && tendPct>=0;
 
-      const ticket = DB.ventas.length ? DB.ventas.reduce((s,v)=>s+v.precio*v.cantidad,0)/DB.ventas.length : 0;
+      const ticket = DB.ventas.length ? DB.ventas.reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0)/DB.ventas.length : 0;
 
       const cotEste = DB.cotizaciones.filter(c=>{ try{ return (c.fecha||'').slice(0,7)===now; }catch(e){ return false; }});
       const totalCot = cotEste.reduce((s,c)=>s+(c.total||0),0);
@@ -389,7 +399,7 @@
     // ── Meta mensual ─────────────────────────────────
     function renderGoal() {
       const meta   = parseFloat(localStorage.getItem('mp_meta_mensual')||'0');
-      const ingEste = DB.ventas.filter(v=>mesKey(v)===getMesActual()).reduce((s,v)=>s+v.precio*v.cantidad,0);
+      const ingEste = DB.ventas.filter(v=>mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const pct    = meta>0 ? Math.min(ingEste/meta*100,100) : 0;
       const barClr = pct>=100?'#22c55e':pct>=60?'#eab308':'#ef4444';
       document.getElementById('goal-card').innerHTML = `
@@ -422,7 +432,7 @@
         const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-30);
         const gramsPerMat = {};
         DB.ventas.filter(v=>{ try{ return new Date(v.fecha)>=cutoff; }catch(e){ return false; }})
-          .forEach(v=>{ (hist[v.pieza]||[]).forEach(e=>{ gramsPerMat[e.matId]=(gramsPerMat[e.matId]||0)+e.grams*v.cantidad; }); });
+          .forEach(v=>{ ventaItems(v).forEach(it=>{ (hist[it.pieza]||[]).forEach(e=>{ gramsPerMat[e.matId]=(gramsPerMat[e.matId]||0)+e.grams*it.cantidad; }); }); });
         Object.entries(DB.materials).forEach(([id,mat])=>{
           const daily = (gramsPerMat[id]||0)/30;
           if (daily>0) { const days=Math.round(mat.pesoTotal/daily); if(days<=DAYS) alerts.push({mat,days,clr:days<=3?'#ef4444':days<=7?'#f97316':'#eab308'}); }
@@ -477,7 +487,7 @@
       if (chartRev) { chartRev.destroy(); chartRev = null; }
       const meses = [];
       for (let i=5;i>=0;i--) { const d=new Date();d.setMonth(d.getMonth()-i);meses.push(d.toISOString().slice(0,7)); }
-      const ingPorMes = meses.map(m=>DB.ventas.filter(v=>mesKey(v)===m).reduce((s,v)=>s+v.precio*v.cantidad,0));
+      const ingPorMes = meses.map(m=>DB.ventas.filter(v=>mesKey(v)===m).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0));
       const labM = meses.map(m=>{const d=new Date(m+'-01');return d.toLocaleDateString('es-MX',{month:'short',year:'2-digit'});});
       chartRev = new Chart(document.getElementById('chartRevenue'),{
         type:'line',
@@ -488,7 +498,7 @@
       // Canal donut chart
       if (chartCanal) { chartCanal.destroy(); chartCanal = null; }
       const canalData = {};
-      DB.ventas.forEach(v=>{ const c=v.canal||'Otro'; canalData[c]=(canalData[c]||0)+v.precio*v.cantidad; });
+      DB.ventas.forEach(v=>{ const c=v.canal||'Otro'; const tot=ventaItems(v).reduce((s,it)=>s+it.precio*it.cantidad,0); canalData[c]=(canalData[c]||0)+tot; });
       const canalClr = {WhatsApp:'#22c55e',Instagram:'#a78bfa',MercadoLibre:'#eab308',Facebook:'#3b82f6',TikTok:'#06b6d4',Otro:'#94a3b8'};
       const cLabs = Object.keys(canalData), cVals = Object.values(canalData);
       if (cLabs.length) {
@@ -516,9 +526,11 @@
       if (chartTop) { chartTop.destroy(); chartTop = null; }
       const piezaMap = {};
       DB.ventas.forEach(v=>{
-        if (!piezaMap[v.pieza]) piezaMap[v.pieza]={uds:0,ing:0};
-        piezaMap[v.pieza].uds += v.cantidad;
-        piezaMap[v.pieza].ing += v.precio*v.cantidad;
+        ventaItems(v).forEach(it=>{
+          if (!piezaMap[it.pieza]) piezaMap[it.pieza]={uds:0,ing:0};
+          piezaMap[it.pieza].uds += it.cantidad;
+          piezaMap[it.pieza].ing += it.precio*it.cantidad;
+        });
       });
       const sorted = Object.entries(piezaMap).sort((a,b)=>b[1][piezasMode]-a[1][piezasMode]).slice(0,6);
       if (sorted.length) {
