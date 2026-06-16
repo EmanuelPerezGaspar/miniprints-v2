@@ -182,15 +182,11 @@
               </select>
             </div>
             <div class="field">
-              <label>Categoría</label>
-              <select id="venta-categoria">
-                <option>General</option>
-                <option>Figuras articuladas</option>
-                <option>Miniaturas</option>
-                <option>Accesorios</option>
-                <option>Organizadores</option>
-                <option>Decoración</option>
-                <option>Encargo personalizado</option>
+              <label>Método de pago</label>
+              <select id="venta-metodo">
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Tarjeta">Tarjeta</option>
               </select>
             </div>
             <div class="field"><label>Notas (opcional)</label><input type="text" id="venta-notas" placeholder="Observaciones..." /></div>
@@ -328,9 +324,9 @@
     async function registrarOrden() {
       if (!carrito.length) return;
       const fecha = document.getElementById('venta-fecha').value || today();
-      const canal = document.getElementById('venta-canal').value;
-      const cat   = document.getElementById('venta-categoria').value;
-      const notas = document.getElementById('venta-notas').value.trim();
+      const canal      = document.getElementById('venta-canal').value;
+      const metodoPago = document.getElementById('venta-metodo').value;
+      const notas      = document.getElementById('venta-notas').value.trim();
 
       carrito.forEach(it => {
         DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) - it.cantidad;
@@ -343,7 +339,7 @@
         id: Date.now(),
         fecha,
         canal,
-        categoria: cat,
+        metodoPago,
         notas,
         items: carrito.map(it => ({ pieza: it.pieza, cantidad: it.cantidad, precio: it.precio }))
       };
