@@ -210,7 +210,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Fecha</th><th>Pieza</th><th>Canal</th>
+                  <th>Fecha</th><th>Pieza</th><th>Canal</th><th>Pago</th>
                   <th style="text-align:right;">Cant.</th>
                   <th style="text-align:right;">Precio unit.</th>
                   <th style="text-align:right;">Total</th>
@@ -405,6 +405,7 @@
           <td style="color:var(--text-dim);">${v.fecha}</td>
           <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${v.notas}</div>` : ''}</td>
           <td><span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:700;">${v.canal || 'Directo'}</span></td>
+          <td style="color:var(--text-dim);font-size:0.82rem;">${v.metodoPago || '—'}</td>
           <td style="text-align:right;">${cantV}</td>
           <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
           <td style="text-align:right;color:#22c55e;font-weight:700;">${fmt(totalV)}</td>
