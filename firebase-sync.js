@@ -1,36 +1,23 @@
 // MiniPrints v2 — sincronización entre dispositivos (Firebase Firestore)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  getFirestore, initializeFirestore, persistentLocalCache,
-  doc, getDoc, setDoc, onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC64TanRR3eG1X5X7lUEoVjLTQGSRZr3Vg",
   authDomain: "miniprints-v2.firebaseapp.com",
   projectId: "miniprints-v2",
   storageBucket: "miniprints-v2.firebasestorage.app",
-  messagingSenderId: "688625548823",
+  messagingSenderId: "688525548823",
   appId: "1:688625548823:web:984352167469cba3402652"
 };
 
 const PIN = "0343";
 const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual'];
 
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-// Persistencia offline con fallback: si el navegador no soporta IndexedDB
-// (Safari privado, WebView, etc.) usa Firestore sin caché local.
-let db;
-try {
-  db = initializeFirestore(app, { localCache: persistentLocalCache() });
-} catch(e) {
-  console.warn('mp: offline cache no disponible, usando Firestore directo', e);
-  db = getFirestore(app);
-}
-
+const app    = initializeApp(firebaseConfig);
+const auth   = getAuth(app);
+const db     = getFirestore(app);
 const docRef = doc(db, 'negocio', 'data');
 
 let applyingRemote = false;
@@ -48,7 +35,7 @@ function schedulePush() {
   pushTimer = setTimeout(flushPush, 150);
 }
 
-// Intercepta cualquier escritura a localStorage y dispara push
+// Intercepta escrituras a localStorage y dispara push a Firestore
 const _origSetItem = localStorage.setItem.bind(localStorage);
 localStorage.setItem = function(key, value) {
   _origSetItem(key, value);
@@ -103,11 +90,15 @@ function showPinGate(onUnlock) {
 }
 
 async function initSync() {
+  // Disparar mp-sync-ready de inmediato para que la página cargue
+  // con los datos locales mientras Firestore sincroniza en segundo plano.
+  window.dispatchEvent(new CustomEvent('mp-sync-ready'));
+
   try {
     await signInAnonymously(auth);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      applyRemoteData(snap.data());
+      applyRemoteData(snap.data());  // dispara mp-sync-update → re-render
     } else {
       const initial = {};
       SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
@@ -120,7 +111,6 @@ async function initSync() {
   } catch (e) {
     console.error('mp sync init error', e);
   }
-  window.dispatchEvent(new CustomEvent('mp-sync-ready'));
 }
 
 showPinGate(initSync);
