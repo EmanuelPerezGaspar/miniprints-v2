@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
-  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  getFirestore, initializeFirestore, persistentLocalCache,
   doc, getDoc, setDoc, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -21,11 +21,16 @@ const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotiza
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Persistencia offline: los writes pendientes se guardan en IndexedDB y se
-// reenvían automáticamente aunque la página se recargue antes de que lleguen.
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
+// Persistencia offline con fallback: si el navegador no soporta IndexedDB
+// (Safari privado, WebView, etc.) usa Firestore sin caché local.
+let db;
+try {
+  db = initializeFirestore(app, { localCache: persistentLocalCache() });
+} catch(e) {
+  console.warn('mp: offline cache no disponible, usando Firestore directo', e);
+  db = getFirestore(app);
+}
+
 const docRef = doc(db, 'negocio', 'data');
 
 let applyingRemote = false;
@@ -50,7 +55,7 @@ localStorage.setItem = function(key, value) {
   if (!applyingRemote && SYNC_KEYS.includes(key)) schedulePush();
 };
 
-// Flush inmediato cuando la página se oculta o cierra (crítico en móvil)
+// Flush inmediato cuando la página se oculta o cierra (crítico en iPhone/iPad)
 document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
 window.addEventListener('pagehide', flushPush);
 
@@ -100,7 +105,6 @@ function showPinGate(onUnlock) {
 async function initSync() {
   try {
     await signInAnonymously(auth);
-    // getDoc lee desde caché local primero (incluye writes pendientes no enviados aún)
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       applyRemoteData(snap.data());
