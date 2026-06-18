@@ -1,7 +1,4 @@
 // MiniPrints v2 — sincronización entre dispositivos (Firebase Firestore)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC64TanRR3eG1X5X7lUEoVjLTQGSRZr3Vg",
@@ -12,45 +9,23 @@ const firebaseConfig = {
   appId: "1:688625548823:web:984352167469cba3402652"
 };
 
-const PIN = "0343";
+const PIN       = "0343";
 const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual'];
 
-const app    = initializeApp(firebaseConfig);
-const auth   = getAuth(app);
-const db     = getFirestore(app);
-const docRef = doc(db, 'negocio', 'data');
-
-let applyingRemote = false;
-let pushTimer = null;
-
-function flushPush() {
-  clearTimeout(pushTimer);
-  const payload = {};
-  SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-  setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
-}
-
-function schedulePush() {
-  clearTimeout(pushTimer);
-  pushTimer = setTimeout(flushPush, 150);
-}
-
-// Intercepta escrituras a localStorage y dispara push a Firestore
 const _origSetItem = localStorage.setItem.bind(localStorage);
-localStorage.setItem = function(key, value) {
-  _origSetItem(key, value);
-  if (!applyingRemote && SYNC_KEYS.includes(key)) schedulePush();
-};
+let applyingRemote = false;
+let pushTimer      = null;
+let _schedulePush  = () => {}; // se activa solo si Firebase carga OK
 
-// Flush inmediato cuando la página se oculta o cierra (crítico en iPhone/iPad)
-document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
-window.addEventListener('pagehide', flushPush);
+// Intercepta localStorage para empujar a Firestore cuando Firebase esté listo
+localStorage.setItem = function (key, value) {
+  _origSetItem(key, value);
+  if (!applyingRemote && SYNC_KEYS.includes(key)) _schedulePush();
+};
 
 function applyRemoteData(data) {
   applyingRemote = true;
-  SYNC_KEYS.forEach(k => {
-    if (data && data[k] != null) _origSetItem(k, data[k]);
-  });
+  SYNC_KEYS.forEach(k => { if (data && data[k] != null) _origSetItem(k, data[k]); });
   applyingRemote = false;
   window.dispatchEvent(new CustomEvent('mp-sync-update'));
 }
@@ -90,26 +65,48 @@ function showPinGate(onUnlock) {
 }
 
 async function initSync() {
-  // Disparar mp-sync-ready de inmediato para que la página cargue
-  // con los datos locales mientras Firestore sincroniza en segundo plano.
+  // Disparar mp-sync-ready de inmediato → las páginas cargan datos locales sin esperar Firebase
   window.dispatchEvent(new CustomEvent('mp-sync-ready'));
 
   try {
+    const { initializeApp }              = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const { getFirestore, doc, getDoc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+    const app    = initializeApp(firebaseConfig);
+    const auth   = getAuth(app);
+    const db     = getFirestore(app);
+    const docRef = doc(db, 'negocio', 'data');
+
+    function flushPush() {
+      clearTimeout(pushTimer);
+      const payload = {};
+      SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
+      setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
+    }
+
+    _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
+
+    document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
+    window.addEventListener('pagehide', flushPush);
+
     await signInAnonymously(auth);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      applyRemoteData(snap.data());  // dispara mp-sync-update → re-render
+      applyRemoteData(snap.data());
     } else {
       const initial = {};
       SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
       await setDoc(docRef, initial);
     }
+
     onSnapshot(docRef, snap => {
       if (snap.metadata.hasPendingWrites) return;
       if (snap.exists()) applyRemoteData(snap.data());
     });
+
   } catch (e) {
-    console.error('mp sync init error', e);
+    console.warn('Firebase sync no disponible — modo local activo:', e);
   }
 }
 
