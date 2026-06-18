@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -1782,20 +1783,27 @@
       if (!state.lastCalc) { showToast('Calcula primero'); return; }
       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (!isIOS) { window.print(); return; }
+
       const panel = document.getElementById('result-panel');
-      showToast('Generando imagen…', 4000);
+      showToast('Generando PDF…', 6000);
+
       html2canvas(panel, { backgroundColor: '#0f172a', scale: 2, useCORS: true, logging: false })
         .then(canvas => {
-          canvas.toBlob(blob => {
-            const file = new File([blob], 'cotizacion-miniprints.png', { type: 'image/png' });
-            if (navigator.canShare?.({ files: [file] })) {
-              navigator.share({ files: [file], title: 'Cotización MiniPrints' }).catch(() => {});
-            } else {
-              window.open(canvas.toDataURL('image/png'), '_blank');
-            }
-          });
+          const { jsPDF } = window.jspdf;
+          const imgData = canvas.toDataURL('image/png');
+          const pdfW = 210;
+          const pdfH = (canvas.height * pdfW) / canvas.width;
+          const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: [pdfW, pdfH] });
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+          const blob = pdf.output('blob');
+          const file = new File([blob], 'cotizacion-miniprints.pdf', { type: 'application/pdf' });
+          if (navigator.canShare?.({ files: [file] })) {
+            navigator.share({ files: [file], title: 'Cotización MiniPrints' }).catch(() => pdf.save('cotizacion-miniprints.pdf'));
+          } else {
+            pdf.save('cotizacion-miniprints.pdf');
+          }
         })
-        .catch(() => showToast('No se pudo generar la imagen'));
+        .catch(() => showToast('No se pudo generar el PDF'));
     }
 
     /* ── Send WhatsApp ────────────────────────── */
