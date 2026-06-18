@@ -1780,7 +1780,22 @@
     /* ── Export PDF ───────────────────────────── */
     function exportPDF() {
       if (!state.lastCalc) { showToast('Calcula primero'); return; }
-      window.print();
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (!isIOS) { window.print(); return; }
+      const panel = document.getElementById('result-panel');
+      showToast('Generando imagen…', 4000);
+      html2canvas(panel, { backgroundColor: '#0f172a', scale: 2, useCORS: true, logging: false })
+        .then(canvas => {
+          canvas.toBlob(blob => {
+            const file = new File([blob], 'cotizacion-miniprints.png', { type: 'image/png' });
+            if (navigator.canShare?.({ files: [file] })) {
+              navigator.share({ files: [file], title: 'Cotización MiniPrints' }).catch(() => {});
+            } else {
+              window.open(canvas.toDataURL('image/png'), '_blank');
+            }
+          });
+        })
+        .catch(() => showToast('No se pudo generar la imagen'));
     }
 
     /* ── Send WhatsApp ────────────────────────── */
