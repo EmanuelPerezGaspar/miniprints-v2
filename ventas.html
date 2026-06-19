@@ -140,18 +140,6 @@
             </div>
           </div>
           <div class="grid-4" style="margin-top:12px;">
-            <div class="field">
-              <label>Canal de venta</label>
-              <select id="venta-canal">
-                <option value="Directo">Directo</option>
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Instagram">Instagram</option>
-                <option value="MercadoLibre">MercadoLibre</option>
-                <option value="Facebook">Facebook</option>
-                <option value="Tienda local">Tienda local</option>
-                <option value="Otro">Otro</option>
-              </select>
-            </div>
             <div class="field" id="campo-metodo">
               <label>Método de pago</label>
               <select id="venta-metodo">
@@ -185,7 +173,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Fecha</th><th>Pieza</th><th>Canal</th><th>Pago</th>
+                  <th>Fecha</th><th>Pieza</th><th>Pago</th>
                   <th style="text-align:right;">Cant.</th>
                   <th style="text-align:right;">Precio unit.</th>
                   <th style="text-align:right;">Total</th>
@@ -309,7 +297,6 @@
     async function registrarOrden() {
       if (!carrito.length) return;
       const fecha = document.getElementById('venta-fecha').value || today();
-      const canal       = document.getElementById('venta-canal').value;
       const estatusPago = document.getElementById('venta-estatus').value;
       const metodoPago  = estatusPago === 'pendiente' ? null : document.getElementById('venta-metodo').value;
       const notas       = document.getElementById('venta-notas').value.trim();
@@ -324,7 +311,6 @@
       const venta = {
         id: Date.now(),
         fecha,
-        canal,
         metodoPago,
         estatusPago,
         notas,
@@ -407,10 +393,8 @@
         <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>
         ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:#eab308;">${fmt(porCobrar)}</span></div>` : ''}`;
 
-      const canalColor = { 'WhatsApp': '#22c55e', 'Instagram': '#a78bfa', 'MercadoLibre': '#eab308', 'Facebook': '#3b82f6', 'Directo': '#64748b', 'Tienda local': '#f97316' };
       tbody.innerHTML = DB.ventas.map(v => {
         const items  = ventaItems(v);
-        const color  = canalColor[v.canal] || '#64748b';
         const totalV = items.reduce((s, it) => s + it.precio * it.cantidad, 0);
         const cantV  = items.reduce((s, it) => s + it.cantidad, 0);
         const piezaLbl = items.length === 1
@@ -424,7 +408,6 @@
         return `<tr style="${pagada ? '' : 'opacity:0.8;'}">
           <td style="color:var(--text-dim);">${v.fecha}</td>
           <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${v.notas}</div>` : ''}</td>
-          <td><span style="font-size:0.7rem;background:${color}22;color:${color};padding:2px 8px;border-radius:99px;font-weight:700;">${v.canal || 'Directo'}</span></td>
           <td style="color:var(--text-dim);font-size:0.82rem;">${v.metodoPago || '—'}</td>
           <td style="text-align:right;">${cantV}</td>
           <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
