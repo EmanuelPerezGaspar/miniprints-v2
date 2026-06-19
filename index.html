@@ -298,138 +298,184 @@
 </head>
 <body>
 
-  <!-- Shape Landing Hero Background -->
+  <!-- Particles Background -->
   <style>
     html { background: #030303; }
-
-    #shapes-bg {
+    #particles-bg {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      overflow: hidden;
     }
-    #shapes-ambient {
-      position: absolute;
-      inset: -40px;
-      background: linear-gradient(
-        135deg,
-        rgba(99, 102, 241, 0.06) 0%,
-        transparent 50%,
-        rgba(34, 197, 94, 0.06) 100%
-      );
-      filter: blur(60px);
-    }
-
-    /* entrance */
-    .es {
-      position: absolute;
-      animation: esIn 2.4s cubic-bezier(0.23, 0.86, 0.39, 0.96) var(--d, 0s) both;
-    }
-    @keyframes esIn {
-      from {
-        opacity: 0;
-        transform: translateY(-150px) rotate(calc(var(--r, 0deg) - 15deg));
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0px) rotate(var(--r, 0deg));
-      }
-    }
-
-    /* float loop (on inner div so rotation from wrapper is preserved) */
-    .es-inner {
-      position: relative;
-      animation: esFloat 12s ease-in-out calc(var(--d, 0s) + 2.4s) infinite;
-    }
-    @keyframes esFloat {
-      0%, 100% { transform: translateY(0px); }
-      50%       { transform: translateY(15px); }
-    }
-
-    /* pill visual */
-    .es-pill {
+    #particles-bg canvas {
       position: absolute;
       inset: 0;
-      border-radius: 9999px;
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(2px);
-      -webkit-backdrop-filter: blur(2px);
+      width: 100% !important;
+      height: 100% !important;
     }
-    .es-pill::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 70%);
-    }
-
-    /* color variants — adapted to MiniPrints palette */
-    .es-indigo { background: linear-gradient(to right, rgba(99,102,241,0.15),  transparent); }
-    .es-green  { background: linear-gradient(to right, rgba(34,197,94,0.15),   transparent); }
-    .es-violet { background: linear-gradient(to right, rgba(139,92,246,0.15),  transparent); }
-    .es-purple { background: linear-gradient(to right, rgba(167,139,250,0.15), transparent); }
-    .es-teal   { background: linear-gradient(to right, rgba(20,184,166,0.12),  transparent); }
-
-    /* vignette — darkens top and bottom edges */
-    #shapes-vignette {
+    #particles-vignette {
       position: absolute;
       inset: 0;
       background: linear-gradient(
         to bottom,
-        rgba(3,3,3,0.70) 0%,
+        rgba(3,3,3,0.55) 0%,
         transparent 30%,
         transparent 70%,
-        rgba(3,3,3,0.80) 100%
+        rgba(3,3,3,0.65) 100%
       );
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .es, .es-inner { animation: none !important; opacity: 1 !important; }
+      pointer-events: none;
     }
   </style>
 
-  <div id="shapes-bg" aria-hidden="true">
-    <div id="shapes-ambient"></div>
-
-    <!-- Shape 1: 600×140, indigo, left-top, rotate 12° -->
-    <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
-      <div class="es-inner" style="width:600px; height:140px">
-        <div class="es-pill es-indigo"></div>
-      </div>
-    </div>
-
-    <!-- Shape 2: 500×120, green, right-bottom, rotate -15° -->
-    <div class="es" style="--d:.50s; --r:-15deg; right:-4%; top:72%">
-      <div class="es-inner" style="width:500px; height:120px">
-        <div class="es-pill es-green"></div>
-      </div>
-    </div>
-
-    <!-- Shape 3: 300×80, violet, left-bottom, rotate -8° -->
-    <div class="es" style="--d:.40s; --r:-8deg; left:7%; bottom:8%">
-      <div class="es-inner" style="width:300px; height:80px">
-        <div class="es-pill es-violet"></div>
-      </div>
-    </div>
-
-    <!-- Shape 4: 200×60, purple, right-top, rotate 20° -->
-    <div class="es" style="--d:.60s; --r:20deg; right:16%; top:11%">
-      <div class="es-inner" style="width:200px; height:60px">
-        <div class="es-pill es-purple"></div>
-      </div>
-    </div>
-
-    <!-- Shape 5: 150×40, teal, left-top, rotate -25° -->
-    <div class="es" style="--d:.70s; --r:-25deg; left:23%; top:6%">
-      <div class="es-inner" style="width:150px; height:40px">
-        <div class="es-pill es-teal"></div>
-      </div>
-    </div>
-
-    <div id="shapes-vignette"></div>
+  <div id="particles-bg" aria-hidden="true">
+    <div id="particles-vignette"></div>
   </div>
+
+  <script type="module">
+    import { Renderer, Camera, Geometry, Program, Mesh } from 'https://esm.sh/ogl';
+
+    const COLORS      = ['#22c55e', '#6366f1', '#a78bfa', '#3b82f6', '#14b8a6', '#ffffff'];
+    const COUNT       = 800;
+    const SPREAD      = 30;
+    const SPEED       = 1.1;
+    const BASE_SIZE   = 300;
+    const SIZE_RAND   = 1;
+    const CAM_DIST    = 20;
+    const ALPHA       = true;
+    const NO_ROTATION = true;
+    const DPR         = Math.min(window.devicePixelRatio || 1, 2);
+
+    const hexToRgb = hex => {
+      hex = hex.replace(/^#/, '');
+      if (hex.length === 3) hex = hex.split('').map(c => c+c).join('');
+      const int = parseInt(hex, 16);
+      return [((int>>16)&255)/255, ((int>>8)&255)/255, (int&255)/255];
+    };
+
+    const vertex = `
+      attribute vec3 position;
+      attribute vec4 random;
+      attribute vec3 color;
+      uniform mat4 modelMatrix;
+      uniform mat4 viewMatrix;
+      uniform mat4 projectionMatrix;
+      uniform float uTime;
+      uniform float uSpread;
+      uniform float uBaseSize;
+      uniform float uSizeRandomness;
+      varying vec4 vRandom;
+      varying vec3 vColor;
+      void main() {
+        vRandom = random;
+        vColor = color;
+        vec3 pos = position * uSpread;
+        pos.z *= 10.0;
+        vec4 mPos = modelMatrix * vec4(pos, 1.0);
+        float t = uTime;
+        mPos.x += sin(t * random.z + 6.28 * random.w) * mix(0.1, 1.5, random.x);
+        mPos.y += sin(t * random.y + 6.28 * random.x) * mix(0.1, 1.5, random.w);
+        mPos.z += sin(t * random.w + 6.28 * random.y) * mix(0.1, 1.5, random.z);
+        vec4 mvPos = viewMatrix * mPos;
+        if (uSizeRandomness == 0.0) {
+          gl_PointSize = uBaseSize;
+        } else {
+          gl_PointSize = (uBaseSize * (1.0 + uSizeRandomness * (random.x - 0.5))) / length(mvPos.xyz);
+        }
+        gl_Position = projectionMatrix * mvPos;
+      }
+    `;
+
+    const fragment = `
+      precision highp float;
+      uniform float uTime;
+      uniform float uAlphaParticles;
+      varying vec4 vRandom;
+      varying vec3 vColor;
+      void main() {
+        vec2 uv = gl_PointCoord.xy;
+        float d = length(uv - vec2(0.5));
+        if(uAlphaParticles < 0.5) {
+          if(d > 0.5) discard;
+          gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), 1.0);
+        } else {
+          float circle = smoothstep(0.5, 0.4, d) * 0.8;
+          gl_FragColor = vec4(vColor + 0.2 * sin(uv.yxx + uTime + vRandom.y * 6.28), circle);
+        }
+      }
+    `;
+
+    const container = document.getElementById('particles-bg');
+
+    const renderer = new Renderer({ dpr: DPR, depth: false, alpha: true });
+    const gl = renderer.gl;
+    gl.clearColor(0, 0, 0, 0);
+    container.insertBefore(gl.canvas, container.firstChild);
+
+    const camera = new Camera(gl, { fov: 15 });
+    camera.position.set(0, 0, CAM_DIST);
+
+    const resize = () => {
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      camera.perspective({ aspect: gl.canvas.width / gl.canvas.height });
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    const positions = new Float32Array(COUNT * 3);
+    const randoms   = new Float32Array(COUNT * 4);
+    const colors    = new Float32Array(COUNT * 3);
+
+    for (let i = 0; i < COUNT; i++) {
+      let x, y, z, len;
+      do {
+        x = Math.random()*2-1; y = Math.random()*2-1; z = Math.random()*2-1;
+        len = x*x + y*y + z*z;
+      } while (len > 1 || len === 0);
+      const r = Math.cbrt(Math.random());
+      positions.set([x*r, y*r, z*r], i*3);
+      randoms.set([Math.random(), Math.random(), Math.random(), Math.random()], i*4);
+      const col = hexToRgb(COLORS[Math.floor(Math.random() * COLORS.length)]);
+      colors.set(col, i*3);
+    }
+
+    const geometry = new Geometry(gl, {
+      position: { size: 3, data: positions },
+      random:   { size: 4, data: randoms },
+      color:    { size: 3, data: colors },
+    });
+
+    const program = new Program(gl, {
+      vertex, fragment,
+      uniforms: {
+        uTime:           { value: 0 },
+        uSpread:         { value: SPREAD },
+        uBaseSize:       { value: BASE_SIZE * DPR },
+        uSizeRandomness: { value: SIZE_RAND },
+        uAlphaParticles: { value: ALPHA ? 1 : 0 },
+      },
+      transparent: true,
+      depthTest: false,
+    });
+
+    const mesh = new Mesh(gl, { mode: gl.POINTS, geometry, program });
+
+    let lastTime = performance.now();
+    let elapsed  = 0;
+
+    (function loop(t) {
+      requestAnimationFrame(loop);
+      const delta = t - lastTime;
+      lastTime = t;
+      elapsed += delta * SPEED;
+      program.uniforms.uTime.value = elapsed * 0.001;
+      if (!NO_ROTATION) {
+        mesh.rotation.x = Math.sin(elapsed * 0.0002) * 0.1;
+        mesh.rotation.y = Math.cos(elapsed * 0.0005) * 0.15;
+        mesh.rotation.z += 0.01 * SPEED;
+      }
+      renderer.render({ scene: mesh, camera });
+    })(performance.now());
+  </script>
 
 
 
