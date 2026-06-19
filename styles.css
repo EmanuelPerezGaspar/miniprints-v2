@@ -141,15 +141,15 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   transition: background 220ms var(--ease-out), box-shadow 220ms var(--ease-out), border-color 220ms var(--ease-out);
 }
 
-/* Liquid glass layer — blurred + SVG-distorted backdrop */
+/* GlassSurface layer — chromatic-aberration displacement + blurred backdrop */
 #navbar::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: 17px;
-  backdrop-filter: blur(22px) saturate(180%) brightness(1.06);
-  -webkit-backdrop-filter: blur(22px) saturate(180%) brightness(1.06);
-  filter: url(#glass-distortion);
+  backdrop-filter: blur(20px) saturate(180%) brightness(1.06);
+  -webkit-backdrop-filter: blur(20px) saturate(180%) brightness(1.06);
+  filter: url(#glass-surface-nav);
   z-index: -1;
   pointer-events: none;
 }
@@ -186,6 +186,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 #navbar.scrolled::before {
   backdrop-filter: blur(28px) saturate(200%) brightness(0.97);
   -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.97);
+  filter: url(#glass-surface-nav);
 }
 .nav-logo {
   display: flex;
