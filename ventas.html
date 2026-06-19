@@ -39,14 +39,33 @@
     .pill-val { font-size: 1rem; font-weight: 800; color: var(--text); }
     .pill-val.green { color: #22c55e; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    @media (max-width: 800px) { .grid-4 { grid-template-columns: 1fr 1fr; } .grid-3 { grid-template-columns: 1fr; } }
+    /* Prevent overflow */
+    .form-card { min-width: 0; }
+    .grid-4 { min-width: 0; }
+    .grid-3 { min-width: 0; }
+    .carrito-item { flex-wrap: wrap; }
+    @media (max-width: 800px) {
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .grid-4 { grid-template-columns: 1fr; }
+      .filter-bar { flex-direction: column; align-items: stretch; }
+      .fb-field { width: 100%; }
+      .fb-field input, .fb-field select { width: 100%; box-sizing: border-box; }
+      .btn-row { flex-wrap: wrap; }
+    }
+    @media (max-width: 480px) {
+      .carrito-item { gap: 6px; }
+      .ci-meta { min-width: 0; font-size: 0.78rem; }
+    }
     .carrito-section { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin: 12px 0; display: none; }
     .carrito-section.visible { display: block; }
     .carrito-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; }
     .carrito-item:last-child { border-bottom: none; }
     .ci-name { flex: 1; font-weight: 600; }
-    .ci-meta { color: var(--text-dim); min-width: 130px; text-align: right; }
-    .ci-total { color: #22c55e; font-weight: 700; min-width: 80px; text-align: right; }
+    .ci-meta { color: var(--text-dim); min-width: 100px; text-align: right; }
+    .ci-total { color: #22c55e; font-weight: 700; min-width: 70px; text-align: right; }
     .carrito-subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
     .cs-lbl { color: var(--text-dim); font-size: 0.85rem; }
     .cs-val { font-weight: 800; color: #22c55e; font-size: 1.05rem; }

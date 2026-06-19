@@ -19,8 +19,17 @@
     .cot-row-cliente { font-weight: 700; color: var(--text); }
     .cot-row-pieza { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    /* Prevent overflow */
+    .filters-row { min-width: 0; }
+    .filters-row input, .filters-row select { min-width: 0; box-sizing: border-box; }
     @media (max-width: 700px) {
       .table-wrap table { font-size: 0.8rem; }
+      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+    }
+    @media (max-width: 600px) {
+      .filters-row { flex-direction: column; }
+      .filters-row input, .filters-row select { width: 100%; }
+      /* hide ganancia col on very small */
       thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
     }
   </style>

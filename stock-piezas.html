@@ -49,8 +49,17 @@
     .qty-num { font-size: 1.1rem; font-weight: 800; min-width: 28px; text-align: center; }
     .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    /* Prevent overflow */
+    .form-card { min-width: 0; }
+    .pieza-item { min-width: 0; }
+    .pieza-name { word-break: break-word; min-width: 0; }
+    .grid-2, .grid-3 { min-width: 0; }
     @media (max-width: 700px) {
       .pieza-item { grid-template-columns: 1fr auto auto; }
+    }
+    @media (max-width: 480px) {
+      .pieza-item { grid-template-columns: 1fr auto auto auto; gap: 8px; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
     }
   </style>
 </head>

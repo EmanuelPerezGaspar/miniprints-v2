@@ -19,7 +19,16 @@
     .pos { color: #22c55e; }
     .pct { color: var(--text-dim); font-size: 0.78rem; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    /* Prevent overflow */
+    .charts-2col { min-width: 0; }
+    .detail-table { min-width: 0; }
     @media (max-width: 900px) { .charts-2col { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) {
+      .chart-wrap-tall { height: 200px; }
+    }
+    @media (max-width: 480px) {
+      .chart-wrap-tall { height: 180px; }
+    }
   </style>
 </head>
 <body>
