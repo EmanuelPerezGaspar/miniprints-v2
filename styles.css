@@ -188,6 +188,24 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
   -webkit-backdrop-filter: blur(28px) saturate(200%) brightness(0.97);
   filter: url(#glass-surface-nav);
 }
+
+/* ── Glass Surface — cards ──────────────────────── */
+.kpi-card,
+.kpi-combined-card,
+.chart-card,
+.feature-card,
+.pricing-card,
+.step,
+.bm-card,
+.form-card,
+.config-panel,
+.result-hero,
+.confirm-card,
+.res-table {
+  backdrop-filter: url(#glass-surface-card) blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+}
+
 .nav-logo {
   display: flex;
   align-items: center;
