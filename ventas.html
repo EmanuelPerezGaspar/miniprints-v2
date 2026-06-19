@@ -64,43 +64,6 @@
   <div id="particles-bg" aria-hidden="true">
     <div id="particles-vignette"></div>
   </div>
-    <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
-      <div class="es-inner" style="width:600px; height:140px"><div class="es-pill es-indigo"></div></div>
-    </div>
-    <div class="es" style="--d:.50s; --r:-15deg; right:-4%; top:72%">
-      <div class="es-inner" style="width:500px; height:120px"><div class="es-pill es-green"></div></div>
-    </div>
-    <div class="es" style="--d:.40s; --r:-8deg; left:7%; bottom:8%">
-      <div class="es-inner" style="width:300px; height:80px"><div class="es-pill es-violet"></div></div>
-    </div>
-    <div class="es" style="--d:.60s; --r:20deg; right:16%; top:11%">
-      <div class="es-inner" style="width:200px; height:60px"><div class="es-pill es-purple"></div></div>
-    </div>
-    <div class="es" style="--d:.70s; --r:-25deg; left:23%; top:6%">
-      <div class="es-inner" style="width:150px; height:40px"><div class="es-pill es-teal"></div></div>
-    </div>
-    <div id="shapes-vignette"></div>
-  </div>
-  <style>
-  #loom-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: #0a0f1a;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-}'@
-
-    # 2. Replace visibility handler + add pageshow for iOS bfcache
-    $oldHandler = @'
-      window.addEventListener('resize', setup);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) cancelAnimationFrame(animId);
-        else animate();
-      });
-      setup(); animate();
-</style>
 <nav id="navbar" role="navigation">
     <a class="nav-logo" href="index.html">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
