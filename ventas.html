@@ -57,6 +57,13 @@
     .metodo-btn { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.875rem; padding:11px 14px; cursor:pointer; text-align:left; margin-bottom:8px; transition:border-color 180ms,background 180ms; display:block; }
     .metodo-btn:hover { border-color:var(--primary); background:rgba(34,197,94,0.08); }
     .modal-cancel { background:none; border:none; color:var(--text-dim); font-size:0.82rem; cursor:pointer; margin-top:4px; width:100%; text-align:center; padding:6px; }
+    .filter-bar { display:flex; align-items:flex-end; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+    .fb-field { display:flex; flex-direction:column; gap:5px; }
+    .fb-field label { font-size:0.68rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
+    .fb-field input, .fb-field select { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.82rem; padding:7px 10px; outline:none; transition:border-color 180ms; }
+    .fb-field input:focus, .fb-field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(34,197,94,0.12); }
+    .fb-field select option { background:#1e293b; }
+    #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
 </head>
 <body>
@@ -168,7 +175,32 @@
           <div class="table-head">
             <span class="table-title">Historial de ventas</span>
           </div>
+          <div class="filter-bar">
+            <div class="fb-field">
+              <label>Desde</label>
+              <input type="date" id="filter-desde" oninput="aplicarFiltros()">
+            </div>
+            <div class="fb-field">
+              <label>Hasta</label>
+              <input type="date" id="filter-hasta" oninput="aplicarFiltros()">
+            </div>
+            <div class="fb-field">
+              <label>Tipo de pago</label>
+              <select id="filter-pago" onchange="aplicarFiltros()">
+                <option value="">Todos</option>
+                <option value="Efectivo">Efectivo</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Tarjeta">Tarjeta</option>
+                <option value="pendiente">Pendiente</option>
+              </select>
+            </div>
+            <button class="btn btn-ghost" id="btn-clear-filter" onclick="limpiarFiltros()" style="display:none;align-self:flex-end;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Limpiar
+            </button>
+          </div>
           <div id="summary-pills" class="summary-pills" style="padding:16px 20px 0;"></div>
+          <div id="filter-info"></div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -367,33 +399,82 @@
       showToast('Orden eliminada — stock restaurado');
     }
 
+    function sortedVentas() {
+      return [...DB.ventas].sort((a, b) => {
+        if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
+        return b.id - a.id;
+      });
+    }
+
+    function getFilteredVentas() {
+      const desde = document.getElementById('filter-desde').value;
+      const hasta = document.getElementById('filter-hasta').value;
+      const pago  = document.getElementById('filter-pago').value;
+      let list = sortedVentas();
+      if (desde) list = list.filter(v => v.fecha >= desde);
+      if (hasta) list = list.filter(v => v.fecha <= hasta);
+      if (pago === 'pendiente') list = list.filter(v => !ventaPagada(v));
+      else if (pago) list = list.filter(v => v.metodoPago === pago);
+      return list;
+    }
+
+    function aplicarFiltros() {
+      const desde = document.getElementById('filter-desde').value;
+      const hasta = document.getElementById('filter-hasta').value;
+      const pago  = document.getElementById('filter-pago').value;
+      document.getElementById('btn-clear-filter').style.display = (desde || hasta || pago) ? '' : 'none';
+      renderVentas();
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('filter-desde').value = '';
+      document.getElementById('filter-hasta').value = '';
+      document.getElementById('filter-pago').value  = '';
+      document.getElementById('btn-clear-filter').style.display = 'none';
+      renderVentas();
+    }
+
     function renderVentas() {
-      const tbody = document.getElementById('ventas-tbody');
-      const empty = document.getElementById('ventas-empty');
-      const pills = document.getElementById('summary-pills');
+      const tbody   = document.getElementById('ventas-tbody');
+      const empty   = document.getElementById('ventas-empty');
+      const pills   = document.getElementById('summary-pills');
+      const info    = document.getElementById('filter-info');
 
       if (!DB.ventas.length) {
         tbody.innerHTML = '';
         empty.style.display = 'flex';
         pills.innerHTML = '';
+        info.innerHTML = '';
         return;
       }
-      empty.style.display = 'none';
 
-      const pagadas    = DB.ventas.filter(ventaPagada);
-      const pendientes = DB.ventas.filter(v => !ventaPagada(v));
-      const tot     = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
-      const unds    = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
+      const lista = getFilteredVentas();
+      const isFiltered = lista.length !== DB.ventas.length;
+
+      empty.style.display = lista.length ? 'none' : 'flex';
+      if (!lista.length) {
+        tbody.innerHTML = '';
+        info.innerHTML = `<span style="color:var(--text-dim);">Sin resultados para los filtros aplicados.</span>`;
+      } else {
+        info.innerHTML = isFiltered
+          ? `Mostrando ${lista.length} de ${DB.ventas.length} ventas`
+          : '';
+      }
+
+      const pagadas    = lista.filter(ventaPagada);
+      const pendientes = lista.filter(v => !ventaPagada(v));
+      const tot       = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      const unds      = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
       const porCobrar = pendientes.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
-      const tkProm  = pagadas.length ? tot / pagadas.length : 0;
+      const tkProm    = pagadas.length ? tot / pagadas.length : 0;
       pills.innerHTML = `
         <div class="pill"><span class="pill-lbl">Total ingresos</span><span class="pill-val green">${fmt(tot)}</span></div>
         <div class="pill"><span class="pill-lbl">Unidades</span><span class="pill-val">${unds}</span></div>
-        <div class="pill"><span class="pill-lbl">Transacciones</span><span class="pill-val">${DB.ventas.length}</span></div>
+        <div class="pill"><span class="pill-lbl">Transacciones</span><span class="pill-val">${lista.length}</span></div>
         <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>
         ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:#eab308;">${fmt(porCobrar)}</span></div>` : ''}`;
 
-      tbody.innerHTML = DB.ventas.map(v => {
+      tbody.innerHTML = lista.map(v => {
         const items  = ventaItems(v);
         const totalV = items.reduce((s, it) => s + it.precio * it.cantidad, 0);
         const cantV  = items.reduce((s, it) => s + it.cantidad, 0);
