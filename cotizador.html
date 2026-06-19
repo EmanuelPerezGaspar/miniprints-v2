@@ -625,8 +625,9 @@
 </head>
 <body>
   <script type="module" src="firebase-sync.js"></script>
-  <div id="shapes-bg" aria-hidden="true">
-    <div id="shapes-ambient"></div>
+  <div id="particles-bg" aria-hidden="true">
+    <div id="particles-vignette"></div>
+  </div>
     <div class="es" style="--d:.30s; --r:12deg; left:-5%; top:18%">
       <div class="es-inner" style="width:600px; height:140px"><div class="es-pill es-indigo"></div></div>
     </div>
@@ -2049,5 +2050,6 @@
     window.addEventListener('beforeunload', saveDraft);
   </script>
   <script src="glass.js"></script>
+  <script type="module" src="particles.js"></script>
 </body>
 </html>

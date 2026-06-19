@@ -28,76 +28,31 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; background: #030303; }
 
-/* ── Shape Landing Background ───────────────────── */
-#shapes-bg {
+/* ── Particles Background ────────────────────────── */
+#particles-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
   background: #030303;
 }
-#shapes-ambient {
-  position: absolute;
-  inset: -40px;
-  background: linear-gradient(
-    135deg,
-    rgba(99, 102, 241, 0.06) 0%,
-    transparent 50%,
-    rgba(34, 197, 94, 0.06) 100%
-  );
-  filter: blur(60px);
-}
-.es {
-  position: absolute;
-  animation: esIn 2.4s cubic-bezier(0.23, 0.86, 0.39, 0.96) var(--d, 0s) both;
-}
-@keyframes esIn {
-  from { opacity: 0; transform: translateY(-150px) rotate(calc(var(--r, 0deg) - 15deg)); }
-  to   { opacity: 1; transform: translateY(0px)    rotate(var(--r, 0deg)); }
-}
-.es-inner {
-  position: relative;
-  animation: esFloat 12s ease-in-out calc(var(--d, 0s) + 2.4s) infinite;
-}
-@keyframes esFloat {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(15px); }
-}
-.es-pill {
+#particles-bg canvas {
   position: absolute;
   inset: 0;
-  border-radius: 9999px;
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  width: 100% !important;
+  height: 100% !important;
 }
-.es-pill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 70%);
-}
-.es-indigo { background: linear-gradient(to right, rgba(99,102,241,0.15),  transparent); }
-.es-green  { background: linear-gradient(to right, rgba(34,197,94,0.15),   transparent); }
-.es-violet { background: linear-gradient(to right, rgba(139,92,246,0.15),  transparent); }
-.es-purple { background: linear-gradient(to right, rgba(167,139,250,0.15), transparent); }
-.es-teal   { background: linear-gradient(to right, rgba(20,184,166,0.12),  transparent); }
-#shapes-vignette {
+#particles-vignette {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(3,3,3,0.70) 0%,
+    rgba(3,3,3,0.55) 0%,
     transparent 30%,
     transparent 70%,
-    rgba(3,3,3,0.80) 100%
+    rgba(3,3,3,0.65) 100%
   );
-}
-@media (prefers-reduced-motion: reduce) {
-  .es, .es-inner { animation: none !important; opacity: 1 !important; }
+  pointer-events: none;
 }
 body {
   font-family: var(--font);
