@@ -351,8 +351,9 @@
     }
 
     // ── Stats strip ──────────────────────────────────
-    function getMesActual() { return new Date().toISOString().slice(0,7); }
-    function getMesAnterior() { const d=new Date(); d.setMonth(d.getMonth()-1); return d.toISOString().slice(0,7); }
+    function localYM(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+    function getMesActual() { return localYM(new Date()); }
+    function getMesAnterior() { const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return localYM(d); }
 
     function renderStatsStrip() {
       const now = getMesActual(), prev = getMesAnterior();
@@ -488,9 +489,9 @@
       // Ingresos line chart
       if (chartRev) { chartRev.destroy(); chartRev = null; }
       const meses = [];
-      for (let i=5;i>=0;i--) { const d=new Date();d.setMonth(d.getMonth()-i);meses.push(d.toISOString().slice(0,7)); }
+      for (let i=5;i>=0;i--) { const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); meses.push(localYM(d)); }
       const ingPorMes = meses.map(m=>DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===m).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0));
-      const labM = meses.map(m=>{const d=new Date(m+'-01');return d.toLocaleDateString('es-MX',{month:'short',year:'2-digit'});});
+      const labM = meses.map(m=>{ const [y,mo]=m.split('-').map(Number); return new Date(y,mo-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
       chartRev = new Chart(document.getElementById('chartRevenue'),{
         type:'line',
         data:{labels:labM,datasets:[{label:'Ingresos',data:ingPorMes,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.10)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#22c55e',tension:0.4,fill:true}]},
