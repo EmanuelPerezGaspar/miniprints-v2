@@ -50,7 +50,11 @@
     .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
     .empty-state svg { margin: 0 auto 12px; opacity: 0.4; }
     #toast { position: fixed; bottom: 24px; right: 24px; background: #1e293b; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    .mat-stats { display: flex; gap: 18px; }
+    .mat-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+    /* Prevent overflow */
+    .form-card { min-width: 0; }
+    .grid-5 { min-width: 0; }
+    .mat-item { min-width: 0; }
     @media (max-width: 800px) {
       .grid-5 { grid-template-columns: 1fr 1fr; }
       .mat-item {
@@ -61,6 +65,13 @@
       .mat-actions { grid-area: actions; }
       .mat-stats   { grid-area: stats; margin-top: 10px; gap: 22px; }
       .mat-stat    { text-align: left; }
+    }
+    @media (max-width: 600px) {
+      .grid-5 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .mat-name { font-size: 0.82rem; }
+      .mat-stat-val { font-size: 0.85rem; }
     }
   </style>
 </head>
