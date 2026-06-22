@@ -16,13 +16,15 @@ const _origSetItem = localStorage.setItem.bind(localStorage);
 let applyingRemote    = false;
 let pushTimer         = null;
 let _schedulePush     = () => {}; // se activa solo si Firebase carga OK
-let _pendingLocalWrite = false;   // cambios hechos antes de que Firebase cargue
+let _pendingLocalWrite  = false; // cambios hechos antes de que Firebase cargue
+let _lastLocalWriteTime = 0;    // timestamp del último write local
 
 // Intercepta localStorage para empujar a Firestore cuando Firebase esté listo
 localStorage.setItem = function (key, value) {
   _origSetItem(key, value);
   if (!applyingRemote && SYNC_KEYS.includes(key)) {
-    _pendingLocalWrite = true; // marcar cambio pendiente aunque _schedulePush sea no-op
+    _pendingLocalWrite  = true;
+    _lastLocalWriteTime = Date.now();
     _schedulePush();
   }
 };
@@ -112,6 +114,9 @@ async function initSync() {
 
     onSnapshot(docRef, snap => {
       if (snap.metadata.hasPendingWrites) return;
+      // Si hubo un write local en los últimos 5 segundos, ignorar snapshot remoto.
+      // Evita que Firestore sobreescriba datos recién agregados antes de que el push confirme.
+      if (Date.now() - _lastLocalWriteTime < 5000) return;
       if (snap.exists()) applyRemoteData(snap.data());
     });
 
