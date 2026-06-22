@@ -13,14 +13,18 @@ const PIN       = "0343";
 const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual'];
 
 const _origSetItem = localStorage.setItem.bind(localStorage);
-let applyingRemote = false;
-let pushTimer      = null;
-let _schedulePush  = () => {}; // se activa solo si Firebase carga OK
+let applyingRemote    = false;
+let pushTimer         = null;
+let _schedulePush     = () => {}; // se activa solo si Firebase carga OK
+let _pendingLocalWrite = false;   // cambios hechos antes de que Firebase cargue
 
 // Intercepta localStorage para empujar a Firestore cuando Firebase esté listo
 localStorage.setItem = function (key, value) {
   _origSetItem(key, value);
-  if (!applyingRemote && SYNC_KEYS.includes(key)) _schedulePush();
+  if (!applyingRemote && SYNC_KEYS.includes(key)) {
+    _pendingLocalWrite = true; // marcar cambio pendiente aunque _schedulePush sea no-op
+    _schedulePush();
+  }
 };
 
 function applyRemoteData(data) {
@@ -80,6 +84,7 @@ async function initSync() {
 
     function flushPush() {
       clearTimeout(pushTimer);
+      _pendingLocalWrite = false;
       const payload = {};
       SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
       setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
@@ -92,7 +97,12 @@ async function initSync() {
 
     await signInAnonymously(auth);
     const snap = await getDoc(docRef);
-    if (snap.exists()) {
+
+    if (_pendingLocalWrite) {
+      // El usuario hizo cambios antes de que Firebase cargara (o durante getDoc).
+      // Empujar estado local a Firestore en lugar de sobreescribir con datos viejos.
+      flushPush();
+    } else if (snap.exists()) {
       applyRemoteData(snap.data());
     } else {
       const initial = {};
