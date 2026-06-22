@@ -84,8 +84,12 @@ async function initSync() {
     const db     = getFirestore(app);
     const docRef = doc(db, 'negocio', 'data');
 
+    let _authReady = false; // setDoc solo se ejecuta después de signInAnonymously
+
     function flushPush() {
       clearTimeout(pushTimer);
+      // Sin auth, no intentar setDoc — dejar _pendingLocalWrite=true para que initSync lo maneje
+      if (!_authReady) return;
       _pendingLocalWrite = false;
       const payload = {};
       SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
@@ -98,15 +102,17 @@ async function initSync() {
     window.addEventListener('pagehide', flushPush);
 
     await signInAnonymously(auth);
+    _authReady = true; // a partir de aquí flushPush puede ejecutar setDoc
+
     const snap = await getDoc(docRef);
 
     if (_pendingLocalWrite) {
-      // El usuario hizo cambios antes de que Firebase cargara (o durante getDoc).
-      // Empujar estado local a Firestore en lugar de sobreescribir con datos viejos.
+      // Cambios locales pendientes (antes de que Firebase cargara, o durante auth/getDoc)
       flushPush();
-    } else if (snap.exists()) {
+    } else if (snap.exists() && Date.now() - _lastLocalWriteTime > 2000) {
+      // Solo aplicar datos remotos si no hubo un write local reciente
       applyRemoteData(snap.data());
-    } else {
+    } else if (!snap.exists()) {
       const initial = {};
       SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
       await setDoc(docRef, initial);
