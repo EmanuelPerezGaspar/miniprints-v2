@@ -15,11 +15,40 @@ const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotiza
 const _origSetItem = localStorage.setItem.bind(localStorage);
 let applyingRemote    = false;
 let pushTimer         = null;
-let _schedulePush     = () => {}; // se activa solo si Firebase carga OK
-let _pendingLocalWrite  = false; // cambios hechos antes de que Firebase cargue
-let _lastLocalWriteTime = 0;    // timestamp del último write local
+let _schedulePush     = () => {};
+let _pendingLocalWrite  = false;
+let _lastLocalWriteTime = 0;
 
-// Intercepta localStorage para empujar a Firestore cuando Firebase esté listo
+// Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
+function syncBadge(state) {
+  let el = document.getElementById('mp-sync-badge');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'mp-sync-badge';
+    el.style.cssText = [
+      'position:fixed', 'bottom:72px', 'right:16px', 'z-index:9998',
+      'font-size:0.68rem', 'font-weight:700', 'padding:4px 10px',
+      'border-radius:20px', 'pointer-events:none', 'transition:opacity 0.4s',
+      'font-family:"Plus Jakarta Sans",sans-serif'
+    ].join(';');
+    document.body.appendChild(el);
+  }
+  clearTimeout(el._t);
+  el.style.opacity = '1';
+  const cfg = {
+    connecting: ['#1e293b','#94a3b8','#334155', '⟳ Conectando...', 0],
+    ok:         ['#052e16','#4ade80','#166534', '✓ Guardado',       3000],
+    error:      ['#450a0a','#f87171','#7f1d1d', '⚠ Error de sync',  0],
+    local:      ['#1c1917','#78716c','#292524', '● Modo local',     5000],
+  }[state];
+  if (!cfg) return;
+  el.style.background = cfg[0];
+  el.style.color       = cfg[1];
+  el.style.border      = `1px solid ${cfg[2]}`;
+  el.textContent       = cfg[3];
+  if (cfg[4]) el._t = setTimeout(() => { el.style.opacity = '0'; }, cfg[4]);
+}
+
 localStorage.setItem = function (key, value) {
   _origSetItem(key, value);
   if (!applyingRemote && SYNC_KEYS.includes(key)) {
@@ -71,29 +100,45 @@ function showPinGate(onUnlock) {
 }
 
 async function initSync() {
-  // Disparar mp-sync-ready de inmediato → las páginas cargan datos locales sin esperar Firebase
   window.dispatchEvent(new CustomEvent('mp-sync-ready'));
+  syncBadge('connecting');
 
   try {
-    const { initializeApp }              = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-    const { getFirestore, doc, getDoc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    const { getAuth, signInAnonymously, setPersistence, browserSessionPersistence } =
+      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const { getFirestore, doc, getDoc, setDoc, onSnapshot } =
+      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
     const app    = initializeApp(firebaseConfig);
     const auth   = getAuth(app);
     const db     = getFirestore(app);
     const docRef = doc(db, 'negocio', 'data');
 
-    let _authReady = false; // setDoc solo se ejecuta después de signInAnonymously
+    let _authReady = false;
+
+    // Push con reintentos — si falla por red lo intenta hasta 3 veces
+    async function executeSetDoc(payload) {
+      for (let i = 0; i < 3; i++) {
+        try {
+          await setDoc(docRef, payload, { merge: true });
+          syncBadge('ok');
+          return;
+        } catch (e) {
+          if (i === 2) { console.error('mp sync push error', e); syncBadge('error'); }
+          else await new Promise(r => setTimeout(r, 800 * (i + 1)));
+        }
+      }
+    }
 
     function flushPush() {
       clearTimeout(pushTimer);
-      // Sin auth, no intentar setDoc — dejar _pendingLocalWrite=true para que initSync lo maneje
+      // Sin auth confirmada no llamar setDoc — _pendingLocalWrite queda true para el check de initSync
       if (!_authReady) return;
       _pendingLocalWrite = false;
       const payload = {};
       SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-      setDoc(docRef, payload, { merge: true }).catch(e => console.error('mp sync push error', e));
+      executeSetDoc(payload);
     }
 
     _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
@@ -101,33 +146,45 @@ async function initSync() {
     document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
     window.addEventListener('pagehide', flushPush);
 
+    // BFCache: al restaurar página desde caché en iOS, refrescar datos
+    window.addEventListener('pageshow', e => {
+      if (e.persisted && _authReady) {
+        getDoc(docRef).then(s => {
+          if (s.exists() && Date.now() - _lastLocalWriteTime > 2000) applyRemoteData(s.data());
+        }).catch(() => {});
+      }
+    });
+
+    // browserSessionPersistence es más confiable en iOS Safari que IndexedDB (default)
+    try { await setPersistence(auth, browserSessionPersistence); } catch (_) {}
+
     await signInAnonymously(auth);
-    _authReady = true; // a partir de aquí flushPush puede ejecutar setDoc
+    _authReady = true;
 
     const snap = await getDoc(docRef);
 
     if (_pendingLocalWrite) {
-      // Cambios locales pendientes (antes de que Firebase cargara, o durante auth/getDoc)
+      // Cambios locales que esperaban auth — pushear ahora
       flushPush();
     } else if (snap.exists() && Date.now() - _lastLocalWriteTime > 2000) {
-      // Solo aplicar datos remotos si no hubo un write local reciente
       applyRemoteData(snap.data());
+      syncBadge('ok');
     } else if (!snap.exists()) {
       const initial = {};
       SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
       await setDoc(docRef, initial);
+      syncBadge('ok');
     }
 
     onSnapshot(docRef, snap => {
       if (snap.metadata.hasPendingWrites) return;
-      // Si hubo un write local en los últimos 5 segundos, ignorar snapshot remoto.
-      // Evita que Firestore sobreescriba datos recién agregados antes de que el push confirme.
       if (Date.now() - _lastLocalWriteTime < 5000) return;
       if (snap.exists()) applyRemoteData(snap.data());
     });
 
   } catch (e) {
-    console.warn('Firebase sync no disponible — modo local activo:', e);
+    console.warn('Firebase sync no disponible:', e);
+    syncBadge('error');
   }
 }
 
