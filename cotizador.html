@@ -1367,7 +1367,7 @@
         fue_aceptada: null,
       };
 
-      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, urgencia, tiempo, printer: printerDisplay, telefono, tipoPieza };
+      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, urgencia, tiempo, printer: printerDisplay, telefono, tipoPieza, filas: null /* se asigna abajo */ };
 
       // ── Render result ──────────────────────────
       const cliente = document.getElementById('inp-cliente').value.trim();
@@ -1448,6 +1448,7 @@
         ['─────', ''],
         ['= Total a cobrar', fmt(precioFinal)],
       ];
+      state.lastCalc.filas = filas;
       document.getElementById('tbl-costos').innerHTML = filas.map(([c, v]) =>
         `<tr>
           <td style="color:${c.startsWith('=') ? 'var(--text)' : c.startsWith('─') ? 'transparent' : 'var(--text-muted)'}; font-weight:${c.startsWith('=') ? '700' : '400'};">${c}</td>
@@ -1550,9 +1551,118 @@
     /* ── Export PDF ───────────────────────────── */
     function exportPDF() {
       if (!state.lastCalc) { showToast('Calcula primero'); return; }
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isIOS) showToast('En el diálogo, toca Guardar en Archivos para obtener el PDF', 5000);
-      setTimeout(() => window.print(), 150);
+      const c = state.lastCalc;
+      const fmtP = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const cliente = document.getElementById('inp-cliente').value.trim() || 'Sin nombre';
+      const fecha = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
+      const xUnidad = c.precioFinal / c.numPiezas;
+      const urgLabels = { express: '⚡ Express (2-3 días)', urgente: '🔥 Urgente (24 hrs)' };
+
+      const matsRows = c.detMat.map(d => `
+        <tr>
+          <td>${d.nombre}</td>
+          <td>${parseFloat(d.grams).toFixed(1)} g</td>
+          <td>${fmtP(d.precioKg)}/kg</td>
+          <td>${fmtP(d.costo)}</td>
+        </tr>`).join('');
+
+      const costRows = (c.filas || []).map(([label, val]) => {
+        if (label.startsWith('─')) return `<tr class="sep-row"><td colspan="2"></td></tr>`;
+        const isTotal = label.startsWith('=');
+        return `<tr class="${isTotal ? 'total-row' : 'dim-row'}"><td>${label}</td><td>${val}</td></tr>`;
+      }).join('');
+
+      const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cotización MiniPrints — ${cliente}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;color:#111;background:#fff;padding:28px 32px;font-size:14px}
+.header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #16a34a;padding-bottom:14px;margin-bottom:20px}
+.brand{font-size:1.5rem;font-weight:900;color:#15803d;letter-spacing:-0.03em}
+.brand span{color:#16a34a}
+.header-right{text-align:right;font-size:0.8rem;color:#555;line-height:1.7}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 24px;background:#f9fafb;border-radius:10px;padding:14px 16px;margin-bottom:20px;border:1px solid #e5e7eb}
+.info-label{font-size:0.68rem;color:#888;text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:2px}
+.info-value{font-size:0.9rem;font-weight:700;color:#111}
+.price-box{text-align:center;background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:20px;margin-bottom:24px}
+.price-lbl{font-size:0.72rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.price-num{font-size:2.6rem;font-weight:900;color:#14532d;line-height:1}
+.price-unit{font-size:0.9rem;color:#16a34a;margin-top:6px}
+.section-title{font-size:0.72rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px}
+table{width:100%;border-collapse:collapse;margin-bottom:22px;font-size:0.85rem}
+thead th{background:#15803d;color:#fff;padding:8px 10px;font-size:0.78rem;font-weight:700;text-align:left}
+thead th:not(:first-child){text-align:right}
+tbody td{padding:7px 10px;border-bottom:1px solid #e5e7eb}
+tbody td:not(:first-child){text-align:right}
+.sep-row td{padding:3px;border:none;background:#f0fdf4}
+.dim-row td{color:#555}
+.total-row td{font-weight:800;background:#f0fdf4;color:#14532d;font-size:0.92rem}
+.footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:0.72rem;color:#aaa;text-align:center}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="brand">Mini<span>Prints</span></div>
+  <div class="header-right"><strong>Cotización</strong><br>${fecha}</div>
+</div>
+
+<div class="info-grid">
+  <div>
+    <span class="info-label">Cliente / Proyecto</span>
+    <span class="info-value">${cliente}</span>
+  </div>
+  <div>
+    <span class="info-label">Teléfono</span>
+    <span class="info-value">${c.telefono || '—'}</span>
+  </div>
+  <div>
+    <span class="info-label">Tipo de pieza</span>
+    <span class="info-value">${c.tipoPieza || '—'}</span>
+  </div>
+  <div>
+    <span class="info-label">Impresora · Tiempo</span>
+    <span class="info-value">${c.printer} · ${c.tiempo.toFixed(2)} h</span>
+  </div>
+  <div>
+    <span class="info-label">Cantidad</span>
+    <span class="info-value">${c.numPiezas} pieza${c.numPiezas > 1 ? 's' : ''}</span>
+  </div>
+  <div>
+    <span class="info-label">Entrega</span>
+    <span class="info-value">${urgLabels[c.urgencia] || 'Normal'}</span>
+  </div>
+</div>
+
+<div class="price-box">
+  <div class="price-lbl">Precio Total a Cobrar</div>
+  <div class="price-num">${fmtP(c.precioFinal)}</div>
+  ${c.numPiezas > 1 ? `<div class="price-unit">${fmtP(xUnidad)} por pieza × ${c.numPiezas} piezas</div>` : ''}
+</div>
+
+<div class="section-title">Materiales</div>
+<table>
+  <thead><tr><th>Material</th><th>Gramos</th><th>$/kg</th><th>Costo</th></tr></thead>
+  <tbody>${matsRows}</tbody>
+</table>
+
+<div class="section-title">Desglose de costo</div>
+<table>
+  <thead><tr><th>Concepto</th><th>Valor</th></tr></thead>
+  <tbody>${costRows}</tbody>
+</table>
+
+<div class="footer">MiniPrints v2 &nbsp;·&nbsp; Cotización generada el ${fecha} &nbsp;·&nbsp; Precios en MXN</div>
+</body>
+</html>`;
+
+      const win = window.open('', '_blank');
+      if (!win) { showToast('Permite ventanas emergentes para descargar el PDF', 4000); return; }
+      win.document.write(html);
+      win.document.close();
+      setTimeout(() => { win.focus(); win.print(); }, 400);
     }
 
     /* ── Send WhatsApp ────────────────────────── */
