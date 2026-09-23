@@ -1,95 +1,21 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20260923s"></script>
-  <script src="categorias.js?v=20260923s"></script>
-  <script src="whatsapp.js?v=20260923s"></script>
+  <script src="theme.js?v=20260923t"></script>
+  <script src="whatsapp.js?v=20260923t"></script>
+  <script src="inventario.js?v=20260923t"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923s" />
+  <link rel="stylesheet" href="styles.css?v=20260923t" />
   <style>
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
-    .field input, .field select {
-      width: 100%; background: rgba(var(--ink), 0.05); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
-      font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
-      -moz-appearance: textfield;
-    }
-    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(48,209,88,0.12); }
-    .field select option { background: var(--ios-bg-3); }
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
-    .form-card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-    .btn-row { display: flex; gap: 8px; margin-top: 16px; }
-    .summary-pills { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    @keyframes pillIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .pill { background: rgba(var(--ink), 0.10); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 120px; animation: pillIn 350ms cubic-bezier(0.23,1,0.32,1) both; }
-    .pill:nth-child(1) { animation-delay: 0ms; }
-    .pill:nth-child(2) { animation-delay: 55ms; }
-    .pill:nth-child(3) { animation-delay: 110ms; }
-    .pill:nth-child(4) { animation-delay: 165ms; }
-    .pill-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); }
-    .pill-val { font-size: 1rem; font-weight: 800; color: var(--text); }
-    .pill-val.green { color: var(--ios-green); }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    /* Prevent overflow */
-    .form-card { min-width: 0; }
-    .grid-4 { min-width: 0; }
-    .grid-3 { min-width: 0; }
-    .carrito-item { flex-wrap: wrap; }
-    @media (max-width: 800px) {
-      .grid-4 { grid-template-columns: 1fr 1fr; }
-      .grid-3 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 600px) {
-      .grid-4 { grid-template-columns: 1fr; }
-      .filter-bar { flex-direction: column; align-items: stretch; }
-      .fb-field { width: 100%; }
-      .fb-field input, .fb-field select { width: 100%; box-sizing: border-box; }
-      .btn-row { flex-wrap: wrap; }
-    }
-    @media (max-width: 480px) {
-      .carrito-item { gap: 6px; }
-      .ci-meta { min-width: 0; font-size: 0.78rem; }
-    }
-    .carrito-section { background: rgba(var(--ink), 0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin: 12px 0; display: none; }
-    .carrito-section.visible { display: block; }
-    .carrito-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(var(--ink), 0.06); font-size: 0.85rem; }
-    .carrito-item:last-child { border-bottom: none; }
-    .ci-name { flex: 1; font-weight: 600; }
-    .ci-meta { color: var(--text-dim); min-width: 100px; text-align: right; }
-    .ci-total { color: var(--ios-green); font-weight: 700; min-width: 70px; text-align: right; }
-    .carrito-subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
-    .cs-lbl { color: var(--text-dim); font-size: 0.85rem; }
-    .cs-val { font-weight: 800; color: var(--ios-green); font-size: 1.05rem; }
-    #modal-pago { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1000; align-items:center; justify-content:center; }
-    #modal-pago.open { display:flex; }
-    .modal-box { background:var(--ios-bg-3); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; width:300px; max-width:92vw; }
-    .modal-title { font-size:0.95rem; font-weight:700; margin-bottom:18px; }
-    .metodo-btn { width:100%; background:rgba(var(--ink), 0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.875rem; padding:11px 14px; cursor:pointer; text-align:left; margin-bottom:8px; transition:border-color 180ms,background 180ms; display:block; }
-    .metodo-btn:hover { border-color:var(--primary); background:rgba(48,209,88,0.08); }
-    .modal-cancel { background:none; border:none; color:var(--text-dim); font-size:0.82rem; cursor:pointer; margin-top:4px; width:100%; text-align:center; padding:6px; }
-    .filter-bar { display:flex; align-items:flex-end; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
-    .fb-field { display:flex; flex-direction:column; gap:5px; }
-    .fb-field label { font-size:0.68rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
-    .fb-field input, .fb-field select { background:rgba(var(--ink), 0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.82rem; padding:7px 10px; outline:none; transition:border-color 180ms; }
-    .fb-field input[type="date"] { width: 136px; }
-    .fb-field input:focus, .fb-field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(48,209,88,0.12); }
-    .fb-field select option { background:var(--ios-bg-3); }
-    #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923s" />
-  <link rel="stylesheet" href="nav.css?v=20260923s" />
+  <link rel="stylesheet" href="ios.css?v=20260923t" />
+  <link rel="stylesheet" href="nav.css?v=20260923t" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,274 +26,289 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923s"></script>
+  <script type="module" src="firebase-sync.js?v=20260923t"></script>
+
   <div class="page-container">
-    <div class="dash-layout">
-      <main class="dash-main">
-        <div class="dash-header">
-          <div>
-            <h1 class="dash-title">Historial de ventas</h1>
-            <p class="dash-subtitle">Todas tus ventas, cobros pendientes y totales.</p>
-          </div>
-          <div class="dash-toolbar">
-            <a class="btn btn-primary" href="ventas.html">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nueva venta
-            </a>
-          </div>
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Historial</h1>
+          <p class="dash-subtitle" id="hx-sub">Tus ventas y cobros pendientes.</p>
+        </div>
+        <div class="inv-actions">
+          <a class="inv-icon-btn is-primary" href="ventas.html" aria-label="Nueva venta">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="hx-wrap">
+        <div class="cq-seg" data-for="f-periodo" role="radiogroup" aria-label="Periodo">
+          <button type="button" data-v="mes">Este mes</button>
+          <button type="button" data-v="pasado">Anterior</button>
+          <button type="button" data-v="todo">Todo</button>
+          <button type="button" data-v="rango">Fechas</button>
+        </div>
+        <input type="hidden" id="f-periodo" value="mes" />
+        <div class="hx-dates" id="f-rango" hidden>
+          <label>Desde<input type="date" id="f-desde" /></label>
+          <label>Hasta<input type="date" id="f-hasta" /></label>
         </div>
 
-        <!-- History -->
-        <div class="empty-table">
-          <div class="table-head">
-            <span class="table-title">Ventas registradas</span>
-          </div>
-          <div class="filter-bar">
-            <div class="fb-field">
-              <label>Desde</label>
-              <input type="date" id="filter-desde" oninput="aplicarFiltros()">
-            </div>
-            <div class="fb-field">
-              <label>Hasta</label>
-              <input type="date" id="filter-hasta" oninput="aplicarFiltros()">
-            </div>
-            <div class="fb-field">
-              <label>Tipo de pago</label>
-              <select id="filter-pago" onchange="aplicarFiltros()">
-                <option value="">Todos</option>
-                <option value="Efectivo">Efectivo</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Tarjeta">Tarjeta</option>
-                <option value="pendiente">Pendiente</option>
-              </select>
-            </div>
-            <button class="btn btn-ghost" id="btn-clear-filter" onclick="limpiarFiltros()" style="display:none;align-self:flex-end;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              Limpiar
-            </button>
-          </div>
-          <div id="summary-pills" class="summary-pills" style="padding:16px 20px 0;"></div>
-          <div id="filter-info"></div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Fecha</th><th>Pieza</th><th>Pago</th>
-                  <th style="text-align:right;">Cant.</th>
-                  <th style="text-align:right;">Precio unit.</th>
-                  <th style="text-align:right;">Total</th>
-                  <th>Estatus</th><th></th>
-                </tr>
-              </thead>
-              <tbody id="ventas-tbody"></tbody>
-            </table>
-          </div>
-          <div id="ventas-empty" class="empty-table-body" style="display:none;">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            <h3>Sin ventas registradas</h3>
-            <p>Registra tu primera venta desde la pestaña Ventas.</p>
-          </div>
-        </div>
-      </main>
+        <div class="inv-sum is-4" id="hx-sum"></div>
+
+        <input type="search" id="f-buscar" class="hx-search" placeholder="Buscar pieza o nota" autocomplete="off" aria-label="Buscar venta" />
+        <div class="vs-cats" id="f-pago" role="radiogroup" aria-label="Filtrar por pago"></div>
+        <div class="hx-info" id="hx-info"></div>
+
+        <div id="hx-list" style="display:flex;flex-direction:column;gap:18px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hoja: detalle de la venta -->
+  <div class="sheet inv-sheet" id="sh-venta" role="dialog" aria-modal="true" aria-labelledby="sh-venta-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-venta-t">Venta</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-hero" id="v-hero"></div>
+    <div class="inv-group hx-items" id="v-items"></div>
+    <div class="inv-group" id="v-datos"></div>
+    <div class="inv-f" id="v-cobrar">
+      <span class="inv-f-lbl">Registrar el pago</span>
+      <div class="inv-quick">
+        <button type="button" onclick="cobrar('Efectivo')">Efectivo</button>
+        <button type="button" onclick="cobrar('Transferencia')">Transferencia</button>
+        <button type="button" onclick="cobrar('Tarjeta')">Tarjeta</button>
+      </div>
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn is-wa" onclick="reenviar()">Enviar por WhatsApp</button>
+      <button type="button" class="inv-btn is-danger" onclick="eliminarVenta()">Eliminar venta</button>
     </div>
   </div>
 
-  <div id="modal-pago">
-    <div class="modal-box">
-      <div class="modal-title">¿Cómo se recibió el pago?</div>
-      <button class="metodo-btn" onclick="confirmarPago('Efectivo')">💵 Efectivo</button>
-      <button class="metodo-btn" onclick="confirmarPago('Transferencia')">🏦 Transferencia</button>
-      <button class="metodo-btn" onclick="confirmarPago('Tarjeta')">💳 Tarjeta</button>
-      <button class="modal-cancel" onclick="cerrarModalPago()">Cancelar</button>
-    </div>
-  </div>
-  <div id="toast"></div>
+  <div id="toast" role="status"></div>
 
   <script>
+    const { esc, money, fecha: F } = MP_INV;
     const DB = { piezas: {}, ventas: [] };
-    let carrito = [];
+    const POR_PAGINA = 40;
+    let limite = POR_PAGINA, pagoFiltro = 'todos';
 
-    function ventaItems(v) {
-      return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }];
-    }
-    function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
+    const ventaItems = v => v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }];
+    const ventaPagada = v => !v.estatusPago || v.estatusPago === 'pagado';
+    const totalDe = v => ventaItems(v).reduce((s, it) => s + (Number(it.precio) || 0) * (Number(it.cantidad) || 0), 0);
+    const udsDe = v => ventaItems(v).reduce((s, it) => s + (Number(it.cantidad) || 0), 0);
 
     function loadDB() {
-      try { const p = localStorage.getItem('mp_piezas'); if (p) DB.piezas = JSON.parse(p); } catch(e) {}
-      try { const v = localStorage.getItem('mp_ventas'); if (v) DB.ventas = JSON.parse(v); } catch(e) {}
+      try { DB.piezas = JSON.parse(localStorage.getItem('mp_piezas')) || {}; } catch (e) { DB.piezas = {}; }
+      try { DB.ventas = JSON.parse(localStorage.getItem('mp_ventas')) || []; } catch (e) { DB.ventas = []; }
     }
-    function savePiezas() { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch(e) {} }
-    function saveVentas() { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch(e) {} }
+    const savePiezas = () => { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch (e) {} };
+    const saveVentas = () => { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch (e) {} };
 
-    const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    // Fecha local (toISOString usa UTC y en la noche daba el día siguiente)
-    function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
-    function showToast(msg) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
-      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
+    // ── Filtros ──
+    function rango() {
+      const p = document.getElementById('f-periodo').value;
+      const d = new Date();
+      if (p === 'mes') return [F.isoDe(new Date(d.getFullYear(), d.getMonth(), 1)), ''];
+      if (p === 'pasado') return [F.isoDe(new Date(d.getFullYear(), d.getMonth() - 1, 1)), F.isoDe(new Date(d.getFullYear(), d.getMonth(), 0))];
+      if (p === 'rango') return [document.getElementById('f-desde').value, document.getElementById('f-hasta').value];
+      return ['', ''];
     }
-
-    function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]); }
-
-    let _pendingPagoId = null;
-
-    function marcarPagado(id) {
-      _pendingPagoId = id;
-      document.getElementById('modal-pago').classList.add('open');
-    }
-
-    function cerrarModalPago() {
-      _pendingPagoId = null;
-      document.getElementById('modal-pago').classList.remove('open');
-    }
-
-    function confirmarPago(metodo) {
-      if (!_pendingPagoId) return;
-      const v = DB.ventas.find(x => x.id === _pendingPagoId);
-      if (v) { v.estatusPago = 'pagado'; v.metodoPago = metodo; saveVentas(); renderVentas(); }
-      cerrarModalPago();
-      showToast(`Pago registrado — ${metodo}`);
-    }
-
-    async function eliminarVenta(id) {
-      const v = DB.ventas.find(x => x.id === id);
-      if (!v) return;
-      const items = ventaItems(v);
-      const label = items.length === 1 ? `"${items[0].pieza}"` : `${items.length} piezas`;
-      if (!confirm(`Eliminar orden de ${label}?`)) return;
-      items.forEach(it => { DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) + it.cantidad; });
-      savePiezas();
-      DB.ventas = DB.ventas.filter(x => x.id !== id);
-      saveVentas();
-      renderVentas();
-      showToast('Orden eliminada — stock restaurado');
-    }
-
-    function sortedVentas() {
-      return [...DB.ventas].sort((a, b) => {
-        if (a.fecha !== b.fecha) return a.fecha < b.fecha ? 1 : -1;
-        return b.id - a.id;
+    function enPeriodo() {
+      const [desde, hasta] = rango();
+      return DB.ventas.filter(v => {
+        const f = F.iso(v.fecha);
+        return (!desde || f >= desde) && (!hasta || f <= hasta);
       });
     }
+    const PAGOS = [
+      { id: 'todos', nombre: 'Todas' },
+      { id: 'pendiente', nombre: 'Por cobrar' },
+      { id: 'Efectivo', nombre: 'Efectivo' },
+      { id: 'Transferencia', nombre: 'Transferencia' },
+      { id: 'Tarjeta', nombre: 'Tarjeta' },
+    ];
+    const pasaPago = (v, f) => f === 'todos' || (f === 'pendiente' ? !ventaPagada(v) : ventaPagada(v) && v.metodoPago === f);
 
-    function getFilteredVentas() {
-      const desde = document.getElementById('filter-desde').value;
-      const hasta = document.getElementById('filter-hasta').value;
-      const pago  = document.getElementById('filter-pago').value;
-      let list = sortedVentas();
-      if (desde) list = list.filter(v => v.fecha >= desde);
-      if (hasta) list = list.filter(v => v.fecha <= hasta);
-      if (pago === 'pendiente') list = list.filter(v => !ventaPagada(v));
-      else if (pago) list = list.filter(v => v.metodoPago === pago);
-      return list;
-    }
+    function render() {
+      const periodo = enPeriodo();
+      const q = document.getElementById('f-buscar').value.trim().toLowerCase();
 
-    function aplicarFiltros() {
-      const desde = document.getElementById('filter-desde').value;
-      const hasta = document.getElementById('filter-hasta').value;
-      const pago  = document.getElementById('filter-pago').value;
-      document.getElementById('btn-clear-filter').style.display = (desde || hasta || pago) ? '' : 'none';
-      renderVentas();
-    }
+      // Resumen del periodo
+      const pagadas = periodo.filter(ventaPagada), pendientes = periodo.filter(v => !ventaPagada(v));
+      const cobrado = pagadas.reduce((s, v) => s + totalDe(v), 0);
+      const porCobrar = pendientes.reduce((s, v) => s + totalDe(v), 0);
+      const uds = periodo.reduce((s, v) => s + udsDe(v), 0);
+      document.getElementById('hx-sum').innerHTML = `
+        <div class="inv-tile" style="--tile-color:var(--ios-green)">
+          <span class="inv-tile-lbl"><i></i>Cobrado</span>
+          <span class="inv-tile-num">${MP_INV.money0(cobrado)}</span>
+          <span class="inv-tile-sub">${pagadas.length} venta${pagadas.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="inv-tile" style="--tile-color:var(--ios-blue)">
+          <span class="inv-tile-lbl"><i></i>Piezas</span>
+          <span class="inv-tile-num">${uds.toLocaleString('es-MX')}</span>
+          <span class="inv-tile-sub">vendidas</span>
+        </div>
+        <div class="inv-tile" style="--tile-color:var(--ios-purple)">
+          <span class="inv-tile-lbl"><i></i>Ticket prom.</span>
+          <span class="inv-tile-num">${MP_INV.money0(pagadas.length ? cobrado / pagadas.length : 0)}</span>
+          <span class="inv-tile-sub">por venta</span>
+        </div>
+        <button type="button" class="inv-tile${pendientes.length ? ' is-alert' : ''}${pagoFiltro === 'pendiente' ? ' is-on' : ''}" style="--tile-color:${pendientes.length ? 'var(--ios-orange)' : 'var(--ios-green)'}"
+                onclick="setPago(pagoFiltro === 'pendiente' ? 'todos' : 'pendiente')" aria-pressed="${pagoFiltro === 'pendiente'}">
+          <span class="inv-tile-lbl"><i></i>Por cobrar</span>
+          <span class="inv-tile-num">${MP_INV.money0(porCobrar)}</span>
+          <span class="inv-tile-sub">${pendientes.length ? `${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''} · ver` : 'todo cobrado'}</span>
+        </button>`;
 
-    function limpiarFiltros() {
-      document.getElementById('filter-desde').value = '';
-      document.getElementById('filter-hasta').value = '';
-      document.getElementById('filter-pago').value  = '';
-      document.getElementById('btn-clear-filter').style.display = 'none';
-      renderVentas();
-    }
+      const cuenta = Object.fromEntries(PAGOS.map(p => [p.id, periodo.filter(v => pasaPago(v, p.id)).length]));
+      document.getElementById('f-pago').innerHTML = PAGOS.filter(p => p.id === 'todos' || cuenta[p.id] || p.id === pagoFiltro)
+        .map(p => `<button type="button" role="radio" data-f="${p.id}" aria-checked="${p.id === pagoFiltro}">${p.nombre} <span>${cuenta[p.id]}</span></button>`).join('');
 
-    function renderVentas() {
-      const tbody   = document.getElementById('ventas-tbody');
-      const empty   = document.getElementById('ventas-empty');
-      const pills   = document.getElementById('summary-pills');
-      const info    = document.getElementById('filter-info');
+      const lista = periodo
+        .filter(v => pasaPago(v, pagoFiltro))
+        .filter(v => !q || ventaItems(v).some(it => String(it.pieza).toLowerCase().includes(q)) || String(v.notas || '').toLowerCase().includes(q))
+        .sort((a, b) => F.iso(b.fecha).localeCompare(F.iso(a.fecha)) || b.id - a.id);
 
+      document.getElementById('hx-sub').textContent = DB.ventas.length
+        ? `${DB.ventas.length} venta${DB.ventas.length !== 1 ? 's' : ''} registradas`
+        : 'Tus ventas y cobros pendientes.';
+      const filtrado = pagoFiltro !== 'todos' || q;
+      document.getElementById('hx-info').innerHTML = periodo.length
+        ? `<span>${lista.length} de ${periodo.length} ventas en el periodo</span>${filtrado ? '<button type="button" onclick="limpiar()">Quitar filtros</button>' : ''}`
+        : '';
+
+      const cont = document.getElementById('hx-list');
       if (!DB.ventas.length) {
-        tbody.innerHTML = '';
-        empty.style.display = 'flex';
-        pills.innerHTML = '';
-        info.innerHTML = '';
+        cont.innerHTML = `<div class="hx-empty"><b>Aún no hay ventas</b>Cuando registres una venta aparecerá aquí.<br><a class="btn btn-primary" href="ventas.html">Registrar venta</a></div>`;
+        return;
+      }
+      if (!lista.length) {
+        cont.innerHTML = `<div class="hx-empty"><b>Sin resultados</b>No hay ventas con estos filtros.<br><button type="button" class="btn btn-ghost" onclick="verTodo()">Ver todas las ventas</button></div>`;
         return;
       }
 
-      const lista = getFilteredVentas();
-      const isFiltered = lista.length !== DB.ventas.length;
-
-      empty.style.display = lista.length ? 'none' : 'flex';
-      if (!lista.length) {
-        tbody.innerHTML = '';
-        info.innerHTML = `<span style="color:var(--text-dim);">Sin resultados para los filtros aplicados.</span>`;
-      } else {
-        info.innerHTML = isFiltered
-          ? `Mostrando ${lista.length} de ${DB.ventas.length} ventas`
-          : '';
-      }
-
-      const pagadas    = lista.filter(ventaPagada);
-      const pendientes = lista.filter(v => !ventaPagada(v));
-      const tot       = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
-      const unds      = pagadas.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.cantidad, 0), 0);
-      const porCobrar = pendientes.reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
-      const tkProm    = pagadas.length ? tot / pagadas.length : 0;
-      pills.innerHTML = `
-        <div class="pill"><span class="pill-lbl">Total ingresos</span><span class="pill-val green">${fmt(tot)}</span></div>
-        <div class="pill"><span class="pill-lbl">Unidades</span><span class="pill-val">${unds}</span></div>
-        <div class="pill"><span class="pill-lbl">Transacciones</span><span class="pill-val">${lista.length}</span></div>
-        <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>
-        ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:var(--ios-yellow);">${fmt(porCobrar)}</span></div>` : ''}`;
-
-      tbody.innerHTML = lista.map(v => {
-        const items  = ventaItems(v);
-        const totalV = items.reduce((s, it) => s + it.precio * it.cantidad, 0);
-        const cantV  = items.reduce((s, it) => s + it.cantidad, 0);
-        const piezaLbl = items.length === 1
-          ? escapeHtml(items[0].pieza)
-          : items.map(it => `${escapeHtml(it.pieza.split(' ')[0])} ×${it.cantidad}`).join(' · ');
-        const titleAttr = items.length > 1 ? ` title="${escapeHtml(items.map(it => it.pieza + ' ×' + it.cantidad).join(', '))}"` : '';
-        const pagada = ventaPagada(v);
-        const estatusBadge = pagada
-          ? `<span style="font-size:0.7rem;background:#30d15822;color:var(--ios-green);padding:2px 8px;border-radius:99px;font-weight:700;">Pagado</span>`
-          : `<span style="font-size:0.7rem;background:#ffd60a22;color:var(--ios-yellow);padding:2px 8px;border-radius:99px;font-weight:700;">Pendiente</span>`;
-        return `<tr style="${pagada ? '' : 'opacity:0.8;'}">
-          <td style="color:var(--text-dim);">${v.fecha}</td>
-          <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${escapeHtml(v.notas)}</div>` : ''}</td>
-          <td style="color:var(--text-dim);font-size:0.82rem;">${v.metodoPago || '—'}</td>
-          <td style="text-align:right;">${cantV}</td>
-          <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
-          <td style="text-align:right;color:${pagada ? IOSC.green : IOSC.yellow};font-weight:700;">${fmt(totalV)}</td>
-          <td>${estatusBadge}</td>
-          <td style="display:flex;gap:4px;">
-            ${!pagada ? `<button class="btn btn-ghost" style="padding:5px 9px;color:var(--ios-green);" onclick="marcarPagado(${v.id})" title="Marcar como pagado">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-            </button>` : ''}
-            <button class="btn btn-ghost" style="padding:5px 9px;color:#25d366;" onclick="reenviarVenta(${v.id})" title="Enviar por WhatsApp" aria-label="Enviar por WhatsApp">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
-            </button>
-            <button class="btn btn-ghost" style="padding:5px 9px;" onclick="eliminarVenta(${v.id})" title="Eliminar" aria-label="Eliminar venta">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-            </button>
-          </td>
-        </tr>`;
-      }).join('');
+      // Agrupar por día
+      const visibles = lista.slice(0, limite);
+      const dias = [];
+      visibles.forEach(v => {
+        const f = F.iso(v.fecha);
+        const g = dias[dias.length - 1];
+        if (g && g.f === f) g.ventas.push(v); else dias.push({ f, ventas: [v] });
+      });
+      cont.innerHTML = dias.map(g => {
+        const tot = g.ventas.filter(ventaPagada).reduce((s, v) => s + totalDe(v), 0);
+        return `<section class="hx-day">
+          <div class="hx-day-head"><span>${F.diaLargo(g.f)}</span><span>${tot ? money(tot) : ''}</span></div>
+          <div class="hx-list">${g.ventas.map(filaVenta).join('')}</div>
+        </section>`;
+      }).join('') + (lista.length > limite ? `<button type="button" class="hx-more" onclick="verMas()">Ver ${Math.min(POR_PAGINA, lista.length - limite)} más</button>` : '');
     }
 
+    const ICO = {
+      Efectivo: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>',
+      Transferencia: '<svg viewBox="0 0 24 24"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg>',
+      Tarjeta: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/></svg>',
+      pendiente: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    };
+    function resumenPiezas(v) {
+      const items = ventaItems(v);
+      return items.length === 1 ? items[0].pieza : `${items[0].pieza} y ${items.length - 1} más`;
+    }
+    function filaVenta(v) {
+      const pagada = ventaPagada(v), uds = udsDe(v);
+      const st = pagada ? 'st-ok' : 'st-low';
+      return `<button type="button" class="hx-row ${st}" data-id="${v.id}">
+        <span class="hx-ico">${pagada ? (ICO[v.metodoPago] || ICO.Efectivo) : ICO.pendiente}</span>
+        <span class="hx-text">
+          <span class="hx-title">${esc(resumenPiezas(v))}</span>
+          <span class="hx-meta">${uds} pieza${uds !== 1 ? 's' : ''} · ${pagada ? esc(v.metodoPago || 'Pagada') : 'Por cobrar'}${v.notas ? ' · ' + esc(v.notas) : ''}</span>
+        </span>
+        <span class="hx-right">
+          <span class="hx-amt">${money(totalDe(v))}</span>
+          ${pagada ? '' : '<span class="hx-tag">Pendiente</span>'}
+        </span>
+      </button>`;
+    }
 
-    function reenviarVenta(id) {
+    function setPago(f) { pagoFiltro = f; limite = POR_PAGINA; render(); }
+    function verMas() { limite += POR_PAGINA; render(); }
+    function limpiar() { pagoFiltro = 'todos'; document.getElementById('f-buscar').value = ''; limite = POR_PAGINA; render(); }
+    function verTodo() { document.getElementById('f-periodo').value = 'todo'; cambioPeriodo(); limpiar(); }
+    function cambioPeriodo() {
+      const p = document.getElementById('f-periodo').value;
+      document.getElementById('f-rango').hidden = p !== 'rango';
+      if (p === 'rango' && !document.getElementById('f-desde').value) {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        document.getElementById('f-desde').value = F.isoDe(d);
+        document.getElementById('f-hasta').value = F.hoy();
+      }
+      MP_INV.syncChips();
+      limite = POR_PAGINA;
+      render();
+    }
+    document.getElementById('f-periodo').addEventListener('change', cambioPeriodo);
+    ['f-desde', 'f-hasta'].forEach(id => document.getElementById(id).addEventListener('change', render));
+    document.getElementById('f-buscar').addEventListener('input', () => { limite = POR_PAGINA; render(); });
+    document.getElementById('f-pago').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) setPago(b.dataset.f); });
+    document.getElementById('hx-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id)); });
+
+    // ── Detalle ──
+    let actual = null;
+    function abrirVenta(id) {
       const v = DB.ventas.find(x => x.id === id);
       if (!v) return;
+      actual = id;
+      const pagada = ventaPagada(v), items = ventaItems(v);
+      document.getElementById('sh-venta-t').textContent = F.diaLargo(F.iso(v.fecha));
+      document.getElementById('v-hero').className = 'inv-hero ' + (pagada ? 'st-ok' : 'st-low');
+      document.getElementById('v-hero').innerHTML = `
+        <span class="inv-hero-num is-small">${money(totalDe(v))}</span>
+        <span class="hx-tag">${pagada ? 'Pagada' + (v.metodoPago ? ' · ' + esc(v.metodoPago) : '') : 'Pendiente de cobro'}</span>`;
+      document.getElementById('v-items').innerHTML = items.map(it => `
+        <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${it.cantidad} × ${money(it.precio)}</span></div>`).join('')
+        + `<div class="inv-group-row hx-total-row"><span>Total</span><span>${money(totalDe(v))}</span></div>`;
+      document.getElementById('v-datos').innerHTML = `
+        <div class="inv-group-row"><span>Fecha</span><span>${esc(F.iso(v.fecha) || v.fecha || '—')}</span></div>
+        ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}`;
+      document.getElementById('v-cobrar').hidden = pagada;
+      MP_INV.abrir('sh-venta');
+    }
+    function cobrar(metodo) {
+      const v = DB.ventas.find(x => x.id === actual);
+      if (!v) return;
+      v.estatusPago = 'pagado'; v.metodoPago = metodo;
+      saveVentas();
+      MP_INV.cerrar(); render();
+      MP_INV.toast(`Pago registrado · ${metodo}`);
+    }
+    function reenviar() {
+      const v = DB.ventas.find(x => x.id === actual);
+      if (!v) return;
       const envio = MP_WA.enviarAGrupo(MP_WA.venta(v));
-      showToast(envio === 'grupo' ? 'Mensaje copiado, pégalo en el grupo' : 'Elige tu grupo en WhatsApp');
+      MP_INV.toast(envio === 'grupo' ? 'Mensaje copiado, pégalo en el grupo' : 'Elige tu grupo en WhatsApp');
+    }
+    // Al eliminar una venta las piezas regresan al inventario
+    function eliminarVenta() {
+      const v = DB.ventas.find(x => x.id === actual);
+      if (!v || !confirm('¿Eliminar esta venta? Las piezas regresan al inventario.')) return;
+      ventaItems(v).forEach(it => { DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) + (Number(it.cantidad) || 0); });
+      savePiezas();
+      DB.ventas = DB.ventas.filter(x => x.id !== actual);
+      saveVentas();
+      MP_INV.cerrar(); render();
+      MP_INV.toast('Venta eliminada · piezas devueltas al inventario');
     }
 
-    function mpInit() {
-      loadDB();
-      renderVentas();
-    }
+    function mpInit() { loadDB(); MP_INV.syncChips(); render(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
-    window.addEventListener('mp-sync-update', () => { loadDB(); renderVentas(); });
+    window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923s"></script>
+  <script src="nav.js?v=20260923t"></script>
 </body>
 </html>

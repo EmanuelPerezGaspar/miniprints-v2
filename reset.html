@@ -1,90 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Reset — MiniPrints v2</title>
-  <script src="theme.js?v=20260923s"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MiniPrints — Restablecer datos</title>
+  <script src="theme.js?v=20260923t"></script>
+  <script src="inventario.js?v=20260923t"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260923t" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: var(--font);
-      background: var(--ios-bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card {
-      background: rgba(var(--ink), 0.05);
-      border: 1px solid rgba(var(--ink), 0.1);
-      border-radius: 16px;
-      padding: 2.5rem;
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-    }
-    .icon { font-size: 3rem; margin-bottom: 1rem; }
-    h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
-    p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
-    .list {
-      background: rgba(255,69,58,0.08);
-      border: 1px solid rgba(255,69,58,0.2);
-      border-radius: 10px;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-      text-align: left;
-    }
-    .list span { display: block; font-size: 0.85rem; color: var(--ios-red); padding: 2px 0; }
-    .keep {
-      background: rgba(48,209,88,0.08);
-      border: 1px solid rgba(48,209,88,0.2);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.85rem;
-      color: #86efac;
-      text-align: left;
-    }
-    .btn-reset {
-      background: var(--ios-red);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 0.85rem 2rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 0.75rem;
-      transition: background 0.2s;
-    }
-    .btn-reset:hover { background: #dc2626; }
-    .btn-back {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid rgba(var(--ink), 0.1);
-      border-radius: 10px;
-      padding: 0.75rem 2rem;
-      font-size: 0.9rem;
-      cursor: pointer;
-      width: 100%;
-      transition: border-color 0.2s;
-    }
-    .btn-back:hover { border-color: var(--ios-green); color: var(--ios-green); }
-    .done {
-      display: none;
-      color: var(--ios-green);
-      font-weight: 600;
-      font-size: 1.1rem;
-      margin-top: 1rem;
-    }
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923s" />
-  <link rel="stylesheet" href="nav.css?v=20260923s" />
+  <link rel="stylesheet" href="ios.css?v=20260923t" />
+  <link rel="stylesheet" href="nav.css?v=20260923t" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -95,64 +25,139 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923s"></script>
-<style>
-  #loom-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    background: var(--ios-bg);
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
-}'@
+  <script type="module" src="firebase-sync.js?v=20260923t"></script>
 
-    # 2. Replace visibility handler + add pageshow for iOS bfcache
-    $oldHandler = @'
-      window.addEventListener('resize', setup);
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) cancelAnimationFrame(animId);
-        else animate();
-      });
-      setup(); animate();
-</style>
-<div class="card">
-    <div class="icon">⚠️</div>
-    <h1>Restablecer datos</h1>
-    <p>Esta acción borrará todos los datos operativos. No se puede deshacer.</p>
+  <div class="page-container">
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Restablecer</h1>
+          <p class="dash-subtitle">Elige qué borrar para empezar de cero. Guarda un respaldo antes.</p>
+        </div>
+      </div>
 
-    <div class="list">
-      <span>✗ Ventas</span>
-      <span>✗ Cotizaciones</span>
-      <span>✗ Stock de piezas</span>
-      <span>✗ Historial de impresión</span>
-      <span>✗ Peso de filamentos — restablecido a 1000g c/u</span>
-    </div>
+      <div class="hx-wrap">
+        <h2 class="fn-sec-title">Respaldo</h2>
+        <div class="rs-btns">
+          <button type="button" class="inv-btn is-plain" onclick="descargarRespaldo()">Descargar respaldo</button>
+          <button type="button" class="inv-btn is-plain" onclick="document.getElementById('rs-archivo').click()">Restaurar un respaldo</button>
+          <input type="file" id="rs-archivo" accept="application/json,.json" hidden />
+        </div>
 
-    <div class="keep">
-      ✓ <strong>Materiales — nombres, precios y tipos se conservan</strong>
-    </div>
+        <h2 class="fn-sec-title">Qué borrar</h2>
+        <div class="hx-list" id="rs-list"></div>
+        <div class="rs-keep"><b>Se conservan:</b> tus filamentos (marca, tipo, color y precio), los ajustes del taller, las plantillas, la meta del mes, las categorías y el grupo de WhatsApp.</div>
 
-    <button class="btn-reset" onclick="doReset()">Restablecer ahora</button>
-    <button class="btn-back" onclick="location.href='index.html'">Cancelar</button>
-
-    <div class="done" id="done">✓ Listo — redirigiendo...</div>
+        <div class="rs-btns">
+          <button type="button" class="inv-btn is-danger" id="rs-btn" onclick="pedirConfirmacion()">Borrar datos seleccionados</button>
+        </div>
+      </div>
+    </main>
   </div>
 
+  <!-- Hoja: confirmación -->
+  <div class="sheet inv-sheet" id="sh-confirmar" role="alertdialog" aria-modal="true" aria-labelledby="sh-confirmar-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-confirmar-t">¿Borrar los datos?</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cancelar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-hero st-crit">
+      <span class="hx-ico" style="width:52px;height:52px"><svg viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M12 3 2.5 20h19z"/><path d="M12 10v4M12 17.5v.01"/></svg></span>
+      <span class="inv-hero-sub" style="text-align:center;font-size:15px">Esto no se puede deshacer y se borra también en tus otros dispositivos.</span>
+    </div>
+    <div class="inv-group" id="rs-resumen"></div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn is-destroy" onclick="borrar()">Borrar ahora</button>
+      <button type="button" class="inv-btn is-plain" data-sheet-close>Cancelar</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
   <script>
-    function doReset() {
-      ['mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial'].forEach(k => localStorage.removeItem(k));
-      try {
-        const mats = JSON.parse(localStorage.getItem('mp_materials') || '{}');
-        Object.values(mats).forEach(m => { m.pesoTotal = 1000; });
-        localStorage.setItem('mp_materials', JSON.stringify(mats));
-      } catch(e) {}
-      document.querySelector('.btn-reset').disabled = true;
-      document.querySelector('.btn-back').disabled = true;
-      document.getElementById('done').style.display = 'block';
-      setTimeout(() => location.href = 'index.html', 1500);
+    const { esc } = MP_INV;
+    const SYNC_KEYS = ['mp_config', 'mp_materials', 'mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial', 'mp_templates', 'mp_meta_mensual', 'mp_categorias', 'mp_wa_grupo', 'mp_wa_modo'];
+    const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+    // Se escribe vacío (en lugar de quitar la clave) para que el borrado también se sincronice
+    const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+    const OPCIONES = [
+      { id: 'ventas', titulo: 'Ventas', color: 'var(--ios-green)', icon: '<path d="M5.2 8h13.6l-1 11.6a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
+        detalle: () => { const n = get('mp_ventas', []).length; return `${n} registrada${n !== 1 ? 's' : ''}`; },
+        borrar: () => set('mp_ventas', []) },
+      { id: 'cotizaciones', titulo: 'Cotizaciones', color: 'var(--ios-blue)', icon: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+        detalle: () => { const n = get('mp_cotizaciones', []).length; return `${n} guardada${n !== 1 ? 's' : ''}`; },
+        borrar: () => set('mp_cotizaciones', []) },
+      { id: 'piezas', titulo: 'Stock de piezas', color: 'var(--ios-orange)', icon: '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+        detalle: () => { const p = Object.values(get('mp_piezas', {})); return `${p.length} modelos · ${p.reduce((s, n) => s + n, 0)} unidades`; },
+        borrar: () => { set('mp_piezas', {}); set('mp_historial', {}); } },
+      { id: 'filamento', titulo: 'Peso de filamentos', color: 'var(--ios-purple)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
+        detalle: () => `Regresa cada rollo a 1 kg`,
+        borrar: () => { const m = get('mp_materials', {}); Object.values(m).forEach(x => { x.pesoTotal = 1000; }); set('mp_materials', m); } },
+    ];
+    const elegido = Object.fromEntries(OPCIONES.map(o => [o.id, o.id !== 'filamento']));
+
+    function render() {
+      document.getElementById('rs-list').innerHTML = OPCIONES.map(o => `
+        <label class="rs-row">
+          <span class="hx-ico" style="background:${o.color};color:#fff"><svg viewBox="0 0 24 24">${o.icon}</svg></span>
+          <span class="hx-text"><span class="hx-title">${o.titulo}</span><span class="hx-meta">${esc(o.detalle())}</span></span>
+          <span class="toggle"><input type="checkbox" data-id="${o.id}" ${elegido[o.id] ? 'checked' : ''} /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+        </label>`).join('');
+      const n = OPCIONES.filter(o => elegido[o.id]).length;
+      const btn = document.getElementById('rs-btn');
+      btn.disabled = !n;
+      btn.textContent = n ? `Borrar ${n} seleccionado${n !== 1 ? 's' : ''}` : 'Elige qué borrar';
     }
+    document.getElementById('rs-list').addEventListener('change', e => {
+      const c = e.target.closest('[data-id]');
+      if (c) { elegido[c.dataset.id] = c.checked; render(); }
+    });
+
+    function pedirConfirmacion() {
+      const sel = OPCIONES.filter(o => elegido[o.id]);
+      if (!sel.length) return;
+      document.getElementById('rs-resumen').innerHTML = sel.map(o =>
+        `<div class="inv-group-row"><span>${o.titulo}</span><span>${esc(o.detalle())}</span></div>`).join('');
+      MP_INV.abrir('sh-confirmar');
+    }
+    function borrar() {
+      OPCIONES.filter(o => elegido[o.id]).forEach(o => o.borrar());
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast('Datos borrados');
+      setTimeout(() => { location.href = 'dashboard.html'; }, 1400);
+    }
+
+    // ── Respaldo de todo en un archivo ──
+    function descargarRespaldo() {
+      const datos = {};
+      SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v != null) datos[k] = v; });
+      const blob = new Blob([JSON.stringify({ app: 'MiniPrints', fecha: new Date().toISOString(), datos }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `miniprints-respaldo-${MP_INV.fecha.hoy()}.json`;
+      a.click();
+      MP_INV.toast('Respaldo descargado');
+    }
+    document.getElementById('rs-archivo').addEventListener('change', async e => {
+      const f = e.target.files[0];
+      e.target.value = '';
+      if (!f) return;
+      let r;
+      try { r = JSON.parse(await f.text()); } catch (err) { return MP_INV.toast('El archivo no es un respaldo válido'); }
+      const datos = r && r.app === 'MiniPrints' && r.datos;
+      if (!datos) return MP_INV.toast('El archivo no es un respaldo de MiniPrints');
+      const fecha = r.fecha ? new Date(r.fecha).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }) : 'sin fecha';
+      if (!confirm(`¿Restaurar el respaldo del ${fecha}? Reemplaza los datos actuales.`)) return;
+      SYNC_KEYS.forEach(k => { if (typeof datos[k] === 'string') { try { localStorage.setItem(k, datos[k]); } catch (err) {} } });
+      render();
+      MP_INV.toast('Respaldo restaurado');
+    });
+
+    window.addEventListener('mp-sync-ready', render, { once: true });
+    window.addEventListener('mp-sync-update', render);
   </script>
-  <script src="nav.js?v=20260923s"></script>
+  <script src="nav.js?v=20260923t"></script>
 </body>
 </html>

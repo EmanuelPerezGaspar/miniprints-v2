@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260923s"></script>
-  <script src="whatsapp.js?v=20260923s"></script>
+  <script src="theme.js?v=20260923t"></script>
+  <script src="whatsapp.js?v=20260923t"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923s" />
+  <link rel="stylesheet" href="styles.css?v=20260923t" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -542,8 +542,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923s" />
-  <link rel="stylesheet" href="nav.css?v=20260923s" />
+  <link rel="stylesheet" href="ios.css?v=20260923t" />
+  <link rel="stylesheet" href="nav.css?v=20260923t" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -554,7 +554,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923s"></script>
+  <script type="module" src="firebase-sync.js?v=20260923t"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -667,6 +667,10 @@
                 <div class="field"><label for="inp-mo-costo">Costo por hora ($)</label><input type="number" inputmode="decimal" id="inp-mo-costo" value="20" min="0" step="5" /></div>
                 <div class="field"><label for="inp-mo-horas">Horas</label><input type="number" inputmode="decimal" id="inp-mo-horas" value="1" min="0" step="0.5" /></div>
               </div>
+              <label class="cq-list-row">
+                <span>Cobrar empaque y envío <small class="cq-row-note" id="empaque-lbl">$12</small></span>
+                <span class="toggle"><input type="checkbox" id="chk-empaque" checked /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+              </label>
               <label class="cq-list-row">
                 <span>Agregar IVA (16%)</span>
                 <span class="toggle"><input type="checkbox" id="chk-iva" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
@@ -1252,6 +1256,7 @@
       const costoMOH    = aplicaMO ? (parseFloat(document.getElementById('inp-mo-costo').value) || 0) : 0;
       const horasMO     = aplicaMO ? (parseFloat(document.getElementById('inp-mo-horas').value) || 0) : 0;
       const aplicaIva   = document.getElementById('chk-iva').checked;
+      const aplicaEmpaque = document.getElementById('chk-empaque').checked;
       const urgencia    = document.getElementById('inp-urgencia')?.value || 'normal';
       const tipoPieza   = document.getElementById('inp-tipo-pieza')?.value || '';
       const telefono    = document.getElementById('inp-telefono')?.value.trim() || '';
@@ -1314,19 +1319,21 @@
       const baseConGanancia = subtotalFalla + ganancia;
       const baseUrgencia  = baseConGanancia * urgFactor;
       const urgenciaMonto = baseUrgencia - baseConGanancia;
-      const ivaMonto      = aplicaIva ? baseUrgencia * 0.16 : 0;
-      const precioFinal   = baseUrgencia + ivaMonto;
+      // Empaque y envío: costo fijo por pedido, sin margen de ganancia (sí lleva IVA)
+      const empaqueMonto  = aplicaEmpaque ? (CONFIG.empaque || 0) : 0;
+      const ivaMonto      = aplicaIva ? (baseUrgencia + empaqueMonto) * 0.16 : 0;
+      const precioFinal   = baseUrgencia + empaqueMonto + ivaMonto;
       const xUnidad       = precioFinal / numPiezas;
 
       const printerDisplay = isMultiImp
         ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
         : printerName;
 
-      return { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, ivaMonto, precioFinal, xUnidad, printerDisplay };
+      return { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, empaqueMonto, ivaMonto, precioFinal, xUnidad, printerDisplay };
     }
 
     function calcular(opts = {}) {
-      const { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, ivaMonto, precioFinal, xUnidad, printerDisplay } = computeQuote();
+      const { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, empaqueMonto, ivaMonto, precioFinal, xUnidad, printerDisplay } = computeQuote();
 
       // Store pending cotización (NOT saved yet — only when user confirms)
       state.pendingCot = {
@@ -1343,7 +1350,7 @@
         fue_aceptada: null,
       };
 
-      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, urgencia, tiempo, printer: printerDisplay, telefono, tipoPieza, filas: null /* se asigna abajo */ };
+      state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, empaqueMonto, urgencia, tiempo, printer: printerDisplay, telefono, tipoPieza, filas: null /* se asigna abajo */ };
 
       // ── Render result ──────────────────────────
       const cliente = document.getElementById('inp-cliente').value.trim();
@@ -1420,6 +1427,7 @@
         ['= Costo de producción', fmt(subtotalFalla)],
         [`+ Ganancia (${(margenPct * 100).toFixed(0)}%)`, fmt(ganancia)],
         ...(urgencia !== 'normal' ? [[`+ Sobrecargo urgencia (${urgencia === 'express' ? '25' : '50'}%)`, fmt(urgenciaMonto)]] : []),
+        ...(empaqueMonto > 0 ? [[`+ Empaque y envío`, fmt(empaqueMonto)]] : []),
         ...(aplicaIva ? [[`+ IVA 16%`, fmt(ivaMonto)]] : []),
         ['─────', ''],
         ['= Total a cobrar', fmt(precioFinal)],
@@ -1665,6 +1673,7 @@ tbody td:not(:first-child){text-align:right}
       msg += `• Ganancia: ${fmt(c.ganancia)}\n`;
       if (c.ivaMonto > 0)      msg += `• IVA (16%): ${fmt(c.ivaMonto)}\n`;
       if (c.urgenciaMonto > 0) msg += `• Sobrecargo urgencia: ${fmt(c.urgenciaMonto)}\n`;
+      if (c.empaqueMonto > 0)  msg += `• Empaque y envío: ${fmt(c.empaqueMonto)}\n`;
       msg += `\n¿Tienes alguna duda? Con gusto te ayudo 🙌\n_Si me recomiendas con alguien, tu siguiente pedido tiene envío gratis_ 🎁`;
 
       // Las cotizaciones se abren directo en el grupo de ventas
@@ -1707,6 +1716,7 @@ tbody td:not(:first-child){text-align:right}
         moCosto:       document.getElementById('inp-mo-costo')?.value    || '20',
         moHoras:       document.getElementById('inp-mo-horas')?.value    || '1',
         iva:           document.getElementById('chk-iva')?.checked        || false,
+        empaque:       document.getElementById('chk-empaque')?.checked ?? true,
         singleMatId:   state.singleMatId,
         singleGrams:   state.singleGrams,
         singlePrinter: document.getElementById('single-printer')?.value  || 'A1 MINI',
@@ -1742,6 +1752,7 @@ tbody td:not(:first-child){text-align:right}
       document.getElementById('inp-margen').value  = t.margen || '60';
       document.getElementById('inp-piezas').value  = t.piezas || '1';
       document.getElementById('chk-iva').checked   = t.iva || false;
+      document.getElementById('chk-empaque').checked = t.empaque !== false;
       document.getElementById('chk-mo').checked    = t.mo  || false;
       if (t.mo) {
         document.getElementById('mo-fields').style.display = 'flex';
@@ -1786,6 +1797,7 @@ tbody td:not(:first-child){text-align:right}
         moCosto:       document.getElementById('inp-mo-costo')?.value     || '20',
         moHoras:       document.getElementById('inp-mo-horas')?.value     || '1',
         iva:           document.getElementById('chk-iva')?.checked        || false,
+        empaque:       document.getElementById('chk-empaque')?.checked ?? true,
         singleMatId:   state.singleMatId,
         singleGrams:   state.singleGrams,
         singleHours:   document.getElementById('single-hours')?.value     || '',
@@ -1817,6 +1829,7 @@ tbody td:not(:first-child){text-align:right}
         document.getElementById('inp-piezas').value   = d.piezas    || '1';
         document.getElementById('inp-margen').value   = d.margen    || '60';
         document.getElementById('chk-iva').checked    = d.iva       || false;
+        document.getElementById('chk-empaque').checked = d.empaque !== false;
         document.getElementById('chk-mo').checked     = d.mo        || false;
         if (d.mo) {
           document.getElementById('mo-fields').style.display = 'flex';
@@ -1846,6 +1859,7 @@ tbody td:not(:first-child){text-align:right}
       document.getElementById('chk-multi-imp').checked  = false;
       document.getElementById('chk-mo').checked         = false;
       document.getElementById('chk-iva').checked        = false;
+      document.getElementById('chk-empaque').checked    = true;
       document.getElementById('mo-fields').style.display = 'none';
       document.getElementById('inp-cliente').value   = '';
       document.getElementById('inp-piezas').value    = '1';
@@ -1888,6 +1902,8 @@ tbody td:not(:first-child){text-align:right}
       if (m && r) r.value = m.value;
       const sub = document.getElementById('cq-settings-sub');
       if (sub) sub.textContent = `$${CONFIG.kwh}/kWh · fallas ${CONFIG.falla}% · empaque $${CONFIG.empaque}`;
+      const emp = document.getElementById('empaque-lbl');
+      if (emp) emp.textContent = fmt(CONFIG.empaque || 0);
     }
 
     document.addEventListener('click', e => {
@@ -1946,6 +1962,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260923s"></script>
+  <script src="nav.js?v=20260923t"></script>
 </body>
 </html>
