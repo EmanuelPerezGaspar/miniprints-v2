@@ -1169,30 +1169,6 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   background-position: 12px center !important;
   padding-left: 38px !important;
 }
-.vs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-.vs-tile {
-  position: relative;
-  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px;
-  min-height: 84px; padding: 12px 40px 12px 14px;
-  border: none; border-radius: 16px;
-  background: var(--ios-fill-2); color: var(--text);
-  font-family: var(--ios-font); text-align: left; cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 120ms, background 160ms, box-shadow 160ms;
-}
-.vs-tile:active { transform: scale(0.96); }
-.vs-tile:disabled { opacity: 0.45; cursor: default; }
-.vs-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
-.vs-tile.is-added { background: rgba(48, 209, 88, 0.14); box-shadow: inset 0 0 0 1.5px var(--ios-green); }
-.vs-tile-name { font-size: 15px; font-weight: 600; line-height: 1.25; word-break: break-word; }
-.vs-tile-meta { font-size: 13px; color: var(--ios-label-2); }
-.vs-tile-plus, .vs-tile-badge {
-  position: absolute; top: 10px; right: 10px;
-  width: 24px; height: 24px; display: grid; place-items: center;
-  border-radius: 50%; font-size: 15px; font-weight: 700;
-}
-.vs-tile-plus { background: var(--ios-fill); color: var(--ios-green); }
-.vs-tile-badge { background: var(--ios-green); color: var(--ios-on-accent); font-family: var(--ios-font-rounded); font-size: 13px; }
 .vs-empty { grid-column: 1 / -1; padding: 18px 0; text-align: center; font-size: 15px; color: var(--ios-label-2); line-height: 1.6; }
 .vs-empty a { color: var(--ios-green); font-weight: 600; }
 
@@ -1224,3 +1200,46 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .vs-item-row > * { min-width: 0; }
 .form-card .vs-price input { width: 100% !important; box-sizing: border-box; }
 .cq-bar-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+/* Lista compacta de piezas (pensada para 100+ productos) */
+.vs-cats { display: flex; gap: 8px; overflow-x: auto; margin: -2px -20px 0; padding: 2px 20px; scrollbar-width: none; }
+.vs-cats::-webkit-scrollbar { display: none; }
+.vs-cats button {
+  flex-shrink: 0; border: none; border-radius: 999px; padding: 7px 13px;
+  background: var(--ios-fill); color: var(--text);
+  font-family: var(--ios-font); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.vs-cats button span { color: var(--ios-label-2); font-variant-numeric: tabular-nums; margin-left: 2px; }
+.vs-cats button[aria-checked="true"] { background: var(--ios-green); color: var(--ios-on-accent); font-weight: 600; }
+.vs-cats button[aria-checked="true"] span { color: inherit; opacity: 0.75; }
+.vs-cats button:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
+
+.vs-list-head { display: flex; justify-content: space-between; font-size: 13px; color: var(--ios-label-2); margin-bottom: -6px; }
+.vs-list {
+  max-height: 392px; overflow-y: auto; overscroll-behavior: contain;
+  border-radius: 14px; background: var(--ios-fill-2);
+  -webkit-overflow-scrolling: touch;
+}
+.vs-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  width: 100%; min-height: 56px; padding: 8px 12px 8px 14px;
+  border: none; border-bottom: 0.5px solid var(--ios-separator); background: transparent;
+  color: var(--text); font-family: var(--ios-font); text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.vs-row:last-child { border-bottom: none; }
+.vs-row:active { background: rgba(var(--ink), 0.06); }
+.vs-row:disabled { opacity: 0.45; cursor: default; }
+.vs-row:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: -2px; }
+.vs-row.is-added { background: rgba(48, 209, 88, 0.12); }
+.vs-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.vs-row-name { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vs-row-meta { font-size: 13px; color: var(--ios-label-2); }
+.vs-row-plus, .vs-row-badge {
+  flex-shrink: 0; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%;
+  font-size: 18px; font-weight: 600;
+}
+.vs-row-plus { background: var(--ios-fill); color: var(--ios-green); }
+.vs-row-badge { background: var(--ios-green); color: var(--ios-on-accent); font-family: var(--ios-font-rounded); font-size: 14px; font-weight: 700; }
+@media (min-width: 900px) { .vs-list { max-height: 460px; } }
