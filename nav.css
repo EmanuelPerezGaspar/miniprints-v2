@@ -10,7 +10,9 @@
   --ios-stroke:   rgba(255, 255, 255, 0.16);
   --ios-bubble:   rgba(255, 255, 255, 0.13);
   --ios-sheet:    #1c1c1e;
-  --ios-group:    #2c2c2e;
+  --ios-group:    rgba(255, 255, 255, 0.09);
+  --sheet-glass:  rgba(30, 30, 34, 0.72);
+  --sheet-card:   rgba(255, 255, 255, 0.09);
   --ios-sep:      rgba(84, 84, 88, 0.55);
   --nav-text:     #ffffff;
   --nav-text-2:   rgba(235, 235, 245, 0.6);
@@ -28,8 +30,32 @@
 
 /* Transición entre páginas: la burbuja de la pestaña activa se desliza */
 @view-transition { navigation: auto; }
-::view-transition-group(tab-bubble) { animation-duration: 380ms; animation-timing-function: var(--ios-spring); }
-::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+::view-transition-group(tab-bubble) { animation-duration: 440ms; animation-timing-function: var(--ios-spring); }
+::view-transition-group(seg-thumb)  { animation-duration: 400ms; animation-timing-function: var(--ios-spring); }
+
+/* Cambio de pestaña: la pantalla anterior se desvanece y la nueva sube un poco al aparecer */
+::view-transition-old(root) { animation: 200ms cubic-bezier(0.4, 0, 1, 1) both vt-fade-out; }
+::view-transition-new(root) { animation: 460ms var(--ios-spring) 40ms both vt-rise-in; }
+/* Entrar a una sección: la nueva llega desde la derecha y la anterior se recorre y oscurece */
+:root[data-vt="push"]::view-transition-old(root) { animation: 500ms var(--ios-spring) both vt-push-old; }
+:root[data-vt="push"]::view-transition-new(root) { animation: 500ms var(--ios-spring) both vt-push-new; box-shadow: -12px 0 40px rgba(0, 0, 0, 0.28); }
+/* Regresar: la actual sale hacia la derecha */
+:root[data-vt="back"]::view-transition-old(root) { animation: 460ms var(--ios-spring) both vt-back-old; z-index: 1; box-shadow: -12px 0 40px rgba(0, 0, 0, 0.28); }
+:root[data-vt="back"]::view-transition-new(root) { animation: 460ms var(--ios-spring) both vt-back-new; }
+/* Piezas ↔ Material: solo un fundido rápido, el selector se desliza */
+:root[data-vt="seg"]::view-transition-old(root) { animation: 160ms ease-out both vt-fade; }
+:root[data-vt="seg"]::view-transition-new(root) { animation: 280ms ease-out 30ms both vt-fade reverse; }
+
+@keyframes vt-fade     { to   { opacity: 0; } }
+@keyframes vt-fade-out { to   { opacity: 0; transform: scale(0.985); } }
+@keyframes vt-rise-in  { from { opacity: 0; transform: translateY(16px) scale(0.99); } }
+@keyframes vt-push-old { to   { transform: translateX(-28%); filter: brightness(0.82); } }
+@keyframes vt-push-new { from { transform: translateX(100%); } }
+@keyframes vt-back-old { to   { transform: translateX(100%); } }
+@keyframes vt-back-new { from { transform: translateX(-28%); filter: brightness(0.82); } }
+
+/* Sin transiciones nativas: la pantalla entra con un fundido */
+.mp-enter .page-container { animation: vt-rise-in 460ms var(--ios-spring) backwards; }
 
 /* ── Tab bar ─────────────────────────────────────── */
 .tabbar {
@@ -197,79 +223,100 @@
   view-transition-name: seg-thumb;
 }
 
-/* ── Hoja "Más" (bottom sheet estilo Ajustes) ────── */
+/* ── Hojas (bottom sheet flotante, Liquid Glass) ───── */
 .sheet-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1100;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.42);
   opacity: 0;
-  transition: opacity 320ms var(--ios-spring);
+  transition: opacity 360ms var(--ios-spring);
 }
 .sheet-backdrop.open { opacity: 1; }
 
 .sheet {
+  --sheet-gap: 8px;
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: var(--sheet-gap); right: var(--sheet-gap);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--sheet-gap));
   z-index: 1101;
-  max-height: 88vh;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
-  border-radius: 22px 22px 0 0;
-  background: var(--ios-sheet);
+  padding: 14px 14px 20px;
+  border-radius: 38px;
+  background: var(--sheet-glass);
+  backdrop-filter: blur(40px) saturate(190%);
+  -webkit-backdrop-filter: blur(40px) saturate(190%);
+  border: 0.5px solid var(--ios-stroke);
   color: var(--nav-text);
   font-family: var(--ios-font);
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
-  transform: translateY(100%);
-  transition: transform 440ms var(--ios-spring);
+  box-shadow:
+    inset 0 1px 0 var(--nav-rim),
+    0 24px 70px rgba(0, 0, 0, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.2);
+  transform: translateY(calc(100% + 40px)) scale(0.96);
+  transform-origin: 50% 100%;
+  transition: transform 520ms var(--ios-spring);
+  scrollbar-width: none;
 }
-.sheet.open { transform: translateY(0); }
+.sheet::-webkit-scrollbar { display: none; }
+.sheet.open { transform: translateY(0) scale(1); }
 .sheet.dragging { transition: none; }
 
-.sheet-grabber {
-  width: 36px; height: 5px;
-  margin: 0 auto 10px;
-  border-radius: 3px;
-  background: var(--nav-text-3);
-}
+/* Sin asa: la hoja flota y se cierra con la X o deslizando */
+.sheet-grabber { display: none; }
+
+/* Encabezado: X en cristal a la izquierda y título centrado */
 .sheet-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
   align-items: center;
-  justify-content: space-between;
-  padding: 4px 4px 14px;
+  gap: 8px;
+  padding: 0 0 14px;
 }
-.sheet-head h2 { font-size: 22px; font-weight: 700; letter-spacing: 0.2px; }
+.sheet-head h2 {
+  grid-column: 2; grid-row: 1;
+  text-align: center;
+  font-size: 17px; font-weight: 600; letter-spacing: -0.43px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .sheet-close {
-  width: 30px; height: 30px;
+  grid-column: 1; grid-row: 1;
+  width: 44px; height: 44px;
   display: grid; place-items: center;
-  border: none;
+  border: 0.5px solid var(--ios-stroke);
   border-radius: 50%;
-  background: var(--nav-fill);
-  color: var(--nav-text-2);
+  background: var(--sheet-card);
+  color: var(--nav-text);
   cursor: pointer;
+  box-shadow: inset 0 1px 0 var(--nav-rim), 0 2px 8px rgba(0, 0, 0, 0.12);
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ios-spring);
 }
-.sheet-close svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+.sheet-close:active { transform: scale(0.9); }
+.sheet-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 
 .sheet-label {
-  padding: 0 16px 6px;
+  padding: 0 18px 7px;
   font-size: 13px;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--nav-text-2);
 }
 .sheet-group {
-  margin-bottom: 26px;
-  border-radius: 12px;
-  background: var(--ios-group);
+  margin-bottom: 18px;
+  border-radius: 26px;
+  background: var(--sheet-card);
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 .sheet-row {
   display: flex;
   align-items: center;
   gap: 14px;
   width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
+  min-height: 64px;
+  padding: 0 16px;
   border: none;
   background: none;
   color: var(--nav-text);
@@ -279,51 +326,58 @@
   text-decoration: none;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  transition: background 160ms;
 }
 .sheet-row:active { background: var(--nav-press); }
 .sheet-row:focus-visible { outline: 2px solid var(--ios-tint); outline-offset: -2px; }
 .sheet-row + .sheet-row .sheet-row-body { border-top: 0.5px solid var(--ios-sep); }
 .sheet-row-body {
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  min-height: 48px;
+  gap: 10px;
+  min-height: 64px;
   align-self: stretch;
 }
-.sheet-row-sub { font-size: 13px; color: var(--nav-text-2); }
-.sheet-row.is-current .sheet-row-sub { color: var(--ios-tint); }
+.sheet-row-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.sheet-row-title { font-size: 17px; letter-spacing: -0.43px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-row-sub { font-size: 13px; color: var(--nav-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sheet-row.is-current .sheet-row-sub { color: var(--ios-tint); font-weight: 600; }
+/* Íconos circulares con brillo, como en Apple Pay */
 .sheet-icon {
   flex-shrink: 0;
-  width: 30px; height: 30px;
+  width: 38px; height: 38px;
   display: grid; place-items: center;
-  border-radius: 7px;
+  border-radius: 50%;
   color: #fff;
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 60%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.18);
 }
-.sheet-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-icon svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .sheet-chev { width: 8px; height: 14px; flex-shrink: 0; stroke: var(--nav-text-3); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.sheet-row.danger { color: var(--nav-danger); }
+.sheet-row.danger .sheet-row-title { color: var(--nav-danger); }
 .sheet-foot { text-align: center; font-size: 12px; color: var(--nav-text-3); padding-top: 2px; }
 
 /* En pantallas anchas la hoja es una tarjeta centrada */
 @media (min-width: 900px) {
   .sheet {
     left: 50%; right: auto; bottom: auto; top: 50%;
-    width: 420px;
-    border-radius: 22px;
-    padding-bottom: 20px;
-    transform: translate(-50%, -46%) scale(0.96);
+    width: 440px;
+    max-height: 86vh;
+    transform: translate(-50%, -46%) scale(0.94);
+    transform-origin: 50% 50%;
     opacity: 0;
-    transition: transform 360ms var(--ios-spring), opacity 220ms;
+    transition: transform 420ms var(--ios-spring), opacity 240ms;
   }
-  .sheet.open { transform: translate(-50%, -50%); opacity: 1; }
-  .sheet-grabber { display: none; }
+  .sheet.open { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tabbar, .tab, .tab svg, .tab-bubble, .sheet, .sheet-backdrop { transition: none !important; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+  .mp-enter .page-container { animation: none !important; }
 }
 
 /* ── Modo claro ─────────────────────────────────── */
@@ -335,7 +389,9 @@
     --ios-stroke:   rgba(0, 0, 0, 0.08);
     --ios-bubble:   rgba(118, 118, 128, 0.14);
     --ios-sheet:    #f2f2f7;
-    --ios-group:    #ffffff;
+    --ios-group:    rgba(255, 255, 255, 0.86);
+    --sheet-glass:  rgba(242, 242, 247, 0.76);
+    --sheet-card:   rgba(255, 255, 255, 0.86);
     --ios-sep:      rgba(60, 60, 67, 0.29);
     --nav-text:     #000000;
     --nav-text-2:   rgba(60, 60, 67, 0.6);
@@ -349,7 +405,7 @@
     --nav-shadow:   rgba(0, 0, 0, 0.12);
   }
   .tabbar-glass::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent); }
-  .sheet { box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15); }
+  .sheet { box-shadow: inset 0 1px 0 var(--nav-rim), 0 24px 70px rgba(0, 0, 0, 0.18), 0 4px 14px rgba(0, 0, 0, 0.06); }
 }
 
 @media print {
