@@ -809,3 +809,6 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   /* El widget de meta se ve igual que en oscuro, con un borde sutil sobre gris claro */
   .goal-widget { box-shadow: inset 0 0 0 0.5px rgba(20, 40, 12, 0.08); }
 }
+
+/* Dashboard con solo el widget de meta: ancho de widget en pantallas grandes */
+.goal-widget--solo { max-width: 640px; }
