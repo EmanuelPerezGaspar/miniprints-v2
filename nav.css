@@ -3,7 +3,7 @@
    Móvil/iPad vertical: barra flotante abajo. Pantallas anchas: arriba.
 ───────────────────────────────────────────────── */
 :root {
-  --ios-font:     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ios-font:     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
   --ios-tint:     #30d158;
   --ios-label:    rgba(235, 235, 245, 0.62);
   --ios-glass:    rgba(28, 28, 32, 0.66);

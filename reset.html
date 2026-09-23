@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Reset — MiniPrints v2</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: #0a0f1a;
-      color: #e2e8f0;
+      font-family: var(--font);
+      background: #000000;
+      color: #f2f2f7;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -28,19 +28,19 @@
     }
     .icon { font-size: 3rem; margin-bottom: 1rem; }
     h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
-    p { color: #94a3b8; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
+    p { color: #aeaeb2; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
     .list {
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.2);
+      background: rgba(255,69,58,0.08);
+      border: 1px solid rgba(255,69,58,0.2);
       border-radius: 10px;
       padding: 1rem;
       margin-bottom: 1.5rem;
       text-align: left;
     }
-    .list span { display: block; font-size: 0.85rem; color: #fca5a5; padding: 2px 0; }
+    .list span { display: block; font-size: 0.85rem; color: #ff6961; padding: 2px 0; }
     .keep {
-      background: rgba(34,197,94,0.08);
-      border: 1px solid rgba(34,197,94,0.2);
+      background: rgba(48,209,88,0.08);
+      border: 1px solid rgba(48,209,88,0.2);
       border-radius: 10px;
       padding: 0.75rem 1rem;
       margin-bottom: 1.5rem;
@@ -49,7 +49,7 @@
       text-align: left;
     }
     .btn-reset {
-      background: #ef4444;
+      background: #ff453a;
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -64,7 +64,7 @@
     .btn-reset:hover { background: #dc2626; }
     .btn-back {
       background: transparent;
-      color: #94a3b8;
+      color: #aeaeb2;
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 10px;
       padding: 0.75rem 2rem;
@@ -73,32 +73,30 @@
       width: 100%;
       transition: border-color 0.2s;
     }
-    .btn-back:hover { border-color: #22c55e; color: #22c55e; }
+    .btn-back:hover { border-color: #30d158; color: #30d158; }
     .done {
       display: none;
-      color: #22c55e;
+      color: #30d158;
       font-weight: 600;
       font-size: 1.1rem;
       margin-top: 1rem;
     }
   </style>
+  <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#030303" />
+  <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
   <script type="module" src="firebase-sync.js"></script>
-  <div id="particles-bg" aria-hidden="true">
-    <div id="particles-vignette"></div>
-  </div>
 <style>
   #loom-bg {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: #0a0f1a;
+    background: #000000;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
 }'@
@@ -149,8 +147,6 @@
       setTimeout(() => location.href = 'index.html', 1500);
     }
   </script>
-  <script src="glass.js"></script>
-  <script type="module" src="particles.js"></script>
   <script src="nav.js"></script>
 </body>
 </html>

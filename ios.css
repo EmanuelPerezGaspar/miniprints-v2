@@ -1,0 +1,606 @@
+/* ─────────────────────────────────────────────────
+   MiniPrints — Sistema de diseño estilo iOS (modo oscuro)
+   Se carga después de styles.css y de los estilos de cada página,
+   así que aquí se redefinen tokens y componentes compartidos.
+───────────────────────────────────────────────── */
+:root {
+  /* Colores de sistema iOS (oscuro) */
+  --ios-green:  #30d158;
+  --ios-blue:   #0a84ff;
+  --ios-orange: #ff9f0a;
+  --ios-red:    #ff453a;
+  --ios-purple: #bf5af2;
+  --ios-indigo: #5e5ce6;
+  --ios-teal:   #64d2ff;
+  --ios-yellow: #ffd60a;
+  --ios-pink:   #ff375f;
+
+  /* Fondos agrupados */
+  --ios-bg:        #000000;
+  --ios-bg-2:      #1c1c1e;
+  --ios-bg-3:      #2c2c2e;
+  --ios-fill:      rgba(118, 118, 128, 0.24);
+  --ios-fill-2:    rgba(118, 118, 128, 0.16);
+  --ios-separator: rgba(84, 84, 88, 0.6);
+  --ios-label-2:   rgba(235, 235, 245, 0.6);
+  --ios-label-3:   rgba(235, 235, 245, 0.42);
+
+  --ios-font:         -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+  --ios-font-rounded: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+
+  /* Tokens que usan styles.css y las páginas */
+  --primary:       var(--ios-green);
+  --primary-dark:  #28b44c;
+  --accent:        var(--ios-purple);
+  --bg:            var(--ios-bg);
+  --bg2:           var(--ios-bg-2);
+  --bg3:           var(--ios-bg-3);
+  --surface:       var(--ios-bg-2);
+  --surface-hover: #232325;
+  --border:        var(--ios-separator);
+  --border-strong: rgba(48, 209, 88, 0.5);
+  --text:          #ffffff;
+  --text-muted:    var(--ios-label-2);
+  --text-dim:      var(--ios-label-3);
+  --radius:        22px;
+  --radius-sm:     12px;
+  --shadow:        none;
+  --shadow-glow:   none;
+  --font:          var(--ios-font);
+
+  color-scheme: dark;
+}
+
+/* ── Base ───────────────────────────────────────── */
+html, body { background: var(--ios-bg) !important; }
+body {
+  font-family: var(--ios-font);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
+}
+#particles-bg, .falling-bg, .falling-bg-overlay { display: none !important; }
+::selection { background: rgba(10, 132, 255, 0.45); }
+
+/* Números con la fuente redondeada de iOS */
+.kpi-value, .pill-val, .bm-value, .rh-amount, .sc-value, .goal-amount,
+.mat-stat-val, .qty-num, .kc-total-value, .kc-stat-value, .cs-val, .psi-qty,
+.rh-unitprice, .ci-total {
+  font-family: var(--ios-font-rounded);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Layout ─────────────────────────────────────── */
+.dash-main { padding: 28px 32px 40px; min-width: 0; }
+@media (max-width: 899px) { .dash-main { padding: 12px 16px 24px; } }
+
+/* Título grande (Large Title) */
+.dash-header { align-items: flex-end; margin-bottom: 22px; gap: 12px; }
+.dash-title {
+  font-size: 34px;
+  line-height: 41px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+}
+.dash-subtitle {
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--ios-label-2);
+  margin-top: 2px;
+}
+@media (max-width: 600px) {
+  .dash-header { flex-direction: column; align-items: stretch; }
+  .dash-toolbar { width: 100%; }
+  .dash-toolbar .btn { flex: 1; justify-content: center; }
+}
+
+/* Títulos de sección (estilo Salud / Fitness) */
+.section-lbl {
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  letter-spacing: 0.38px;
+  text-transform: none;
+  color: var(--text);
+  margin: 28px 0 10px;
+}
+.section-lbl::after { display: none; }
+.section-lbl:first-child { margin-top: 0; }
+
+/* ── Tarjetas ───────────────────────────────────── */
+.kpi-card, .kpi-combined-card, .chart-card, .table-card, .form-card, .config-panel,
+.res-table, .detail-table, .pill, .stat-chip, .goal-card, .bm-card, .mat-item,
+.pieza-card, .confirm-card, .result-hero, .alert-banner {
+  background: var(--ios-bg-2) !important;
+  border: none !important;
+  border-radius: var(--radius) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* Sin "saltitos" al pasar el cursor: iOS no mueve las tarjetas */
+.kpi-card:hover, .mat-item:hover, .pieza-card:hover, .bm-card:hover,
+.feature-card:hover, .placeholder-card:hover { transform: none !important; }
+.bm-card:hover { background: var(--ios-bg-2) !important; }
+
+/* Elementos dentro de tarjetas */
+.carrito-section, .tpl-item, .psi, .top-product-row {
+  background: var(--ios-bg-3) !important;
+  border: none !important;
+  border-radius: 14px !important;
+}
+
+.form-card, .chart-card { padding: 20px; }
+@media (max-width: 600px) { .form-card, .chart-card { padding: 16px; } }
+
+.form-card-title, .chart-title, .table-title, .res-table-head, .detail-table-head,
+.config-panel-title, .confirm-card-title {
+  font-size: 17px !important;
+  line-height: 22px;
+  font-weight: 600 !important;
+  letter-spacing: -0.43px !important;
+  text-transform: none !important;
+  color: var(--text) !important;
+}
+.config-panel-title, .res-table-head, .detail-table-head, .table-head { border-bottom: 0.5px solid var(--ios-separator) !important; }
+.form-card-title svg, .config-panel-title svg:not(.cfg-chevron), .res-table-head svg { color: var(--ios-green); }
+
+/* ── Etiquetas (sin mayúsculas ni tracking ancho) ── */
+.field label, .fb-field label, .kpi-label, .pill-lbl, .bm-label, .mat-stat-lbl,
+.sc-label, .rh-label, .goal-label, .sidebar-section-title, .mat-rows-header span,
+.time-row-header span, .kc-total-label, .kc-stat-label {
+  font-size: 13px !important;
+  line-height: 18px;
+  font-weight: 500 !important;
+  letter-spacing: -0.08px !important;
+  text-transform: none !important;
+  color: var(--ios-label-2) !important;
+}
+.rh-cliente {
+  font-size: 15px !important;
+  font-weight: 600;
+  letter-spacing: -0.24px !important;
+  text-transform: none !important;
+}
+
+/* ── Campos de formulario ───────────────────────── */
+.field input, .field select, .field textarea,
+.fb-field input, .fb-field select,
+.filters-row input, .filters-row select,
+.mat-select, .mat-grams, .goal-input, .select-period,
+.modal-box input, .modal-box select, .form-card textarea, .form-card input, .form-card select {
+  background-color: var(--ios-fill) !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  font-family: var(--ios-font) !important;
+  font-size: 17px !important;       /* 16px o más evita el zoom automático de iOS */
+  line-height: 22px;
+  padding: 11px 14px !important;
+  min-height: 44px;
+  box-shadow: none !important;
+  transition: background-color 160ms, box-shadow 160ms;
+}
+.field input::placeholder, .fb-field input::placeholder, .filters-row input::placeholder,
+.form-card input::placeholder, .form-card textarea::placeholder, .modal-box input::placeholder {
+  color: var(--ios-label-3);
+}
+.field input:focus, .field select:focus, .field textarea:focus,
+.fb-field input:focus, .fb-field select:focus,
+.filters-row input:focus, .filters-row select:focus,
+.mat-select:focus, .mat-grams:focus, .goal-input:focus, .select-period:focus,
+.modal-box input:focus, .modal-box select:focus,
+.form-card input:focus, .form-card select:focus, .form-card textarea:focus {
+  background-color: rgba(118, 118, 128, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.7) !important;
+  outline: none;
+}
+/* Selectores con flechas estilo menú de iOS */
+.field select, .fb-field select, .filters-row select, .mat-select, .select-period,
+.modal-box select, .form-card select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='16' viewBox='0 0 12 16' fill='none' stroke='%2330d158' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.5 6 6 2.5 9.5 6M2.5 10 6 13.5 9.5 10'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  background-size: 11px 15px !important;
+}
+select option { background: var(--ios-bg-3); color: #fff; }
+input[type="date"] { color-scheme: dark; }
+.fb-field input[type="date"] { width: 160px; }
+
+.field, .fb-field { gap: 6px; }
+.markup-hint { font-size: 13px; color: var(--ios-purple); }
+
+/* ── Interruptor iOS ───────────────────────────── */
+.toggle { width: 51px !important; height: 31px !important; }
+.toggle-track {
+  border: none !important;
+  border-radius: 16px !important;
+  background: rgba(120, 120, 128, 0.32) !important;
+  transition: background 220ms ease !important;
+}
+.toggle input:checked ~ .toggle-track { background: var(--ios-green) !important; }
+.toggle-thumb {
+  top: 2px !important; left: 2px !important;
+  width: 27px !important; height: 27px !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06) !important;
+  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+.toggle input:checked ~ .toggle-thumb { transform: translateX(20px) !important; }
+.toggle input:focus-visible ~ .toggle-track { box-shadow: 0 0 0 2px var(--ios-blue); }
+.toggle-label { font-size: 17px !important; color: var(--text) !important; }
+.toggle-row { min-height: 44px; }
+
+/* ── Botones (cápsula) ─────────────────────────── */
+.btn {
+  border-radius: 999px !important;
+  font-family: var(--ios-font) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.24px;
+  padding: 10px 18px !important;
+  min-height: 40px;
+  border: none !important;
+  box-shadow: none !important;
+  transition: opacity 160ms, transform 160ms cubic-bezier(0.32, 0.72, 0, 1), background 160ms !important;
+}
+.btn:active, .btn-calc:active, .btn-confirm:active, .btn-export:active,
+.metodo-btn:active, .add-row-btn:active, .tpl-load:active { transform: scale(0.96) !important; opacity: 0.85; }
+.btn:hover { transform: none !important; }
+.btn-primary, .btn-calc, .btn-confirm-yes, .goal-save-btn {
+  background: var(--ios-green) !important;
+  color: #000 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.btn-primary:hover, .btn-calc:hover { background: #3ade66 !important; }
+.btn-primary svg, .btn-calc svg { stroke: #000; }
+.btn-ghost, .btn-confirm-no, .btn-export {
+  background: var(--ios-fill) !important;
+  color: var(--ios-green) !important;
+  border: none !important;
+}
+.btn-ghost:hover, .btn-confirm-no:hover, .btn-export:hover { background: rgba(118, 118, 128, 0.32) !important; color: var(--ios-green) !important; }
+.btn-confirm-no { color: #fff !important; }
+.btn-export.wa { color: #25d366 !important; }
+.btn-calc {
+  border-radius: 999px !important;
+  min-height: 52px;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.43px !important;
+}
+.btn-confirm, .btn-export {
+  border-radius: 999px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  padding: 11px 18px !important;
+}
+
+.add-row-btn {
+  background: var(--ios-fill-2) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  color: var(--ios-green) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  min-height: 44px;
+}
+.rm-btn, .tpl-del, .pieza-card-del {
+  border: none !important;
+  border-radius: 50% !important;
+  background: rgba(255, 69, 58, 0.16) !important;
+  color: var(--ios-red) !important;
+}
+.pieza-card-del { background: rgba(0, 0, 0, 0.35) !important; color: rgba(255, 255, 255, 0.7) !important; }
+.pieza-card-del:hover { background: rgba(255, 69, 58, 0.3) !important; color: #fff !important; }
+.tpl-load {
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(48, 209, 88, 0.16) !important;
+  color: var(--ios-green) !important;
+  font-size: 13px !important;
+  padding: 5px 12px !important;
+}
+.tpl-name { font-size: 15px !important; color: var(--text) !important; }
+.tpl-type { background: var(--ios-fill) !important; border-radius: 999px !important; font-size: 11px !important; }
+.goal-edit-btn, .link-all { color: var(--ios-green) !important; font-size: 15px !important; font-weight: 500; }
+
+/* Controles segmentados */
+.chart-toggle {
+  background: var(--ios-fill) !important;
+  border: none !important;
+  border-radius: 9px !important;
+  padding: 2px !important;
+  gap: 0 !important;
+}
+.ct-btn {
+  border: none !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 5px 12px !important;
+}
+.ct-btn.active {
+  background: #636366 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* ── KPIs (estilo Salud) ───────────────────────── */
+.kpi-card { padding: 16px !important; gap: 4px; }
+.kpi-label { font-size: 15px !important; font-weight: 600 !important; color: var(--text) !important; letter-spacing: -0.24px !important; }
+.kpi-icon {
+  width: 30px !important; height: 30px !important;
+  border-radius: 50% !important;
+  border: none !important;
+}
+.kpi-icon svg { width: 16px; height: 16px; }
+.kpi-value {
+  font-size: 30px !important;
+  line-height: 36px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  margin-top: 6px;
+}
+.kpi-change, .sc-trend, .kpi-period { font-size: 13px !important; font-weight: 500 !important; }
+.pill { padding: 12px 16px !important; }
+.pill-val { font-size: 22px !important; font-weight: 700 !important; }
+.sc-value { font-size: 22px !important; font-weight: 700 !important; }
+.goal-amount { font-size: 28px !important; font-weight: 700 !important; }
+
+/* ── Barras de progreso ────────────────────────── */
+.bm-bar-track, .pbar, .goal-bar-wrap, .tp-bar-track, .kc-stat-bar {
+  background: var(--ios-fill) !important;
+  border-radius: 999px !important;
+}
+.pbar-green  { background: var(--ios-green)  !important; }
+.pbar-yellow { background: var(--ios-yellow) !important; }
+.pbar-red    { background: var(--ios-red)    !important; }
+.bm-card--cost   .bm-bar-fill { background: var(--ios-indigo) !important; }
+.bm-card--profit .bm-bar-fill { background: var(--ios-green)  !important; }
+.bm-card--iva    .bm-bar-fill { background: var(--ios-orange) !important; }
+.bm-card--unit   .bm-bar-fill { background: var(--ios-purple) !important; }
+.bm-card--cost .bm-value { color: #7d7aff !important; }
+.bm-card--iva  .bm-value { color: var(--ios-orange) !important; }
+.bm-value { font-size: 22px !important; font-weight: 700 !important; }
+.bm-sub, .bm-bar-hint, .bm-bar-pct { font-size: 12px !important; }
+
+/* ── Resultado del cotizador ───────────────────── */
+.result-hero { padding: 28px 20px !important; }
+.rh-amount {
+  font-size: 56px !important;
+  line-height: 1.05 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  color: var(--ios-green) !important;
+}
+.rh-unit, .rh-printer { font-size: 15px !important; color: var(--ios-label-2) !important; }
+.rh-unitprice {
+  border: none !important;
+  border-radius: 999px !important;
+  background: rgba(48, 209, 88, 0.16) !important;
+  font-size: 15px !important;
+}
+.rh-badge { border: none !important; border-radius: 999px !important; font-size: 12px !important; font-weight: 600 !important; padding: 4px 10px !important; }
+.confirm-card-sub { font-size: 15px !important; color: var(--ios-label-2) !important; }
+@media (max-width: 600px) { .rh-amount { font-size: 44px !important; } }
+
+/* Avisos */
+.stock-warn, .price-floor-warn {
+  border: none !important;
+  border-radius: 14px !important;
+  font-size: 15px !important;
+  padding: 12px 14px !important;
+}
+.stock-warn { background: rgba(255, 69, 58, 0.14) !important; }
+.price-floor-warn { background: rgba(255, 214, 10, 0.12) !important; }
+.alert-banner { background: rgba(255, 69, 58, 0.12) !important; padding: 14px 16px !important; }
+.alert-title { font-size: 15px !important; font-weight: 600 !important; }
+.alert-item { font-size: 13px !important; }
+
+/* ── Tablas como listas agrupadas ──────────────── */
+.table-card, .detail-table, .res-table { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 600px) { tbody td, thead th { white-space: nowrap; } }
+table { border-collapse: collapse; }
+thead th {
+  background: transparent !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.08px !important;
+  text-transform: none !important;
+  color: var(--ios-label-2) !important;
+  border-bottom: 0.5px solid var(--ios-separator) !important;
+}
+tbody tr { border-bottom: 0.5px solid var(--ios-separator) !important; }
+tbody tr:last-child { border-bottom: none !important; }
+tbody tr:hover { background: rgba(255, 255, 255, 0.03) !important; }
+tbody td { font-size: 15px; letter-spacing: -0.24px; }
+.filter-bar { border-bottom: 0.5px solid var(--ios-separator) !important; }
+
+/* Etiquetas de estado (cápsula) */
+.badge {
+  border: none !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  padding: 3px 10px !important;
+}
+.badge-success { background: rgba(48, 209, 88, 0.18) !important;  color: var(--ios-green) !important; }
+.badge-warning { background: rgba(255, 159, 10, 0.18) !important;  color: var(--ios-orange) !important; }
+.badge-info    { background: rgba(10, 132, 255, 0.18) !important;  color: #409cff !important; }
+.badge-error   { background: rgba(255, 69, 58, 0.18) !important;   color: var(--ios-red) !important; }
+
+/* ── Inventario ─────────────────────────────────── */
+.mat-item { padding: 14px 16px !important; margin-bottom: 8px !important; }
+.mat-name { font-size: 17px !important; font-weight: 600 !important; letter-spacing: -0.43px; }
+.mat-sub { font-size: 13px !important; color: var(--ios-label-2) !important; }
+.mat-stat-val { font-size: 17px !important; font-weight: 700 !important; }
+
+.pieza-card { border-radius: 20px !important; }
+.pieza-card-top.s-ok       { background: rgba(48, 209, 88, 0.16) !important; }
+.pieza-card-top.s-low      { background: rgba(255, 159, 10, 0.18) !important; }
+.pieza-card-top.s-critical { background: rgba(255, 69, 58, 0.18) !important; }
+.pieza-card-icon { border: none !important; border-radius: 50% !important; background: rgba(0, 0, 0, 0.25) !important; }
+.pieza-card-name { font-size: 15px !important; font-weight: 600 !important; letter-spacing: -0.24px; }
+.pieza-card-meta { font-size: 12px !important; color: var(--ios-label-2) !important; }
+/* Stepper de iOS */
+.qty-ctrl {
+  background: var(--ios-fill) !important;
+  border: none !important;
+  border-radius: 9px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+.qty-btn {
+  width: 32px !important; height: 30px !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 9px !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+}
+.qty-btn:active { background: rgba(255, 255, 255, 0.1) !important; }
+.qty-num { font-size: 15px !important; font-weight: 600 !important; min-width: 22px; }
+
+/* ── Ventas ─────────────────────────────────────── */
+.carrito-item { border-bottom: 0.5px solid var(--ios-separator) !important; font-size: 15px !important; }
+.ci-total, .cs-val { color: var(--ios-green) !important; }
+
+/* ── Modales (alerta / hoja de iOS) ────────────── */
+.modal-overlay, #modal-pago { background: rgba(0, 0, 0, 0.5) !important; backdrop-filter: none !important; }
+.modal-box {
+  background: rgba(37, 37, 39, 0.94) !important;
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: none !important;
+  border-radius: 22px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+}
+.modal-title { font-size: 17px !important; font-weight: 600 !important; letter-spacing: -0.43px; }
+.modal-sub { font-size: 13px !important; color: var(--ios-label-2) !important; }
+.metodo-btn {
+  background: var(--ios-fill) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-size: 17px !important;
+  min-height: 48px;
+}
+.metodo-btn:hover { background: rgba(118, 118, 128, 0.32) !important; }
+.modal-cancel { color: var(--ios-blue) !important; font-size: 17px !important; font-weight: 600; padding: 12px !important; }
+
+/* ── Aviso flotante (HUD) ──────────────────────── */
+#toast {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  max-width: min(92vw, 420px) !important;
+  background: rgba(44, 44, 46, 0.92) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 999px !important;
+  padding: 12px 20px !important;
+  font-size: 15px !important;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Badge de sincronización más discreto */
+#mp-sync-badge { font-family: var(--ios-font) !important; font-size: 12px !important; font-weight: 600 !important; border: none !important; }
+
+/* ── Tarjeta de cobertura del dashboard ────────── */
+.kc-fade { background: linear-gradient(to bottom, transparent, var(--ios-bg-2) 80%) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .toggle-thumb, .toggle-track { transition: none !important; }
+}
+
+/* ── Ajustes del dashboard ─────────────────────── */
+.charts-row { grid-template-columns: 1fr !important; }
+.charts-row .chart-card.chart-wide { grid-column: 1 / -1 !important; }
+.top-product-row {
+  background: transparent !important;
+  border-radius: 0 !important;
+  border-bottom: 0.5px solid var(--ios-separator) !important;
+}
+.top-product-row:last-child { border-bottom: none !important; }
+.psi-name { font-size: 15px !important; font-weight: 600 !important; }
+
+/* En iPhone los KPIs van de dos en dos, como los resúmenes de Salud */
+@media (max-width: 600px) {
+  .kpi-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .kpi-grid > .kpi-card { width: auto !important; }
+  .kpi-value { font-size: 24px !important; line-height: 30px !important; }
+  .kpi-card { padding: 14px !important; }
+}
+
+/* Los checkboxes de los interruptores quedan ocultos aunque estén dentro de .form-card */
+.toggle input[type="checkbox"] {
+  position: absolute !important;
+  opacity: 0 !important;
+  width: 0 !important; height: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+
+/* KPIs en rejilla adaptable en pantallas medianas y grandes */
+@media (min-width: 601px) {
+  .kpi-grid { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)) !important; gap: 12px !important; }
+  .kpi-grid > .kpi-card { width: auto !important; }
+}
+/* Subtítulos dentro de una tarjeta: más discretos */
+.form-card .section-lbl, .config-panel .section-lbl { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.43px; margin: 20px 0 8px; }
+
+/* Tarjetas de piezas */
+.pieza-card-qty-ghost { display: none !important; }
+.pieza-card-footer { flex-wrap: wrap; row-gap: 8px; }
+.pieza-card-footer .badge { white-space: nowrap; }
+
+/* Peso editable en la lista de materiales */
+.mat-peso-input {
+  width: 84px;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 9px;
+  background: var(--ios-fill);
+  color: #fff;
+  font-family: var(--ios-font-rounded);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+.mat-peso-input:focus { box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.7); }
+
+/* ── Pantalla de restablecer ───────────────────── */
+.card { background: var(--ios-bg-2) !important; border: none !important; border-radius: 26px !important; }
+.list { background: rgba(255, 69, 58, 0.12) !important; border: none !important; border-radius: 14px !important; }
+.keep { background: rgba(48, 209, 88, 0.12) !important; border: none !important; border-radius: 14px !important; color: var(--ios-green) !important; }
+.btn-reset {
+  border-radius: 999px !important;
+  min-height: 50px;
+  background: var(--ios-red) !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+}
+.btn-back {
+  border: none !important;
+  border-radius: 999px !important;
+  min-height: 50px;
+  background: var(--ios-fill) !important;
+  color: #fff !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+}
