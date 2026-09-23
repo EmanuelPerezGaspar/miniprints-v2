@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -12,7 +13,8 @@
   <script src="ios-charts.js"></script>
   <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
@@ -157,13 +159,13 @@
       const totalMateriales = Object.keys(DB.materials).length;
       const critico = Object.values(DB.materials).filter(m=>m.pesoTotal<=200).length;
       const margen = ingresos > 0 ? ((ganancia/ingresos)*100).toFixed(1) : '0';
-      const gananciaColor = parseFloat(margen)>=20?'#30d158':parseFloat(margen)>=10?'#ffd60a':'#ff453a';
+      const gananciaColor = parseFloat(margen)>=20?IOSC.green:parseFloat(margen)>=10?IOSC.yellow:IOSC.red;
 
       const costoProduccion = DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
       const coverageRatio  = costoProduccion > 0 ? ingresos / costoProduccion : (ingresos > 0 ? 1 : 0);
       const coveragePct    = (coverageRatio * 100).toFixed(1);
       const coverageFrac   = Math.min(coverageRatio, 1);
-      const dotColor       = coverageRatio >= 1 ? '#30d158' : coverageRatio >= 0.5 ? '#ffd60a' : '#ff453a';
+      const dotColor       = coverageRatio >= 1 ? IOSC.green : coverageRatio >= 0.5 ? IOSC.yellow : IOSC.red;
 
       const outerDots = genDots(36, 68, 80, 80);
       const innerDots = genDots(24, 52, 80, 80);
@@ -187,7 +189,7 @@
           <div class="kc-bottom">
             <div class="kc-stat">
               <div class="kc-stat-header">
-                <div class="kc-stat-bar" style="background:#bf5af2;"></div>
+                <div class="kc-stat-bar" style="background:var(--ios-purple);"></div>
                 <span class="kc-stat-label">Costo Prod.</span>
               </div>
               <div class="kc-stat-value">${fmt(costoProduccion)}</div>
@@ -205,7 +207,7 @@
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">Piezas en stock</span>
-            <div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
           </div>
           <div class="kpi-value">${totalPiezas}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
@@ -221,7 +223,7 @@
               return `<div class="psi" style="animation-delay:${delay}s">
                 <div class="psi-left">
                   <div class="psi-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                   </div>
                   <div class="psi-info">
                     <div class="psi-name" title="${nombre}">${nombre}</div>
@@ -241,10 +243,10 @@
         </div>
         <div class="kpi-card">
           <div class="kpi-top"><span class="kpi-label">Materiales</span>
-            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ff453a':'#bf5af2'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${critico>0?IOSC.red:IOSC.purple}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
           </div>
           <div class="kpi-value">${totalMateriales}</div>
-          <div class="kpi-change neutral" style="color:${critico>0?'#ff453a':'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
+          <div class="kpi-change neutral" style="color:${critico>0?IOSC.red:'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
         </div>`;
 
       const now = new Date();
@@ -266,7 +268,7 @@
             return `<tr>
               <td${titleAttr}>${piezaLbl}</td>
               <td>${cantV}</td>
-              <td style="color:#30d158;font-weight:600;">${fmt(totalV)}</td>
+              <td style="color:var(--ios-green);font-weight:600;">${fmt(totalV)}</td>
               <td style="color:var(--text-dim);font-size:0.8rem;">${v.fecha||'—'}</td>
             </tr>`;
           }).join('')
@@ -380,11 +382,11 @@
           .forEach(v=>{ ventaItems(v).forEach(it=>{ (hist[it.pieza]||[]).forEach(e=>{ gramsPerMat[e.matId]=(gramsPerMat[e.matId]||0)+e.grams*it.cantidad; }); }); });
         Object.entries(DB.materials).forEach(([id,mat])=>{
           const daily = (gramsPerMat[id]||0)/30;
-          if (daily>0) { const days=Math.round(mat.pesoTotal/daily); if(days<=DAYS) alerts.push({mat,days,clr:days<=3?'#ff453a':days<=7?'#ff9f0a':'#ffd60a'}); }
-          else if (mat.pesoTotal<=200 && !alerts.find(a=>a.mat.id===id)) alerts.push({mat,days:null,clr:'#ff453a'});
+          if (daily>0) { const days=Math.round(mat.pesoTotal/daily); if(days<=DAYS) alerts.push({mat,days,clr:days<=3?IOSC.red:days<=7?IOSC.orange:IOSC.yellow}); }
+          else if (mat.pesoTotal<=200 && !alerts.find(a=>a.mat.id===id)) alerts.push({mat,days:null,clr:IOSC.red});
         });
       } catch(e) {
-        Object.values(DB.materials).filter(m=>m.pesoTotal<=200).forEach(mat=>alerts.push({mat,days:null,clr:'#ff453a'}));
+        Object.values(DB.materials).filter(m=>m.pesoTotal<=200).forEach(mat=>alerts.push({mat,days:null,clr:IOSC.red}));
       }
       const el = document.getElementById('alert-banner');
       if (!alerts.length) { el.innerHTML=''; return; }
@@ -402,7 +404,7 @@
       const maxPeso = Math.max(...mats.map(m=>m.pesoTotal), 1);
       document.getElementById('mat-list').innerHTML = mats.length
         ? mats.map((m,i)=>{
-            const color = m.pesoTotal<=200?'#ff453a':m.pesoTotal<=500?'#ffd60a':'#30d158';
+            const color = m.pesoTotal<=200?IOSC.red:m.pesoTotal<=500?IOSC.yellow:IOSC.green;
             const pct = Math.round((m.pesoTotal/maxPeso)*100);
             return `<div class="top-product-row">
               <span class="tp-rank">#${i+1}</span>
@@ -437,7 +439,7 @@
       chartRev = new Chart(document.getElementById('chartRevenue'),{
         type:'bar',
         data:{labels:labM,datasets:[{label:'Ingresos',data:ingPorMes,
-          backgroundColor:ingPorMes.map((_,i)=>i===ultimo?IOS.green:'rgba(48,209,88,0.38)'),
+          backgroundColor:ingPorMes.map((_,i)=>i===ultimo?IOS.green:IOS.greenSoft),
           hoverBackgroundColor:IOS.green,maxBarThickness:44,borderRadius:8}]},
         options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},
           scales:IOS.scales(v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v)}
@@ -448,7 +450,6 @@
     }
 
     function renderPiezasChart() {
-      const grid = 'rgba(255,255,255,0.06)', tick = '#8e8e93';
       if (chartTop) { chartTop.destroy(); chartTop = null; }
       const piezaMap = {};
       DB.ventas.forEach(v=>{
@@ -464,12 +465,12 @@
         chartTop = new Chart(document.getElementById('chartStatus'),{
           type:'bar',
           data:{labels:sorted.map(([p])=>p.length>16?p.substring(0,16)+'…':p),datasets:[{label:piezasMode==='uds'?'Unidades':'Ingresos',data:vals,
-            backgroundColor:vals.map((_,i)=>i===0?IOS.green:'rgba(48,209,88,0.45)'),hoverBackgroundColor:IOS.green,barThickness:18,borderRadius:999}]},
+            backgroundColor:vals.map((_,i)=>i===0?IOS.green:IOS.greenSoft),hoverBackgroundColor:IOS.green,barThickness:18,borderRadius:999}]},
           options:{indexAxis:'y',interaction:{mode:'nearest',axis:'y',intersect:false},
             plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>piezasMode==='uds'?`${ctx.raw} uds`:fmt(ctx.raw)}}},
             scales:{
               x:{position:'top',grid:{color:IOS.grid,drawTicks:false},border:{display:false,dash:[3,3]},ticks:{color:IOS.label2,maxTicksLimit:5,padding:6,callback:v=>piezasMode==='ing'?(v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v):v}},
-              y:{grid:{display:false},border:{display:false},ticks:{color:'#fff',font:{size:13},padding:10}}}}
+              y:{grid:{display:false},border:{display:false},ticks:{color:IOS.text,font:{size:13},padding:10}}}}
         });
       } else {
         const el = document.getElementById('chartStatus');

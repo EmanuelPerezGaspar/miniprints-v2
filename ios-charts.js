@@ -1,13 +1,18 @@
 // MiniPrints — estilo de gráficas iOS para Chart.js (tipo Salud / Bolsa)
+// Toma los colores del tema activo desde IOSC (theme.js).
 (function () {
   const IOS = window.IOS = {
-    green:  '#30d158', blue:   '#0a84ff', orange: '#ff9f0a', red:    '#ff453a',
-    purple: '#bf5af2', indigo: '#5e5ce6', teal:   '#64d2ff', yellow: '#ffd60a',
-    label2: 'rgba(235,235,245,0.6)',
-    label3: 'rgba(235,235,245,0.3)',
-    grid:   'rgba(84,84,88,0.45)',
-    font:   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif',
+    font: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif',
   };
+
+  function syncPalette() {
+    const C = window.IOSC || {};
+    Object.assign(IOS, {
+      green: C.chartGreen, greenSoft: C.chartGreenSoft, greenRgb: C.chartGreenRgb,
+      purple: C.chartPurple, blue: C.blue, orange: C.orange, red: C.red,
+      text: C.text, label2: C.text2, label3: C.text3, grid: C.grid,
+    });
+  }
 
   // Degradado vertical que se desvanece, como el área bajo la línea en la app Bolsa
   IOS.gradient = function (rgb, top = 0.32) {
@@ -35,48 +40,55 @@
     };
   };
 
-  if (!window.Chart) return;
-  const D = Chart.defaults;
-  D.font.family = IOS.font;
-  D.font.size = 12;
-  D.color = IOS.label2;
-  D.borderColor = IOS.grid;
-  D.maintainAspectRatio = false;
-  D.animation.duration = 650;
-  D.animation.easing = 'easeOutQuart';
-  D.interaction.mode = 'index';
-  D.interaction.intersect = false;
+  function applyDefaults() {
+    syncPalette();
+    if (!window.Chart) return;
+    const C = window.IOSC || {};
+    const D = Chart.defaults;
+    D.font.family = IOS.font;
+    D.font.size = 12;
+    D.color = IOS.label2;
+    D.borderColor = IOS.grid;
+    D.maintainAspectRatio = false;
+    D.animation.duration = 650;
+    D.animation.easing = 'easeOutQuart';
+    D.interaction.mode = 'index';
+    D.interaction.intersect = false;
 
-  const tt = D.plugins.tooltip;
-  tt.backgroundColor = 'rgba(44,44,46,0.96)';
-  tt.titleColor = '#fff';
-  tt.bodyColor = 'rgba(235,235,245,0.85)';
-  tt.borderColor = 'rgba(255,255,255,0.08)';
-  tt.borderWidth = 0.5;
-  tt.cornerRadius = 12;
-  tt.padding = { x: 12, y: 9 };
-  tt.caretSize = 0;
-  tt.displayColors = false;
-  tt.titleFont = { weight: '600', size: 13 };
-  tt.bodyFont = { size: 13 };
+    const tt = D.plugins.tooltip;
+    tt.backgroundColor = C.tooltip;
+    tt.titleColor = C.text;
+    tt.bodyColor = C.tooltipText;
+    tt.borderColor = C.tooltipBorder;
+    tt.borderWidth = 0.5;
+    tt.cornerRadius = 12;
+    tt.padding = { x: 12, y: 9 };
+    tt.caretSize = 0;
+    tt.displayColors = false;
+    tt.titleFont = { weight: '600', size: 13 };
+    tt.bodyFont = { size: 13 };
 
-  const lg = D.plugins.legend;
-  lg.align = 'start';
-  lg.labels.usePointStyle = true;
-  lg.labels.pointStyle = 'circle';
-  lg.labels.boxWidth = 8;
-  lg.labels.boxHeight = 8;
-  lg.labels.padding = 16;
-  lg.labels.color = IOS.label2;
-  lg.labels.font = { size: 13 };
+    const lg = D.plugins.legend;
+    lg.align = 'start';
+    lg.labels.usePointStyle = true;
+    lg.labels.pointStyle = 'circle';
+    lg.labels.boxWidth = 8;
+    lg.labels.boxHeight = 8;
+    lg.labels.padding = 16;
+    lg.labels.color = IOS.label2;
+    lg.labels.font = { size: 13 };
 
-  D.elements.bar.borderRadius = 8;
-  D.elements.bar.borderSkipped = false;
-  D.elements.line.tension = 0.35;
-  D.elements.line.borderWidth = 2.5;
-  D.elements.line.borderCapStyle = 'round';
-  D.elements.point.radius = 0;
-  D.elements.point.hoverRadius = 6;
-  D.elements.point.hoverBorderWidth = 3;
-  D.elements.point.hoverBorderColor = '#1c1c1e';
+    D.elements.bar.borderRadius = 8;
+    D.elements.bar.borderSkipped = false;
+    D.elements.line.tension = 0.35;
+    D.elements.line.borderWidth = 2.5;
+    D.elements.line.borderCapStyle = 'round';
+    D.elements.point.radius = 0;
+    D.elements.point.hoverRadius = 6;
+    D.elements.point.hoverBorderWidth = 3;
+    D.elements.point.hoverBorderColor = C.card;
+  }
+
+  applyDefaults();
+  window.addEventListener('mp-theme-change', applyDefaults);
 })();
