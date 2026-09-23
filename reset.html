@@ -44,9 +44,9 @@
           <input type="file" id="rs-archivo" accept="application/json,.json" hidden />
         </div>
 
-        <h2 class="fn-sec-title">Qué borrar</h2>
+        <div class="hx-info" style="align-items:baseline"><h2 class="fn-sec-title" style="padding:6px 0 0">Qué borrar</h2><button type="button" id="rs-todo" onclick="seleccionarTodo()">Seleccionar todo</button></div>
         <div class="hx-list" id="rs-list"></div>
-        <div class="rs-keep"><b>Se conservan:</b> tus filamentos (marca, tipo, color y precio), los ajustes del taller, las plantillas, la meta del mes, las categorías y el grupo de WhatsApp.</div>
+        <div class="rs-keep"><b>Siempre se conservan:</b> los ajustes del taller (luz, fallas, empaque) y el grupo de WhatsApp.</div>
 
         <div class="rs-btns">
           <button type="button" class="inv-btn is-danger" id="rs-btn" onclick="pedirConfirmacion()">Borrar datos seleccionados</button>
@@ -91,20 +91,37 @@
       { id: 'piezas', titulo: 'Stock de piezas', color: 'var(--ios-orange)', icon: '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
         detalle: () => { const p = Object.values(get('mp_piezas', {})); return `${p.length} modelos · ${p.reduce((s, n) => s + n, 0)} unidades`; },
         borrar: () => { set('mp_piezas', {}); set('mp_historial', {}); } },
-      { id: 'filamento', titulo: 'Peso de filamentos', color: 'var(--ios-purple)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
-        detalle: () => `Regresa cada rollo a 1 kg`,
+      { id: 'materiales', titulo: 'Filamentos', color: 'var(--ios-purple)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
+        detalle: () => { const n = Object.keys(get('mp_materials', {})).length; return `${n} registrado${n !== 1 ? 's' : ''} · se borra la lista`; },
+        borrar: () => set('mp_materials', {}) },
+      { id: 'filamento', titulo: 'Solo el peso de filamentos', color: 'var(--ios-indigo)', icon: '<path d="M12 3v18M5 8l7-5 7 5"/>',
+        detalle: () => 'Conserva la lista y regresa cada rollo a 1 kg',
+        oculto: () => elegido.materiales,
         borrar: () => { const m = get('mp_materials', {}); Object.values(m).forEach(x => { x.pesoTotal = 1000; }); set('mp_materials', m); } },
+      { id: 'plantillas', titulo: 'Plantillas del cotizador', color: 'var(--ios-teal)', icon: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/>',
+        detalle: () => { const n = get('mp_templates', []).length; return `${n} guardada${n !== 1 ? 's' : ''}`; },
+        borrar: () => set('mp_templates', []) },
+      { id: 'extras', titulo: 'Meta del mes y categorías', color: 'var(--ios-pink)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8"/>',
+        detalle: () => { const n = Object.keys(get('mp_categorias', {})).length; const m = parseFloat(localStorage.getItem('mp_meta_mensual') || '0'); return `${m > 0 ? 'Meta $' + m.toLocaleString('es-MX') : 'Sin meta'} · ${n} categoría${n !== 1 ? 's' : ''} asignada${n !== 1 ? 's' : ''}`; },
+        borrar: () => { try { localStorage.setItem('mp_meta_mensual', '0'); } catch (e) {} set('mp_categorias', {}); } },
     ];
-    const elegido = Object.fromEntries(OPCIONES.map(o => [o.id, o.id !== 'filamento']));
+    const elegido = Object.fromEntries(OPCIONES.map(o => [o.id, ['ventas', 'cotizaciones', 'piezas'].includes(o.id)]));
+    const activas = () => OPCIONES.filter(o => elegido[o.id] && !(o.oculto && o.oculto()));
+    function seleccionarTodo() {
+      OPCIONES.forEach(o => { elegido[o.id] = o.id !== 'filamento'; });
+      render();
+    }
 
     function render() {
-      document.getElementById('rs-list').innerHTML = OPCIONES.map(o => `
+      document.getElementById('rs-list').innerHTML = OPCIONES.filter(o => !(o.oculto && o.oculto())).map(o => `
         <label class="rs-row">
           <span class="hx-ico" style="background:${o.color};color:#fff"><svg viewBox="0 0 24 24">${o.icon}</svg></span>
           <span class="hx-text"><span class="hx-title">${o.titulo}</span><span class="hx-meta">${esc(o.detalle())}</span></span>
           <span class="toggle"><input type="checkbox" data-id="${o.id}" ${elegido[o.id] ? 'checked' : ''} /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
         </label>`).join('');
-      const n = OPCIONES.filter(o => elegido[o.id]).length;
+      const n = activas().length;
+      const todo = OPCIONES.every(o => o.id === 'filamento' || elegido[o.id]);
+      document.getElementById('rs-todo').textContent = todo ? '' : 'Seleccionar todo';
       const btn = document.getElementById('rs-btn');
       btn.disabled = !n;
       btn.textContent = n ? `Borrar ${n} seleccionado${n !== 1 ? 's' : ''}` : 'Elige qué borrar';
@@ -115,14 +132,14 @@
     });
 
     function pedirConfirmacion() {
-      const sel = OPCIONES.filter(o => elegido[o.id]);
+      const sel = activas();
       if (!sel.length) return;
       document.getElementById('rs-resumen').innerHTML = sel.map(o =>
         `<div class="inv-group-row"><span>${o.titulo}</span><span>${esc(o.detalle())}</span></div>`).join('');
       MP_INV.abrir('sh-confirmar');
     }
     function borrar() {
-      OPCIONES.filter(o => elegido[o.id]).forEach(o => o.borrar());
+      activas().forEach(o => o.borrar());
       MP_INV.cerrar();
       render();
       MP_INV.toast('Datos borrados');
