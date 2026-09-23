@@ -985,3 +985,25 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .cat-info { flex: 1; }
 .cat-status { font-size: 14px; gap: 4px; min-width: 0; }
 .cat-status svg { width: 15px; height: 15px; }
+
+/* ── Ventas por mes (barras estilo app Salud) ──── */
+.month-card {
+  margin-top: 26px;
+  padding: 16px 16px 12px;
+  border-radius: 22px;
+  background: var(--ios-bg-2);
+  font-family: var(--ios-font);
+}
+.month-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.month-title { font-size: 17px; line-height: 22px; font-weight: 600; letter-spacing: -0.43px; color: var(--text); }
+.month-total { margin-top: 6px; display: flex; align-items: baseline; gap: 5px; }
+.month-total-num {
+  font-family: var(--ios-font-rounded);
+  font-variant-numeric: tabular-nums;
+  font-size: 28px; line-height: 32px; font-weight: 700;
+  color: var(--text);
+}
+.month-total-unit { font-size: 15px; font-weight: 500; color: var(--ios-label-2); }
+.month-caption { margin-top: 2px; font-size: 13px; color: var(--ios-label-2); }
+.month-chart { position: relative; height: 190px; margin-top: 12px; }
+@media (max-width: 600px) { .month-chart { height: 170px; } }
