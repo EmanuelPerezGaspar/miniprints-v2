@@ -32,25 +32,21 @@
             <h1 class="dash-title">Panel de Control</h1>
             <p class="dash-subtitle" id="dash-subtitle">Cargando datos…</p>
           </div>
-          <div class="dash-toolbar">
-            <a href="cotizador.html" class="btn btn-primary">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nueva cotización
-            </a>
-          </div>
         </div>
 
         <!-- Body: KPIs izquierda + contenido derecha -->
         <div class="dash-body">
 
-          <!-- Columna izquierda: Meta + KPIs -->
+          <!-- Columna izquierda: KPIs -->
           <div class="dash-left">
-            <div class="goal-card" id="goal-card"></div>
             <div class="kpi-grid" id="kpi-grid" role="list" aria-label="Indicadores clave"></div>
           </div>
 
           <!-- Contenido derecha -->
           <div class="dash-content">
+
+            <!-- Meta del mes -->
+            <section class="goal-widget" id="goal-card" aria-label="Meta del mes"></section>
 
             <!-- Alertas de re-orden -->
             <div id="alert-banner"></div>
@@ -331,21 +327,40 @@
       const meta   = parseFloat(localStorage.getItem('mp_meta_mensual')||'0');
       const ingEste = DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const pct    = meta>0 ? Math.min(ingEste/meta*100,100) : 0;
-      const barClr = pct>=100?'#30d158':pct>=60?'#ffd60a':'#ff453a';
+      const R = 38, C = 2 * Math.PI * R;
+      const fmtCorto = n => '$' + Math.round(n).toLocaleString('es-MX');
       document.getElementById('goal-card').innerHTML = `
-        <div class="goal-header">
-          <span class="goal-label">Meta del mes</span>
-          <button class="goal-edit-btn" onclick="toggleGoalInput()">✏ editar</button>
+        <div class="gw-top">
+          <span class="gw-chip">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+            Meta del mes
+          </span>
+          <button class="gw-edit" type="button" onclick="toggleGoalInput()" aria-label="Editar meta">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
+          </button>
         </div>
-        ${meta>0
-          ? `<div class="goal-amount">${fmt(meta)}</div>
-             <div class="goal-bar-wrap"><div class="goal-bar-fill" style="width:${pct}%;background:${barClr};"></div></div>
-             <div class="goal-pct" style="color:${barClr};">${pct.toFixed(1)}% · ${fmt(ingEste)} de ${fmt(meta)}</div>`
-          : `<div class="goal-empty">Sin meta establecida</div>`}
+        <div class="gw-body">
+          <div class="gw-text">
+            <h2 class="gw-title">${meta>0 ? (pct>=100 ? '¡Meta cumplida!' : 'Tu progreso del mes') : 'Define tu meta del mes'}</h2>
+            <p class="gw-sub">${meta>0 ? `${fmtCorto(ingEste)} de ${fmtCorto(meta)}` : 'Toca el lápiz para fijarla'}</p>
+          </div>
+          <div class="gw-ring" role="img" aria-label="${meta>0 ? pct.toFixed(0)+'% de la meta' : 'Sin meta'}">
+            <svg viewBox="0 0 96 96" aria-hidden="true">
+              <circle class="gw-track" cx="48" cy="48" r="${R}"/>
+              <circle class="gw-arc" cx="48" cy="48" r="${R}" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-offset="${C * (1 - pct / 100)}"/>
+            </svg>
+            <div class="gw-center"><span class="gw-num">${meta>0 ? Math.floor(pct) + '%' : '—'}</span><span class="gw-unit">${meta>0 ? 'logrado' : 'sin meta'}</span></div>
+          </div>
+        </div>
         <div class="goal-input-wrap" id="goal-input-wrap">
-          <input class="goal-input" id="goal-input" type="number" placeholder="Ej: 15000" value="${meta||''}">
+          <input class="goal-input" id="goal-input" type="number" inputmode="decimal" placeholder="Ej: 15000" value="${meta||''}" aria-label="Meta mensual en pesos">
           <button class="goal-save-btn" onclick="saveGoal()">Guardar</button>
         </div>`;
+      // Anima el anillo desde cero, como los widgets de iOS
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const arc = document.querySelector('#goal-card .gw-arc');
+        if (arc) arc.style.strokeDashoffset = arc.dataset.offset;
+      }));
     }
     function toggleGoalInput() { document.getElementById('goal-input-wrap').classList.toggle('open'); }
     function saveGoal() {

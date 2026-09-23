@@ -539,7 +539,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 
 /* En iPhone los KPIs van de dos en dos, como los resúmenes de Salud */
 @media (max-width: 600px) {
-  .kpi-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .kpi-grid:not(.dash-left .kpi-grid) { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
   .kpi-grid > .kpi-card { width: auto !important; }
   .kpi-value { font-size: 24px !important; line-height: 30px !important; }
   .kpi-card { padding: 14px !important; }
@@ -603,4 +603,139 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   color: #fff !important;
   font-size: 17px !important;
   font-weight: 600 !important;
+}
+
+/* ── Widget "Meta del mes" (estilo widget de iOS) ─ */
+.goal-widget {
+  --gw-bg:    #c4ee93;
+  --gw-ink:   #14280c;
+  --gw-ink-2: rgba(20, 40, 12, 0.62);
+  --gw-arc:   #2fb34f;
+  position: relative;
+  margin-bottom: 16px;
+  padding: 16px 18px 18px;
+  border-radius: 26px;
+  background: var(--gw-bg);
+  color: var(--gw-ink);
+  font-family: var(--ios-font);
+  overflow: hidden;
+}
+.gw-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px 5px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.08px;
+  color: var(--gw-ink);
+}
+.gw-chip svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.gw-edit {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--gw-ink);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms cubic-bezier(0.32, 0.72, 0, 1), background 160ms;
+}
+.gw-edit:hover { background: rgba(255, 255, 255, 0.7); }
+.gw-edit:active { transform: scale(0.9); }
+.gw-edit:focus-visible { outline: 2px solid var(--gw-ink); outline-offset: 2px; }
+.gw-edit svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+.gw-body { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 10px; }
+.gw-text { min-width: 0; }
+.gw-title {
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: var(--gw-ink);
+  max-width: 11ch;
+}
+.gw-sub {
+  margin-top: 6px;
+  font-family: var(--ios-font-rounded);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gw-ink-2);
+}
+
+.gw-ring { position: relative; flex-shrink: 0; width: 96px; height: 96px; }
+.gw-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.gw-track { fill: none; stroke: rgba(255, 255, 255, 0.75); stroke-width: 10; }
+.gw-arc {
+  fill: none;
+  stroke: var(--gw-arc);
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1100ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.gw-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.gw-num {
+  font-family: var(--ios-font-rounded);
+  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gw-ink);
+}
+.gw-unit { margin-top: 3px; font-size: 11px; font-weight: 500; color: var(--gw-ink-2); }
+
+/* Campo para editar la meta dentro del widget */
+.goal-widget .goal-input-wrap { margin-top: 14px; gap: 8px; }
+.goal-widget .goal-input-wrap.open { display: flex; }
+.goal-widget .goal-input {
+  flex: 1;
+  min-width: 0;
+  width: auto !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--gw-ink) !important;
+}
+.goal-widget .goal-input::placeholder { color: var(--gw-ink-2); }
+.goal-widget .goal-input:focus { box-shadow: 0 0 0 2px var(--gw-ink) !important; }
+.goal-widget .goal-save-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0 18px;
+  min-height: 44px;
+  background: var(--gw-ink) !important;
+  color: var(--gw-bg) !important;
+  font-family: var(--ios-font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+@media (max-width: 600px) {
+  .gw-num { font-size: 19px; }
+  .gw-title { font-size: 22px; line-height: 26px; }
+  .gw-ring { width: 84px; height: 84px; }
+  .goal-widget .goal-input-wrap.open { flex-direction: row; }
+  .goal-widget .goal-save-btn { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .gw-arc { transition: none; } }
+
+/* En iPhone el widget de meta va primero en la pantalla principal */
+@media (max-width: 768px) {
+  .dash-body { flex-direction: column; align-items: stretch !important; gap: 0 !important; }
+  .dash-content { display: contents; }
+  .dash-content > .goal-widget { order: -1; }
+  .dash-left { width: 100% !important; margin-bottom: 16px; gap: 12px !important; }
+  .dash-left .kpi-grid { display: flex !important; flex-direction: column !important; gap: 12px !important; }
 }
