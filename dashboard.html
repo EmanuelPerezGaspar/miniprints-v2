@@ -4,20 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20260923e"></script>
+  <script src="theme.js?v=20260923f"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923e" />
-  <link rel="stylesheet" href="ios.css?v=20260923e" />
-  <link rel="stylesheet" href="nav.css?v=20260923e" />
+  <link rel="stylesheet" href="styles.css?v=20260923f" />
+  <link rel="stylesheet" href="ios.css?v=20260923f" />
+  <link rel="stylesheet" href="nav.css?v=20260923f" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923e"></script>
+  <script type="module" src="firebase-sync.js?v=20260923f"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -54,17 +54,31 @@
             <div class="st-value" id="st-ventas-val"><span class="st-num">—</span> <span class="st-unit">ventas</span></div>
           </a>
         </div>
+
+        <!-- Ventas por categoría -->
+        <section class="cat-section" aria-labelledby="cat-title">
+          <div class="cat-head">
+            <h2 class="cat-title" id="cat-title">Ventas por categoría</h2>
+            <div class="cat-seg" role="radiogroup" aria-label="Periodo">
+              <button type="button" role="radio" data-range="mes" aria-checked="true">Este mes</button>
+              <button type="button" role="radio" data-range="todo" aria-checked="false">Todo</button>
+            </div>
+          </div>
+          <div class="cat-grid" id="cat-grid"></div>
+          <p class="cat-note" id="cat-note" hidden></p>
+        </section>
       </div>
     </main>
   </div>
 
   <script>
-    const DB = { ventas: [], piezas: {} };
+    const DB = { ventas: [], piezas: {}, categorias: {} };
     function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
     function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
     function loadDB() {
       try { const v = localStorage.getItem('mp_ventas');       if (v) DB.ventas       = JSON.parse(v); } catch(e){}
       try { const p = localStorage.getItem('mp_piezas');       if (p) DB.piezas       = JSON.parse(p); } catch(e){}
+      try { const c = localStorage.getItem('mp_categorias');   if (c) DB.categorias   = JSON.parse(c); } catch(e){}
     }
 
     function mesKey(v) {
@@ -134,6 +148,80 @@
       document.querySelector('#st-ventas-val .st-unit').textContent = ventasMes === 1 ? 'venta' : 'ventas';
     }
 
+    // ── Ventas por categoría ───────────────────────────
+    // Íconos en estilo SF Symbols (trazo)
+    const CATEGORIAS = [
+      { id: 'miniaturas', nombre: 'Miniaturas', icon: '<circle cx="12" cy="6.5" r="3"/><path d="M9.5 9.5 8.5 16h7l-1-6.5"/><path d="M6.5 20.5h11M7.5 16h9l1 4.5h-11z"/>' },
+      { id: 'llaveros',   nombre: 'Llaveros',   icon: '<circle cx="8" cy="15" r="4.5"/><path d="M11.2 11.8 20 3M16.5 6.5l2.5 2.5M14.5 8.5l2 2"/>' },
+      { id: 'figuras',    nombre: 'Figuras',    icon: '<path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 1 5.7L12 16.5l-5.1 2.7 1-5.7-4.1-4 5.7-.8z"/>' },
+      { id: 'oficina',    nombre: 'Oficina',    icon: '<rect x="3" y="7.5" width="18" height="12" rx="2.5"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5M3 13h18"/>' },
+      { id: 'hogar',      nombre: 'Hogar',      icon: '<path d="M7 11h10l-1.3 9H8.3z"/><path d="M12 11V7m0 0c0-2.2 1.8-3.5 4-3.5 0 2.2-1.8 3.5-4 3.5zm0 0c0-2.2-1.8-3.5-4-3.5 0 2.2 1.8 3.5 4 3.5z"/>' },
+    ];
+    // Mientras no se categoricen los productos, se adivina por el nombre
+    const CAT_PALABRAS = [
+      ['llaveros',   /llaver/i],
+      ['miniaturas', /miniatura|\bmini\b|warhammer|d&d|dnd|tabletop/i],
+      ['figuras',    /figura|estatua|busto|personaje|funko|anime/i],
+      ['oficina',    /oficina|soporte|organizador|porta ?(l[aá]piz|lapices|pluma|celular|tarjeta)|escritorio|lapicero/i],
+      ['hogar',      /maceta|hogar|l[aá]mpara|florero|jarr[oó]n|decora|gancho|posavaso|cocina/i],
+    ];
+    function categoriaDe(pieza) {
+      if (DB.categorias[pieza]) return DB.categorias[pieza];
+      const hit = CAT_PALABRAS.find(([, re]) => re.test(pieza || ''));
+      return hit ? hit[0] : null;
+    }
+
+    let catRange = 'mes';
+    const ICON_ESTADO = {
+      top:  '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M8 11.5v-7M5 7.2 8 4.2l3 3" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      ok:   '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.8 8.2 7 10.3l4.2-4.6" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      baja: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M8 4.5v7M5 8.8l3 3 3-3" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      cero: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M5 8h6" stroke="var(--cat-on)" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    };
+
+    function renderCategorias() {
+      const uds = Object.fromEntries(CATEGORIAS.map(c => [c.id, 0]));
+      let sinCategoria = 0;
+      DB.ventas
+        .filter(v => catRange === 'todo' || mesKey(v) === getMesActual())
+        .forEach(v => ventaItems(v).forEach(it => {
+          const cat = categoriaDe(it.pieza);
+          const n = Number(it.cantidad) || 0;
+          if (cat && cat in uds) uds[cat] += n; else sinCategoria += n;
+        }));
+      const max = Math.max(0, ...Object.values(uds));
+
+      document.getElementById('cat-grid').innerHTML = CATEGORIAS.map(c => {
+        const n = uds[c.id];
+        const pct = max > 0 ? n / max : 0;
+        const estado = n === 0 ? 'cero' : n === max ? 'top' : pct >= 0.5 ? 'ok' : 'baja';
+        const texto  = { top: 'Más vendida', ok: 'Normal', baja: 'Baja', cero: 'Sin ventas' }[estado];
+        const nivel  = Math.round(pct * 100);
+        return `
+          <article class="cat-card cat--${estado}" aria-label="${c.nombre}: ${n} ${n === 1 ? 'unidad' : 'unidades'}, ${texto}">
+            <div class="cat-info">
+              <div class="cat-name"><svg class="cat-ico" viewBox="0 0 24 24" aria-hidden="true">${c.icon}</svg>${c.nombre}</div>
+              <div class="cat-value"><span class="cat-num">${n.toLocaleString('es-MX')}</span><span class="cat-unit">uds</span></div>
+              <div class="cat-status">${ICON_ESTADO[estado]}${texto}</div>
+            </div>
+            <div class="cat-gauge" aria-hidden="true">
+              <div class="cat-fill" style="height:calc((100% - 8px) * ${nivel / 100})"></div>
+              <div class="cat-knob" style="bottom:calc(9px + (100% - 18px) * ${nivel / 100})"></div>
+            </div>
+          </article>`;
+      }).join('');
+
+      const note = document.getElementById('cat-note');
+      note.hidden = sinCategoria === 0;
+      note.textContent = sinCategoria ? `${sinCategoria} ${sinCategoria === 1 ? 'pieza vendida' : 'piezas vendidas'} sin categoría` : '';
+    }
+
+    document.querySelectorAll('.cat-seg button').forEach(b => b.addEventListener('click', () => {
+      catRange = b.dataset.range;
+      document.querySelectorAll('.cat-seg button').forEach(x => x.setAttribute('aria-checked', String(x === b)));
+      renderCategorias();
+    }));
+
     function renderSubtitle() {
       document.getElementById('dash-subtitle').textContent =
         'Actualizado ' + new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -144,10 +232,11 @@
       renderSubtitle();
       renderGoal();
       renderTiles();
+      renderCategorias();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923e"></script>
+  <script src="nav.js?v=20260923f"></script>
 </body>
 </html>
