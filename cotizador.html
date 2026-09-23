@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260923g"></script>
+  <script src="theme.js?v=20260923h"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923g" />
+  <link rel="stylesheet" href="styles.css?v=20260923h" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -539,192 +539,354 @@
       .mat-row { grid-template-columns: 1fr 72px 36px; }
       .time-row { grid-template-columns: 1fr 56px 56px 36px; }
     }
+
+    /* ── Cotizador guiado (rediseño iOS) ───────── */
+    .cq-header { max-width: 680px; }
+    .cq-wrap { max-width: 680px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 96px; }
+    .cq-step { display: flex; flex-direction: column; gap: 14px; }
+    .cq-step-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .cq-step-title { display: flex; align-items: center; gap: 10px; font-size: 20px; line-height: 25px; font-weight: 700; letter-spacing: 0.38px; color: var(--text); }
+    .cq-num {
+      width: 26px; height: 26px; flex-shrink: 0;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: var(--ios-green); color: var(--ios-on-accent);
+      font-family: var(--ios-font-rounded); font-size: 15px; font-weight: 700;
+    }
+    #mats-container, #time-container { display: flex; flex-direction: column; gap: 14px; }
+    .cq-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .cq-readout {
+      min-height: 44px; display: flex; align-items: center; padding: 0 14px;
+      border-radius: 12px; background: var(--ios-fill-2);
+      font-family: var(--ios-font-rounded); font-size: 17px; font-weight: 600; color: var(--ios-label-2);
+    }
+    .cq-inline-toggle { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: var(--ios-label-2); cursor: pointer; }
+
+    /* Chips (tipo de pieza) */
+    .cq-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cq-chips button {
+      border: none; border-radius: 999px; padding: 9px 15px; min-height: 38px;
+      background: var(--ios-fill); color: var(--text);
+      font-family: var(--ios-font); font-size: 15px; font-weight: 500; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; transition: background 160ms, color 160ms, transform 120ms;
+    }
+    .cq-chips button:active { transform: scale(0.95); }
+    .cq-chips button[aria-checked="true"] { background: var(--ios-green); color: var(--ios-on-accent); font-weight: 600; }
+
+    /* Control segmentado (urgencia, impresora) */
+    .cq-seg { display: flex; padding: 2px; border-radius: 10px; background: var(--ios-fill); }
+    .cq-seg button {
+      flex: 1; border: none; border-radius: 8px; padding: 8px 6px; min-height: 36px;
+      background: transparent; color: var(--text);
+      font-family: var(--ios-font); font-size: 14px; font-weight: 500; cursor: pointer; line-height: 1.15;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cq-seg button small { display: block; font-size: 11px; color: var(--ios-label-2); font-weight: 500; }
+    .cq-seg button[aria-checked="true"] { background: var(--ios-seg-thumb); font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
+    .cq-chips button:focus-visible, .cq-seg button:focus-visible, .cq-stepper button:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
+
+    /* Stepper de piezas */
+    .cq-stepper { display: flex; align-items: stretch; border-radius: 12px; background: var(--ios-fill); overflow: hidden; }
+    .cq-stepper button {
+      width: 44px; flex-shrink: 0; border: none; background: transparent; color: var(--ios-green);
+      font-size: 22px; font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .cq-stepper button:active { background: rgba(var(--ink), 0.08); }
+    .form-card .cq-stepper input {
+      min-width: 0; width: 100% !important; text-align: center;
+      background: transparent !important; padding: 11px 0 !important;
+      font-family: var(--ios-font-rounded) !important; font-weight: 600;
+    }
+
+    /* Ganancia: deslizador + número */
+    .cq-margin { display: flex; align-items: center; gap: 14px; }
+    .form-card .cq-margin input[type="range"] {
+      flex: 1; min-height: 0 !important; height: 28px; padding: 0 !important;
+      background: transparent !important; box-shadow: none !important; accent-color: var(--ios-green);
+    }
+    .cq-margin-val { display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
+    .form-card .cq-margin-val input {
+      width: 84px !important; text-align: right;
+      font-family: var(--ios-font-rounded) !important; font-size: 22px !important; font-weight: 700;
+    }
+    .cq-margin-val span { font-size: 17px; font-weight: 600; color: var(--ios-label-2); }
+
+    /* Lista con interruptores */
+    .cq-list { display: flex; flex-direction: column; border-top: 0.5px solid var(--ios-separator); }
+    .cq-list-row { display: flex; align-items: center; justify-content: space-between; min-height: 52px; font-size: 17px; color: var(--text); cursor: pointer; border-bottom: 0.5px solid var(--ios-separator); }
+    .cq-list-row:last-child { border-bottom: none; }
+    #mo-fields { padding: 10px 0 14px; border-bottom: 0.5px solid var(--ios-separator); }
+
+    /* Ajustes del taller (plegable) */
+    .cq-settings { padding: 0 !important; }
+    .cq-settings summary {
+      list-style: none; cursor: pointer; padding: 16px 20px;
+      display: flex; flex-direction: column; gap: 2px; position: relative;
+    }
+    .cq-settings summary::-webkit-details-marker { display: none; }
+    .cq-settings summary::after {
+      content: ''; position: absolute; right: 22px; top: 50%; width: 9px; height: 9px;
+      border-right: 2px solid var(--ios-label-3); border-bottom: 2px solid var(--ios-label-3);
+      transform: translateY(-70%) rotate(45deg); transition: transform 200ms;
+    }
+    .cq-settings[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+    .cq-settings-title { font-size: 17px; font-weight: 600; color: var(--text); }
+    .cq-settings-sub { font-size: 13px; color: var(--ios-label-2); }
+    .cq-settings-body { display: flex; flex-direction: column; gap: 14px; padding: 0 20px 20px; }
+
+    /* Plantillas */
+    .cq-tpl-row { display: flex; flex-direction: column; gap: 8px; }
+    .cq-tpl-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .cq-tpl-list::-webkit-scrollbar { display: none; }
+    .cq-tpl-empty { font-size: 13px; color: var(--ios-label-2); }
+    .cq-tpl-chip { display: inline-flex; align-items: center; flex-shrink: 0; border-radius: 999px; background: var(--ios-bg-2); overflow: hidden; }
+    .cq-tpl-load { border: none; background: none; color: var(--text); font-family: var(--ios-font); font-size: 15px; font-weight: 500; padding: 9px 4px 9px 14px; cursor: pointer; white-space: nowrap; }
+    .cq-tpl-del { border: none; background: none; color: var(--ios-label-3); font-size: 12px; padding: 9px 12px 9px 8px; cursor: pointer; }
+    .cq-link { align-self: flex-start; border: none; background: none; padding: 2px 0; color: var(--ios-green); font-family: var(--ios-font); font-size: 15px; font-weight: 500; cursor: pointer; }
+
+    /* Resultado */
+    #result-panel { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px; }
+    #result-panel .result-hero { margin-bottom: 0 !important; }
+    .cq-actions { display: flex; gap: 10px; }
+    .cq-actions .btn-export { flex: 0 0 auto; min-height: 50px; }
+    .cq-actions .btn-export.cq-action-main { flex: 1; background: #25d366 !important; color: #fff !important; font-size: 17px !important; }
+    .cq-details { border-radius: 22px; background: var(--ios-bg-2); padding: 0 16px; }
+    .cq-details summary { list-style: none; cursor: pointer; padding: 16px 0; font-size: 17px; font-weight: 600; color: var(--ios-green); }
+    .cq-details summary::-webkit-details-marker { display: none; }
+    .cq-details[open] { padding-bottom: 16px; }
+    .cq-details .breakdown-grid { margin-bottom: 12px; }
+    .cq-details .bm-card, .cq-details .res-table { background: var(--ios-bg-3) !important; }
+    .cq-details .res-table { margin-bottom: 12px; }
+
+    /* Barra fija con el precio en vivo */
+    .cq-bar {
+      position: fixed; z-index: 900;
+      left: 50%; transform: translateX(-50%);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
+      width: min(calc(100% - 32px), 640px);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 8px 8px 8px 18px;
+      border-radius: 22px;
+      background: var(--ios-material);
+      backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 0.5px solid rgba(var(--ink), 0.1);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      font-family: var(--ios-font);
+    }
+    .cq-bar-info { display: flex; flex-direction: column; min-width: 0; }
+    .cq-bar-label { font-size: 12px; color: var(--ios-label-2); }
+    .cq-bar-total { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 24px; line-height: 28px; font-weight: 700; color: var(--text); }
+    .cq-bar-sub { font-size: 12px; color: var(--ios-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cq-bar-btn {
+      flex-shrink: 0; border: none; border-radius: 999px; min-height: 48px; padding: 0 20px;
+      background: var(--ios-green); color: var(--ios-on-accent);
+      font-family: var(--ios-font); font-size: 16px; font-weight: 600; cursor: pointer;
+      transition: transform 120ms;
+    }
+    .cq-bar-btn:active { transform: scale(0.96); }
+    @media (min-width: 900px) {
+      .cq-bar { bottom: 20px; left: calc(32px + min(680px, 100% - 64px) / 2); width: min(680px, calc(100% - 64px)); }
+    }
+    @media (max-width: 380px) { .cq-row2 { grid-template-columns: 1fr; } .cq-bar-total { font-size: 21px; } }
+    @media print { .cq-bar, .cq-tpl-row, .cq-actions { display: none !important; } }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923g" />
-  <link rel="stylesheet" href="nav.css?v=20260923g" />
+  <link rel="stylesheet" href="ios.css?v=20260923h" />
+  <link rel="stylesheet" href="nav.css?v=20260923h" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923g"></script>
+  <script type="module" src="firebase-sync.js?v=20260923h"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
     <div class="dash-layout">
       <main class="dash-main">
-        <div class="dash-header">
+        <div class="dash-header cq-header">
           <div>
-            <h1 class="dash-title">Cotizador 3D</h1>
-            <p class="dash-subtitle">Calcula el precio de impresión considerando materiales, electricidad y margen.</p>
+            <h1 class="dash-title">Cotizar</h1>
+            <p class="dash-subtitle">Llena los pasos y el precio se calcula solo.</p>
           </div>
           <div class="dash-toolbar">
             <button class="btn btn-ghost" onclick="clearDraft()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nueva cotización
+              Nueva
             </button>
           </div>
         </div>
 
-        <div class="cot-grid">
-
-          <!-- Config panel (left) -->
-          <div class="cot-config">
-            <div class="config-panel" id="cfg-main">
-              <div class="config-panel-title" onclick="toggleConfig('cfg-main')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-                Configuración
-                <svg class="cfg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <div class="config-collapsible">
-              <div class="config-panel-body">
-
-                <div class="field">
-                  <label>Electricidad ($/kWh)</label>
-                  <input type="number" id="inp-kwh" value="5.00" min="0.1" step="0.1" onchange="saveConfig()" />
-                </div>
-
-                <div class="field">
-                  <label>Margen de falla (%)</label>
-                  <input type="number" id="inp-falla" value="10" min="0" max="50" step="1" onchange="saveConfig()" />
-                  <span class="markup-hint" id="falla-hint" style="cursor:pointer;" onclick="applyFallaSuggestion()"></span>
-                </div>
-
-                <div class="field">
-                  <label>Empaque / envío ($)</label>
-                  <input type="number" id="inp-empaque" value="12" min="0" step="1" onchange="saveConfig()" />
-                </div>
-
-                <div class="field">
-                  <label>% Ganancia</label>
-                  <input type="number" id="inp-margen" value="60" min="0" max="300" step="5" />
-                  <span class="markup-hint" id="markup-hint"></span>
-                </div>
-
-                <div class="field">
-                  <label>Tipo de pieza</label>
-                  <select id="inp-tipo-pieza" onchange="updateMarkupSuggestion()">
-                    <option value="">— General —</option>
-                    <option value="funcional">Funcional / Industrial</option>
-                    <option value="decorativa">Decorativa / Coleccionable</option>
-                    <option value="prototipo">Prototipo (emprendedor)</option>
-                    <option value="repuesto">Repuesto recurrente</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label>Urgencia</label>
-                  <select id="inp-urgencia">
-                    <option value="normal">Normal — sin sobrecargo</option>
-                    <option value="express">Express 2-3 días (+25%)</option>
-                    <option value="urgente">Urgente 24 hrs (+50%)</option>
-                  </select>
-                </div>
-
-                <div class="toggle-row">
-                  <span class="toggle-label">Mano de obra</span>
-                  <label class="toggle">
-                    <input type="checkbox" id="chk-mo" onchange="toggleMO()" />
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </label>
-                </div>
-                <div id="mo-fields" style="display:none; flex-direction:column; gap:10px;">
-                  <div class="field"><label>Costo / hora ($)</label><input type="number" id="inp-mo-costo" value="20" min="0" step="5" /></div>
-                  <div class="field"><label>Horas</label><input type="number" id="inp-mo-horas" value="1" min="0" step="0.5" /></div>
-                </div>
-                <div class="toggle-row">
-                  <span class="toggle-label">IVA (16%)</span>
-                  <label class="toggle">
-                    <input type="checkbox" id="chk-iva" />
-                    <span class="toggle-track"></span>
-                    <span class="toggle-thumb"></span>
-                  </label>
-                </div>
-              </div>
-              </div><!-- /config-collapsible -->
-            </div>
-
-            <!-- Templates panel -->
-            <div class="config-panel" id="cfg-tpl">
-              <div class="config-panel-title" onclick="toggleConfig('cfg-tpl')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Plantillas
-                <svg class="cfg-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-              </div>
-              <div class="config-collapsible">
-              <div class="config-panel-body" style="gap:10px;">
-                <div class="tpl-list" id="tpl-list"></div>
-                <button class="add-row-btn" onclick="saveTemplate()">+ Guardar como plantilla</button>
-              </div>
-              </div><!-- /config-collapsible -->
-            </div>
-
+        <div class="cq-wrap" id="cq-form">
+          <!-- Plantillas: empezar rápido -->
+          <div class="cq-tpl-row">
+            <div class="cq-tpl-list" id="tpl-list"></div>
+            <button class="cq-link" type="button" onclick="saveTemplate()">Guardar como plantilla</button>
           </div>
 
-          <!-- Form + result (right) -->
-          <div>
-            <!-- Datos generales -->
-            <div class="section-lbl">Datos generales</div>
-            <div class="form-card">
-              <div class="grid-2" style="margin-bottom:14px;">
-                <div class="field">
-                  <label>Cliente / Modelo</label>
-                  <input type="text" id="inp-cliente" placeholder="Nombre del proyecto..." oninput="debouncedSave()" />
-                </div>
-                <div class="field">
-                  <label>Teléfono (WhatsApp)</label>
-                  <input type="text" id="inp-telefono" placeholder="10 dígitos..." maxlength="15" oninput="debouncedSave()" />
-                </div>
-                <div class="field">
-                  <label>Piezas obtenidas</label>
-                  <input type="number" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
-                </div>
+          <!-- 1. Proyecto -->
+          <section class="form-card cq-step" aria-labelledby="cq-s1">
+            <h2 class="cq-step-title" id="cq-s1"><span class="cq-num">1</span>¿Qué vas a imprimir?</h2>
+            <div class="field">
+              <label for="inp-cliente">Cliente o modelo</label>
+              <input type="text" id="inp-cliente" placeholder="Ej: Ana López · Llavero logo" autocomplete="off" oninput="debouncedSave()" />
+            </div>
+            <div class="cq-row2">
+              <div class="field">
+                <label for="inp-telefono">WhatsApp (opcional)</label>
+                <input type="tel" inputmode="tel" id="inp-telefono" placeholder="10 dígitos" maxlength="15" oninput="debouncedSave()" />
               </div>
-              <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
-                <div class="toggle-row" style="gap:10px;">
-                  <span class="toggle-label" style="font-size:0.82rem;">Multicolor</span>
-                  <label class="toggle"><input type="checkbox" id="chk-multicolor" onchange="renderMats()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
-                </div>
-                <div class="toggle-row" style="gap:10px;">
-                  <span class="toggle-label" style="font-size:0.82rem;">Múltiples impresiones</span>
-                  <label class="toggle"><input type="checkbox" id="chk-multi-imp" onchange="renderTimes()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+              <div class="field">
+                <label for="inp-piezas">Piezas</label>
+                <div class="cq-stepper">
+                  <button type="button" aria-label="Menos piezas" onclick="stepPiezas(-1)">−</button>
+                  <input type="number" inputmode="numeric" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
+                  <button type="button" aria-label="Más piezas" onclick="stepPiezas(1)">+</button>
                 </div>
               </div>
             </div>
-
-            <!-- Materiales -->
-            <div class="section-lbl">Material(es)</div>
-            <div class="form-card" id="mats-container"></div>
-            <div class="stock-warn" id="stock-warn"></div>
-
-            <!-- Tiempo -->
-            <div class="section-lbl">Tiempo de impresión</div>
-            <div class="form-card" id="time-container"></div>
-
-            <!-- Precio mínimo warning -->
-            <div class="price-floor-warn" id="price-floor-warn"></div>
-
-            <!-- Calcular -->
-            <button class="btn-calc" onclick="calcular()">
-              Calcular Precio Final
-            </button>
-
-            <!-- Result panel -->
-            <div id="result-panel" style="display:none; margin-top:24px;">
-              <div class="section-lbl">Resultado</div>
-
-              <div class="result-hero" id="result-hero">
-                <div class="rh-cliente" id="res-cliente" style="display:none;"></div>
-                <div class="rh-label">Total a cobrar</div>
-                <div class="rh-amount" id="res-total">$0.00</div>
-                <div class="rh-unit">MXN</div>
-                <div class="rh-unitprice" id="res-unit" style="display:none;"></div>
-                <div class="rh-printer" id="res-printer"></div>
-                <div class="rh-badges" id="res-badges"></div>
+            <div class="field">
+              <label>Tipo de pieza</label>
+              <div class="cq-chips" data-for="inp-tipo-pieza" role="radiogroup" aria-label="Tipo de pieza">
+                <button type="button" data-v="">General</button>
+                <button type="button" data-v="decorativa">Decorativa</button>
+                <button type="button" data-v="funcional">Funcional</button>
+                <button type="button" data-v="prototipo">Prototipo</button>
+                <button type="button" data-v="repuesto">Repuesto</button>
               </div>
+              <select id="inp-tipo-pieza" hidden onchange="updateMarkupSuggestion()">
+                <option value="">General</option>
+                <option value="funcional">Funcional</option>
+                <option value="decorativa">Decorativa</option>
+                <option value="prototipo">Prototipo</option>
+                <option value="repuesto">Repuesto</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>¿Para cuándo?</label>
+              <div class="cq-seg" data-for="inp-urgencia" role="radiogroup" aria-label="Urgencia">
+                <button type="button" data-v="normal">Normal</button>
+                <button type="button" data-v="express">2-3 días <small>+25%</small></button>
+                <button type="button" data-v="urgente">24 h <small>+50%</small></button>
+              </div>
+              <select id="inp-urgencia" hidden>
+                <option value="normal">Normal</option>
+                <option value="express">Express</option>
+                <option value="urgente">Urgente</option>
+              </select>
+            </div>
+          </section>
 
+          <!-- 2. Material -->
+          <section class="form-card cq-step" aria-labelledby="cq-s2">
+            <div class="cq-step-head">
+              <h2 class="cq-step-title" id="cq-s2"><span class="cq-num">2</span>Material</h2>
+              <label class="cq-inline-toggle">Varios colores
+                <span class="toggle"><input type="checkbox" id="chk-multicolor" onchange="renderMats()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+            <div id="mats-container"></div>
+            <div class="stock-warn" id="stock-warn"></div>
+          </section>
+
+          <!-- 3. Impresión -->
+          <section class="form-card cq-step" aria-labelledby="cq-s3">
+            <div class="cq-step-head">
+              <h2 class="cq-step-title" id="cq-s3"><span class="cq-num">3</span>Tiempo de impresión</h2>
+              <label class="cq-inline-toggle">Varias impresiones
+                <span class="toggle"><input type="checkbox" id="chk-multi-imp" onchange="renderTimes()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+            <div id="time-container"></div>
+          </section>
+
+          <!-- 4. Precio -->
+          <section class="form-card cq-step" aria-labelledby="cq-s4">
+            <h2 class="cq-step-title" id="cq-s4"><span class="cq-num">4</span>Tu ganancia</h2>
+            <div class="cq-margin">
+              <input type="range" id="rng-margen" min="0" max="300" step="5" value="60" aria-label="Porcentaje de ganancia" />
+              <div class="cq-margin-val"><input type="number" inputmode="numeric" id="inp-margen" value="60" min="0" max="300" step="5" aria-label="Ganancia en porcentaje" oninput="debouncedSave()" /><span>%</span></div>
+            </div>
+            <span class="markup-hint" id="markup-hint"></span>
+            <div class="cq-list">
+              <label class="cq-list-row">
+                <span>Cobrar mano de obra</span>
+                <span class="toggle"><input type="checkbox" id="chk-mo" onchange="toggleMO()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+              </label>
+              <div id="mo-fields" class="cq-row2" style="display:none;">
+                <div class="field"><label for="inp-mo-costo">Costo por hora ($)</label><input type="number" inputmode="decimal" id="inp-mo-costo" value="20" min="0" step="5" /></div>
+                <div class="field"><label for="inp-mo-horas">Horas</label><input type="number" inputmode="decimal" id="inp-mo-horas" value="1" min="0" step="0.5" /></div>
+              </div>
+              <label class="cq-list-row">
+                <span>Agregar IVA (16%)</span>
+                <span class="toggle"><input type="checkbox" id="chk-iva" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+              </label>
+            </div>
+          </section>
+
+          <!-- Ajustes del taller (se cambian poco) -->
+          <details class="form-card cq-settings">
+            <summary>
+              <span class="cq-settings-title">Ajustes del taller</span>
+              <span class="cq-settings-sub" id="cq-settings-sub"></span>
+            </summary>
+            <div class="cq-settings-body">
+              <div class="field">
+                <label for="inp-kwh">Electricidad ($ por kWh)</label>
+                <input type="number" inputmode="decimal" id="inp-kwh" value="5.00" min="0.1" step="0.1" onchange="saveConfig()" />
+              </div>
+              <div class="field">
+                <label for="inp-falla">Margen por fallas (%)</label>
+                <input type="number" inputmode="decimal" id="inp-falla" value="10" min="0" max="50" step="1" onchange="saveConfig()" />
+                <span class="markup-hint" id="falla-hint" role="button" tabindex="0" style="cursor:pointer;" onclick="applyFallaSuggestion()"></span>
+              </div>
+              <div class="field">
+                <label for="inp-empaque">Empaque y envío ($)</label>
+                <input type="number" inputmode="decimal" id="inp-empaque" value="12" min="0" step="1" onchange="saveConfig()" />
+              </div>
+            </div>
+          </details>
+
+          <div class="price-floor-warn" id="price-floor-warn"></div>
+
+          <!-- Resultado -->
+          <div id="result-panel" style="display:none;">
+            <div class="result-hero" id="result-hero">
+              <div class="rh-cliente" id="res-cliente" style="display:none;"></div>
+              <div class="rh-label">Total a cobrar</div>
+              <div class="rh-amount" id="res-total">$0.00</div>
+              <div class="rh-unit">MXN</div>
+              <div class="rh-unitprice" id="res-unit" style="display:none;"></div>
+              <div class="rh-printer" id="res-printer"></div>
+              <div class="rh-badges" id="res-badges"></div>
+            </div>
+
+            <div class="cq-actions">
+              <button class="btn-export wa cq-action-main" onclick="sendWhatsApp()" aria-label="Enviar cotización por WhatsApp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+                WhatsApp
+              </button>
+              <button class="btn-export" onclick="exportPDF()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                PDF
+              </button>
+            </div>
+
+            <div class="confirm-card">
+              <div class="confirm-card-title">¿El cliente aceptó?</div>
+              <div class="confirm-card-sub">Si se imprime, se descuentan los materiales y las piezas pasan al inventario.</div>
+              <div class="confirm-btns">
+                <button class="btn-confirm btn-confirm-yes" onclick="confirmarImpresion(true)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
+                  Sí, se imprime
+                </button>
+                <button class="btn-confirm btn-confirm-no" onclick="confirmarImpresion(false)">Solo guardar cotización</button>
+              </div>
+              <div id="confirm-msg" style="margin-top:8px; font-size:13px; color:var(--text-dim);"></div>
+            </div>
+
+            <details class="cq-details">
+              <summary>Ver desglose del precio</summary>
               <div class="breakdown-grid">
                 <!-- Costo de producción -->
                 <div class="bm-card bm-card--cost">
@@ -802,21 +964,6 @@
                 </div>
               </div>
 
-              <div class="confirm-card">
-                <div class="confirm-card-title">¿Esta cotización se va a imprimir?</div>
-                <div class="confirm-card-sub">Confirmar descuenta materiales y agrega las piezas al inventario.</div>
-                <div class="confirm-btns">
-                  <button class="btn-confirm btn-confirm-yes" onclick="confirmarImpresion(true)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                    Sí, imprimir y guardar
-                  </button>
-                  <button class="btn-confirm btn-confirm-no" onclick="confirmarImpresion(false)">
-                    Solo cotización
-                  </button>
-                </div>
-                <div id="confirm-msg" style="margin-top:8px; font-size:0.78rem; color:var(--text-dim);"></div>
-              </div>
-
               <div class="res-table">
                 <div class="res-table-head">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
@@ -842,15 +989,18 @@
                   </table>
                 </div>
               </div>
-
-              <div class="export-row">
-                <button class="btn-export" onclick="exportPDF()">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                  Descargar PDF
-                </button>
-              </div>
-            </div>
+            </details>
           </div>
+        </div>
+
+        <!-- Barra fija con el precio en vivo -->
+        <div class="cq-bar" id="cq-bar" aria-live="polite">
+          <div class="cq-bar-info">
+            <span class="cq-bar-label">Precio estimado</span>
+            <span class="cq-bar-total" id="cq-bar-total">$0.00</span>
+            <span class="cq-bar-sub" id="cq-bar-sub"></span>
+          </div>
+          <button class="cq-bar-btn" type="button" onclick="calcular()">Ver cotización</button>
         </div>
       </main>
     </div>
@@ -1086,7 +1236,7 @@
     }
 
     /* ── Markup suggestion ────────────────────── */
-    function updateMarkupSuggestion() {
+    function updateMarkupSuggestion(aplicar = true) {
       const tipo = document.getElementById('inp-tipo-pieza')?.value;
       const hint = document.getElementById('markup-hint');
       const margenEl = document.getElementById('inp-margen');
@@ -1100,7 +1250,7 @@
       if (tipo && tips[tipo]) {
         hint.textContent = tips[tipo].label;
         hint.style.display = 'block';
-        margenEl.value = tips[tipo].val;
+        if (aplicar) margenEl.value = tips[tipo].val;  // al cargar borrador o plantilla se respeta la ganancia guardada
       } else {
         hint.style.display = 'none';
       }
@@ -1116,29 +1266,21 @@
       if (!isMulti) {
         const selId = state.singleMatId || (matsSorted()[0]?.id || '');
         c.innerHTML = `
-          <div class="grid-3">
+          <div class="field">
+            <label for="single-mat">Filamento</label>
+            <select id="single-mat" onchange="state.singleMatId=this.value; showStock(); checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
+          </div>
+          <div class="cq-row2">
             <div class="field">
-              <label>Material</label>
-              <select id="single-mat" onchange="state.singleMatId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
+              <label for="single-grams">Gramos del trabajo</label>
+              <input type="number" inputmode="decimal" id="single-grams" min="0" step="0.1" placeholder="0" value="${state.singleGrams}" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" />
             </div>
             <div class="field">
-              <label>Peso total del trabajo (g)</label>
-              <input type="number" id="single-grams" min="0" step="0.1" placeholder="0.0" value="${state.singleGrams}" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" />
-            </div>
-            <div class="field">
-              <label>Stock disponible</label>
-              <select id="single-mat-price-display" style="pointer-events:none; opacity:0.6;" tabindex="-1">
-                <option id="single-price-opt"></option>
-              </select>
+              <label>Tienes en stock</label>
+              <div class="cq-readout" id="single-stock">—</div>
             </div>
           </div>`;
-        const mat = DB.materials[selId];
-        const opt = document.getElementById('single-price-opt');
-        if (opt && mat) opt.textContent = (mat.pesoTotal || 0).toFixed(0) + 'g disponibles';
-        document.getElementById('single-mat')?.addEventListener('change', function () {
-          const m = DB.materials[this.value];
-          if (opt && m) opt.textContent = (m.pesoTotal || 0).toFixed(0) + 'g disponibles';
-        });
+        showStock();
       } else {
         if (state.matRows.length < 2) {
           const firstId = matsSorted()[0]?.id || '';
@@ -1170,6 +1312,7 @@
         c.appendChild(btn);
       }
       checkStock();
+      if (typeof updateLive === 'function') updateLive();
     }
 
     function removeMatRow(i) {
@@ -1186,11 +1329,18 @@
 
       if (!isMulti) {
         const prOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
-        c.innerHTML = `<div class="grid-3">
-          <div class="field"><label>Impresora</label><select id="single-printer" onchange="debouncedSave()">${prOpts}</select></div>
-          <div class="field"><label>Horas</label><input type="number" id="single-hours" min="0" step="1" placeholder="0" oninput="debouncedSave()" /></div>
-          <div class="field"><label>Minutos</label><input type="number" id="single-minutes" min="0" max="59" step="1" placeholder="0" oninput="debouncedSave()" /></div>
-        </div>`;
+        const prBtns = Object.keys(PRINTERS).map(k => `<button type="button" data-v="${k}">${k}</button>`).join('');
+        c.innerHTML = `
+          <div class="field">
+            <label>Impresora</label>
+            <div class="cq-seg" data-for="single-printer" role="radiogroup" aria-label="Impresora">${prBtns}</div>
+            <select id="single-printer" hidden onchange="debouncedSave()">${prOpts}</select>
+          </div>
+          <div class="cq-row2">
+            <div class="field"><label for="single-hours">Horas</label><input type="number" inputmode="numeric" id="single-hours" min="0" step="1" placeholder="0" oninput="debouncedSave()" /></div>
+            <div class="field"><label for="single-minutes">Minutos</label><input type="number" inputmode="numeric" id="single-minutes" min="0" max="59" step="1" placeholder="0" oninput="debouncedSave()" /></div>
+          </div>`;
+        syncUI();
       } else {
         const defaultPrinter = state.timeRows[0]?.printer || 'A1 MINI';
         if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', printer: defaultPrinter }, { h: '', m: '', printer: defaultPrinter }];
@@ -1239,7 +1389,8 @@
     }
 
     /* ── Calcular ─────────────────────────────── */
-    function calcular() {
+    // Calcula el precio con lo que hay en el formulario (sin pintar nada)
+    function computeQuote() {
       const KWH   = CONFIG.kwh;
       const FALLA = CONFIG.falla / 100;
 
@@ -1320,6 +1471,12 @@
       const printerDisplay = isMultiImp
         ? [...new Set(detTiempos.map(d => d.printer))].join(' + ')
         : printerName;
+
+      return { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, ivaMonto, precioFinal, xUnidad, printerDisplay };
+    }
+
+    function calcular(opts = {}) {
+      const { KWH, FALLA, printerName, printer, margenPct, numPiezas, aplicaMO, costoMOH, horasMO, aplicaIva, urgencia, tipoPieza, telefono, urgFactor, costoMat, detMat, isMulti, tiempo, costoElec, costoMaq, isMultiImp, detTiempos, costoMO, costoBase, margenFalla, subtotalFalla, ganancia, baseConGanancia, baseUrgencia, urgenciaMonto, ivaMonto, precioFinal, xUnidad, printerDisplay } = computeQuote();
 
       // Store pending cotización (NOT saved yet — only when user confirms)
       state.pendingCot = {
@@ -1436,7 +1593,8 @@
       document.getElementById('confirm-msg').textContent = '';
       const panel = document.getElementById('result-panel');
       panel.style.display = 'block';
-      setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      if (opts.scroll !== false) setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+      updateBar({ precioFinal, xUnidad, numPiezas });
       saveDraft();
     }
 
@@ -1678,17 +1836,14 @@ tbody td:not(:first-child){text-align:right}
       let tpls = [];
       try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
       if (!tpls.length) {
-        list.innerHTML = '<div class="tpl-empty">Sin plantillas guardadas</div>';
+        list.innerHTML = '<span class="cq-tpl-empty">Guarda tus trabajos frecuentes como plantilla para cotizar en segundos.</span>';
         return;
       }
-      const tipoLabels = { funcional:'Func', decorativa:'Decor', prototipo:'Proto', repuesto:'Rep' };
       list.innerHTML = tpls.map((t, i) => `
-        <div class="tpl-item">
-          <span class="tpl-name" title="${t.nombre || ''}">${t.nombre || 'Sin nombre'}</span>
-          ${t.tipo ? `<span class="tpl-type">${tipoLabels[t.tipo] || t.tipo}</span>` : ''}
-          <button class="tpl-load" onclick="loadTemplate(${i})">Cargar</button>
-          <div class="tpl-del" onclick="deleteTemplate(${i})" title="Eliminar">✕</div>
-        </div>`).join('');
+        <span class="cq-tpl-chip">
+          <button type="button" class="cq-tpl-load" onclick="loadTemplate(${i})">${escapeHtml(t.nombre || 'Sin nombre')}</button>
+          <button type="button" class="cq-tpl-del" onclick="deleteTemplate(${i})" aria-label="Eliminar plantilla ${escapeHtml(t.nombre || '')}">✕</button>
+        </span>`).join('');
     }
 
     function saveTemplate() {
@@ -1750,7 +1905,7 @@ tbody td:not(:first-child){text-align:right}
       }
       const tp = document.getElementById('inp-tipo-pieza');
       const ug = document.getElementById('inp-urgencia');
-      if (tp) { tp.value = t.tipo    || ''; updateMarkupSuggestion(); }
+      if (tp) { tp.value = t.tipo    || ''; updateMarkupSuggestion(false); }
       if (ug)   ug.value = t.urgencia || 'normal';
       if (!t.multiImp) {
         const h = document.getElementById('single-hours');   if (h) h.value = t.singleHours || '';
@@ -1824,7 +1979,7 @@ tbody td:not(:first-child){text-align:right}
           document.getElementById('inp-mo-costo').value = d.moCosto || '20';
           document.getElementById('inp-mo-horas').value = d.moHoras || '1';
         }
-        const tp = document.getElementById('inp-tipo-pieza');   if (tp) { tp.value = d.tipoPieza || ''; updateMarkupSuggestion(); }
+        const tp = document.getElementById('inp-tipo-pieza');   if (tp) { tp.value = d.tipoPieza || ''; updateMarkupSuggestion(false); }
         const ug = document.getElementById('inp-urgencia');     if (ug)  ug.value = d.urgencia  || 'normal';
         if (!d.multiImp) {
           const h = document.getElementById('single-hours');   if (h) h.value = d.singleHours || '';
@@ -1864,6 +2019,74 @@ tbody td:not(:first-child){text-align:right}
       showToast('Nueva cotización lista');
     }
 
+    /* ── Formulario guiado: ayudantes ─────────── */
+    function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]); }
+
+    function showStock() {
+      const el = document.getElementById('single-stock');
+      const m = DB.materials[document.getElementById('single-mat')?.value];
+      if (el) el.textContent = m ? `${Math.round(m.pesoTotal || 0).toLocaleString('es-MX')} g` : '—';
+    }
+
+    function stepPiezas(d) {
+      const el = document.getElementById('inp-piezas');
+      el.value = Math.max(1, (parseInt(el.value) || 1) + d);
+      debouncedSave(); updateLive();
+    }
+
+    // Chips y controles segmentados: reflejan el valor de su <select> oculto
+    function syncUI() {
+      document.querySelectorAll('.cq-chips[data-for], .cq-seg[data-for]').forEach(group => {
+        const sel = document.getElementById(group.dataset.for);
+        if (!sel) return;
+        group.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === sel.value)));
+      });
+      const m = document.getElementById('inp-margen'), r = document.getElementById('rng-margen');
+      if (m && r) r.value = m.value;
+      const sub = document.getElementById('cq-settings-sub');
+      if (sub) sub.textContent = `$${CONFIG.kwh}/kWh · fallas ${CONFIG.falla}% · empaque $${CONFIG.empaque}`;
+    }
+
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.cq-chips[data-for] button, .cq-seg[data-for] button');
+      if (!b) return;
+      const sel = document.getElementById(b.parentElement.dataset.for);
+      if (!sel) return;
+      sel.value = b.dataset.v;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      syncUI(); debouncedSave(); updateLive();
+    });
+
+    // Precio en vivo en la barra inferior
+    function updateBar(q) {
+      document.getElementById('cq-bar-total').textContent = fmt(q.precioFinal);
+      document.getElementById('cq-bar-sub').textContent = q.numPiezas > 1 ? `${fmt(q.xUnidad)} c/u · ${q.numPiezas} piezas` : '';
+    }
+    let _liveTimer = null;
+    function updateLive() {
+      clearTimeout(_liveTimer);
+      _liveTimer = setTimeout(() => {
+        // Si el resultado ya está abierto, se mantiene al día sin mover la pantalla
+        if (document.getElementById('result-panel').style.display !== 'none') { calcular({ scroll: false }); return; }
+        let q;
+        try { q = computeQuote(); } catch (e) { return; }
+        updateBar(q);
+      }, 120);
+    }
+
+    document.getElementById('cq-form').addEventListener('input', e => {
+      if (e.target.id === 'rng-margen') { document.getElementById('inp-margen').value = e.target.value; debouncedSave(); }
+      if (e.target.id === 'inp-margen') document.getElementById('rng-margen').value = e.target.value;
+      updateLive();
+    });
+    document.getElementById('cq-form').addEventListener('change', () => { syncUI(); updateLive(); });
+
+    // Al cargar borrador o plantilla, o al limpiar, refrescar chips y precio
+    ['loadDraft', 'loadTemplate', 'clearDraft', 'saveConfig'].forEach(n => {
+      const f = window[n];
+      window[n] = function (...args) { const r = f.apply(this, args); syncUI(); updateLive(); return r; };
+    });
+
     /* ── Init ─────────────────────────────────── */
     function mpInit() {
       loadDB();
@@ -1873,11 +2096,13 @@ tbody td:not(:first-child){text-align:right}
       loadDraft();
       updateFallaSuggestion();
       renderTemplates();
+      syncUI();
+      updateLive();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260923g"></script>
+  <script src="nav.js?v=20260923h"></script>
 </body>
 </html>
