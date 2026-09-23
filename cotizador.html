@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260923h"></script>
+  <script src="theme.js?v=20260923i"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923h" />
+  <link rel="stylesheet" href="styles.css?v=20260923i" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -554,6 +554,9 @@
       font-family: var(--ios-font-rounded); font-size: 15px; font-weight: 700;
     }
     #mats-container, #time-container { display: flex; flex-direction: column; gap: 14px; }
+    .cq-pieces { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .cq-pieces label { font-size: 17px; color: var(--text); }
+    .cq-pieces .cq-stepper { width: 160px; }
     .cq-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .cq-readout {
       min-height: 44px; display: flex; align-items: center; padding: 0 14px;
@@ -690,15 +693,15 @@
     @media (max-width: 380px) { .cq-row2 { grid-template-columns: 1fr; } .cq-bar-total { font-size: 21px; } }
     @media print { .cq-bar, .cq-tpl-row, .cq-actions { display: none !important; } }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923h" />
-  <link rel="stylesheet" href="nav.css?v=20260923h" />
+  <link rel="stylesheet" href="ios.css?v=20260923i" />
+  <link rel="stylesheet" href="nav.css?v=20260923i" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923h"></script>
+  <script type="module" src="firebase-sync.js?v=20260923i"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -731,18 +734,12 @@
               <label for="inp-cliente">Cliente o modelo</label>
               <input type="text" id="inp-cliente" placeholder="Ej: Ana López · Llavero logo" autocomplete="off" oninput="debouncedSave()" />
             </div>
-            <div class="cq-row2">
-              <div class="field">
-                <label for="inp-telefono">WhatsApp (opcional)</label>
-                <input type="tel" inputmode="tel" id="inp-telefono" placeholder="10 dígitos" maxlength="15" oninput="debouncedSave()" />
-              </div>
-              <div class="field">
-                <label for="inp-piezas">Piezas</label>
-                <div class="cq-stepper">
-                  <button type="button" aria-label="Menos piezas" onclick="stepPiezas(-1)">−</button>
-                  <input type="number" inputmode="numeric" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
-                  <button type="button" aria-label="Más piezas" onclick="stepPiezas(1)">+</button>
-                </div>
+            <div class="cq-pieces">
+              <label for="inp-piezas">Piezas</label>
+              <div class="cq-stepper">
+                <button type="button" aria-label="Menos piezas" onclick="stepPiezas(-1)">−</button>
+                <input type="number" inputmode="numeric" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
+                <button type="button" aria-label="Más piezas" onclick="stepPiezas(1)">+</button>
               </div>
             </div>
             <div class="field">
@@ -1969,7 +1966,6 @@ tbody td:not(:first-child){text-align:right}
         renderTimes();
 
         document.getElementById('inp-cliente').value  = d.cliente   || '';
-        document.getElementById('inp-telefono').value = d.telefono  || '';
         document.getElementById('inp-piezas').value   = d.piezas    || '1';
         document.getElementById('inp-margen').value   = d.margen    || '60';
         document.getElementById('chk-iva').checked    = d.iva       || false;
@@ -2004,7 +2000,6 @@ tbody td:not(:first-child){text-align:right}
       document.getElementById('chk-iva').checked        = false;
       document.getElementById('mo-fields').style.display = 'none';
       document.getElementById('inp-cliente').value   = '';
-      document.getElementById('inp-telefono').value  = '';
       document.getElementById('inp-piezas').value    = '1';
       document.getElementById('inp-margen').value    = '60';
       document.getElementById('inp-mo-costo').value  = '20';
@@ -2103,6 +2098,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260923h"></script>
+  <script src="nav.js?v=20260923i"></script>
 </body>
 </html>
