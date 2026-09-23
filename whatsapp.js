@@ -1,5 +1,5 @@
 // MiniPrints — mensajes de WhatsApp (ventas).
-// Abre WhatsApp con el mensaje escrito; se elige el chat dentro de WhatsApp.
+// Las ventas se envían al grupo configurado (ver enviarAGrupo).
 (function () {
   const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -23,12 +23,56 @@
     return msg;
   }
 
-  function abrir(texto, telefono) {
-    const tel = String(telefono || '').replace(/\D/g, '');
-    const url = (tel ? `https://wa.me/52${tel}` : 'https://wa.me/') + '?text=' + encodeURIComponent(texto);
+  function abrirUrl(url) {
     const w = window.open(url, '_blank');
     if (!w) window.location.href = url;   // si el navegador bloquea la ventana nueva
   }
 
-  window.MP_WA = { venta, abrir };
+  // Abre WhatsApp con el texto escrito (a un número, o para elegir el chat)
+  function abrir(texto, telefono) {
+    const tel = String(telefono || '').replace(/\D/g, '');
+    abrirUrl((tel ? `https://wa.me/52${tel}` : 'https://wa.me/') + '?text=' + encodeURIComponent(texto));
+  }
+
+  // ── Grupo fijo ───────────────────────────────────
+  // WhatsApp no permite dejar un mensaje escrito en un grupo desde un enlace.
+  // Por eso se copia el mensaje y se abre el grupo con su enlace de invitación;
+  // solo falta pegar y enviar.
+  const KEY = 'mp_wa_grupo';
+  const RE_GRUPO = /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]{10,}/;
+
+  function grupo() { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+  function guardarGrupo(link) {
+    const l = String(link || '').trim();
+    if (l && !RE_GRUPO.test(l)) return false;
+    try { l ? localStorage.setItem(KEY, l) : localStorage.removeItem(KEY); } catch (e) { return false; }
+    return true;
+  }
+
+  function copiar(texto) {
+    let ok = false;
+    try {   // copia síncrona: funciona en iOS dentro del mismo toque
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select(); ta.setSelectionRange(0, texto.length);
+      ok = document.execCommand('copy');
+      ta.remove();
+    } catch (e) {}
+    try { navigator.clipboard && navigator.clipboard.writeText(texto).catch(() => {}); ok = true; } catch (e) {}
+    return ok;
+  }
+
+  // Devuelve 'grupo' si abrió el grupo configurado o 'elegir' si no hay grupo
+  function enviarAGrupo(texto) {
+    const g = grupo();
+    if (!g) { abrir(texto); return 'elegir'; }
+    copiar(texto);
+    abrirUrl(g);
+    return 'grupo';
+  }
+
+  window.MP_WA = { venta, abrir, grupo, guardarGrupo, enviarAGrupo, copiar };
 })();

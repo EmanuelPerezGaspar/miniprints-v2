@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260923n"></script>
-  <script src="categorias.js?v=20260923n"></script>
-  <script src="whatsapp.js?v=20260923n"></script>
+  <script src="theme.js?v=20260923o"></script>
+  <script src="categorias.js?v=20260923o"></script>
+  <script src="whatsapp.js?v=20260923o"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923n" />
+  <link rel="stylesheet" href="styles.css?v=20260923o" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -88,15 +88,15 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923n" />
-  <link rel="stylesheet" href="nav.css?v=20260923n" />
+  <link rel="stylesheet" href="ios.css?v=20260923o" />
+  <link rel="stylesheet" href="nav.css?v=20260923o" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923n"></script>
+  <script type="module" src="firebase-sync.js?v=20260923o"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -166,6 +166,26 @@
               </div>
             </details>
           </section>
+
+          <!-- Grupo de WhatsApp al que se envían las ventas -->
+          <details class="form-card vs-wa" id="vs-wa">
+            <summary>
+              <span class="vs-wa-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg></span>
+              <span class="vs-wa-text"><span class="vs-wa-title">Grupo de WhatsApp</span><span class="vs-wa-sub" id="vs-wa-sub">Sin configurar</span></span>
+            </summary>
+            <div class="vs-wa-body">
+              <p>Cada venta se copia y se abre este grupo; solo pegas y envías.</p>
+              <ol>
+                <li>En WhatsApp abre el grupo y toca su nombre.</li>
+                <li>Toca <b>Invitar mediante enlace</b> › <b>Copiar enlace</b>.</li>
+                <li>Pégalo aquí y guarda.</li>
+              </ol>
+              <div class="vs-wa-row">
+                <input type="url" id="vs-wa-link" placeholder="https://chat.whatsapp.com/…" autocomplete="off" aria-label="Enlace del grupo de WhatsApp" />
+                <button type="button" class="btn btn-primary" onclick="guardarGrupoWA()">Guardar</button>
+              </div>
+            </div>
+          </details>
         </div>
 
         <!-- Barra fija: total y registrar -->
@@ -404,8 +424,8 @@
       DB.ventas.unshift(venta);
       saveVentas();
 
-      // Enviar el resumen de la venta por WhatsApp
-      MP_WA.abrir(MP_WA.venta(venta));
+      // Enviar el resumen de la venta al grupo de WhatsApp
+      const envio = MP_WA.enviarAGrupo(MP_WA.venta(venta));
 
       carrito = [];
       renderCarrito();
@@ -414,7 +434,9 @@
       document.getElementById('venta-notas').value = '';
       document.getElementById('vs-buscar').value = '';
       calcularPopularidad(); refreshPiezaSelect(); syncSeg();
-      showToast(`Venta registrada: ${fmt(total)} · abriendo WhatsApp`);
+      showToast(envio === 'grupo'
+        ? `Venta registrada: ${fmt(total)} · mensaje copiado, pégalo en el grupo`
+        : `Venta registrada: ${fmt(total)} · elige el chat en WhatsApp`);
     }
 
     function toggleMetodoPago() {
@@ -429,6 +451,22 @@
       });
     }
 
+    // ── Configuración del grupo de WhatsApp ──
+    function renderGrupoWA() {
+      const g = MP_WA.grupo();
+      document.getElementById('vs-wa-sub').textContent = g ? 'Configurado · las ventas se envían aquí' : 'Sin configurar · toca para agregarlo';
+      document.getElementById('vs-wa-sub').classList.toggle('is-ok', !!g);
+      document.getElementById('vs-wa-link').value = g;
+      if (!g) document.getElementById('vs-wa').open = true;
+    }
+    function guardarGrupoWA() {
+      const link = document.getElementById('vs-wa-link').value;
+      if (!MP_WA.guardarGrupo(link)) return showToast('Ese no parece un enlace de grupo (https://chat.whatsapp.com/…)');
+      renderGrupoWA();
+      document.getElementById('vs-wa').open = false;
+      showToast(link.trim() ? 'Grupo de WhatsApp guardado' : 'Grupo de WhatsApp quitado');
+    }
+
     function mpInit() {
       loadDB();
       calcularPopularidad();
@@ -436,10 +474,11 @@
       refreshPiezaSelect();
       renderCarrito();
       syncSeg();
+      renderGrupoWA();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
-    window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); });
+    window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20260923n"></script>
+  <script src="nav.js?v=20260923o"></script>
 </body>
 </html>
