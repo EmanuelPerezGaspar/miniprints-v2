@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260923i"></script>
+  <script src="theme.js?v=20260923j"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923i" />
+  <link rel="stylesheet" href="styles.css?v=20260923j" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -540,168 +540,16 @@
       .time-row { grid-template-columns: 1fr 56px 56px 36px; }
     }
 
-    /* ── Cotizador guiado (rediseño iOS) ───────── */
-    .cq-header { max-width: 680px; }
-    .cq-wrap { max-width: 680px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 96px; }
-    .cq-step { display: flex; flex-direction: column; gap: 14px; }
-    .cq-step-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .cq-step-title { display: flex; align-items: center; gap: 10px; font-size: 20px; line-height: 25px; font-weight: 700; letter-spacing: 0.38px; color: var(--text); }
-    .cq-num {
-      width: 26px; height: 26px; flex-shrink: 0;
-      display: grid; place-items: center;
-      border-radius: 50%;
-      background: var(--ios-green); color: var(--ios-on-accent);
-      font-family: var(--ios-font-rounded); font-size: 15px; font-weight: 700;
-    }
-    #mats-container, #time-container { display: flex; flex-direction: column; gap: 14px; }
-    .cq-pieces { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .cq-pieces label { font-size: 17px; color: var(--text); }
-    .cq-pieces .cq-stepper { width: 160px; }
-    .cq-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .cq-readout {
-      min-height: 44px; display: flex; align-items: center; padding: 0 14px;
-      border-radius: 12px; background: var(--ios-fill-2);
-      font-family: var(--ios-font-rounded); font-size: 17px; font-weight: 600; color: var(--ios-label-2);
-    }
-    .cq-inline-toggle { display: inline-flex; align-items: center; gap: 10px; font-size: 15px; color: var(--ios-label-2); cursor: pointer; }
-
-    /* Chips (tipo de pieza) */
-    .cq-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .cq-chips button {
-      border: none; border-radius: 999px; padding: 9px 15px; min-height: 38px;
-      background: var(--ios-fill); color: var(--text);
-      font-family: var(--ios-font); font-size: 15px; font-weight: 500; cursor: pointer;
-      -webkit-tap-highlight-color: transparent; transition: background 160ms, color 160ms, transform 120ms;
-    }
-    .cq-chips button:active { transform: scale(0.95); }
-    .cq-chips button[aria-checked="true"] { background: var(--ios-green); color: var(--ios-on-accent); font-weight: 600; }
-
-    /* Control segmentado (urgencia, impresora) */
-    .cq-seg { display: flex; padding: 2px; border-radius: 10px; background: var(--ios-fill); }
-    .cq-seg button {
-      flex: 1; border: none; border-radius: 8px; padding: 8px 6px; min-height: 36px;
-      background: transparent; color: var(--text);
-      font-family: var(--ios-font); font-size: 14px; font-weight: 500; cursor: pointer; line-height: 1.15;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .cq-seg button small { display: block; font-size: 11px; color: var(--ios-label-2); font-weight: 500; }
-    .cq-seg button[aria-checked="true"] { background: var(--ios-seg-thumb); font-weight: 600; box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04); }
-    .cq-chips button:focus-visible, .cq-seg button:focus-visible, .cq-stepper button:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
-
-    /* Stepper de piezas */
-    .cq-stepper { display: flex; align-items: stretch; border-radius: 12px; background: var(--ios-fill); overflow: hidden; }
-    .cq-stepper button {
-      width: 44px; flex-shrink: 0; border: none; background: transparent; color: var(--ios-green);
-      font-size: 22px; font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent;
-    }
-    .cq-stepper button:active { background: rgba(var(--ink), 0.08); }
-    .form-card .cq-stepper input {
-      min-width: 0; width: 100% !important; text-align: center;
-      background: transparent !important; padding: 11px 0 !important;
-      font-family: var(--ios-font-rounded) !important; font-weight: 600;
-    }
-
-    /* Ganancia: deslizador + número */
-    .cq-margin { display: flex; align-items: center; gap: 14px; }
-    .form-card .cq-margin input[type="range"] {
-      flex: 1; min-height: 0 !important; height: 28px; padding: 0 !important;
-      background: transparent !important; box-shadow: none !important; accent-color: var(--ios-green);
-    }
-    .cq-margin-val { display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
-    .form-card .cq-margin-val input {
-      width: 84px !important; text-align: right;
-      font-family: var(--ios-font-rounded) !important; font-size: 22px !important; font-weight: 700;
-    }
-    .cq-margin-val span { font-size: 17px; font-weight: 600; color: var(--ios-label-2); }
-
-    /* Lista con interruptores */
-    .cq-list { display: flex; flex-direction: column; border-top: 0.5px solid var(--ios-separator); }
-    .cq-list-row { display: flex; align-items: center; justify-content: space-between; min-height: 52px; font-size: 17px; color: var(--text); cursor: pointer; border-bottom: 0.5px solid var(--ios-separator); }
-    .cq-list-row:last-child { border-bottom: none; }
-    #mo-fields { padding: 10px 0 14px; border-bottom: 0.5px solid var(--ios-separator); }
-
-    /* Ajustes del taller (plegable) */
-    .cq-settings { padding: 0 !important; }
-    .cq-settings summary {
-      list-style: none; cursor: pointer; padding: 16px 20px;
-      display: flex; flex-direction: column; gap: 2px; position: relative;
-    }
-    .cq-settings summary::-webkit-details-marker { display: none; }
-    .cq-settings summary::after {
-      content: ''; position: absolute; right: 22px; top: 50%; width: 9px; height: 9px;
-      border-right: 2px solid var(--ios-label-3); border-bottom: 2px solid var(--ios-label-3);
-      transform: translateY(-70%) rotate(45deg); transition: transform 200ms;
-    }
-    .cq-settings[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
-    .cq-settings-title { font-size: 17px; font-weight: 600; color: var(--text); }
-    .cq-settings-sub { font-size: 13px; color: var(--ios-label-2); }
-    .cq-settings-body { display: flex; flex-direction: column; gap: 14px; padding: 0 20px 20px; }
-
-    /* Plantillas */
-    .cq-tpl-row { display: flex; flex-direction: column; gap: 8px; }
-    .cq-tpl-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
-    .cq-tpl-list::-webkit-scrollbar { display: none; }
-    .cq-tpl-empty { font-size: 13px; color: var(--ios-label-2); }
-    .cq-tpl-chip { display: inline-flex; align-items: center; flex-shrink: 0; border-radius: 999px; background: var(--ios-bg-2); overflow: hidden; }
-    .cq-tpl-load { border: none; background: none; color: var(--text); font-family: var(--ios-font); font-size: 15px; font-weight: 500; padding: 9px 4px 9px 14px; cursor: pointer; white-space: nowrap; }
-    .cq-tpl-del { border: none; background: none; color: var(--ios-label-3); font-size: 12px; padding: 9px 12px 9px 8px; cursor: pointer; }
-    .cq-link { align-self: flex-start; border: none; background: none; padding: 2px 0; color: var(--ios-green); font-family: var(--ios-font); font-size: 15px; font-weight: 500; cursor: pointer; }
-
-    /* Resultado */
-    #result-panel { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 16px; }
-    #result-panel .result-hero { margin-bottom: 0 !important; }
-    .cq-actions { display: flex; gap: 10px; }
-    .cq-actions .btn-export { flex: 0 0 auto; min-height: 50px; }
-    .cq-actions .btn-export.cq-action-main { flex: 1; background: #25d366 !important; color: #fff !important; font-size: 17px !important; }
-    .cq-details { border-radius: 22px; background: var(--ios-bg-2); padding: 0 16px; }
-    .cq-details summary { list-style: none; cursor: pointer; padding: 16px 0; font-size: 17px; font-weight: 600; color: var(--ios-green); }
-    .cq-details summary::-webkit-details-marker { display: none; }
-    .cq-details[open] { padding-bottom: 16px; }
-    .cq-details .breakdown-grid { margin-bottom: 12px; }
-    .cq-details .bm-card, .cq-details .res-table { background: var(--ios-bg-3) !important; }
-    .cq-details .res-table { margin-bottom: 12px; }
-
-    /* Barra fija con el precio en vivo */
-    .cq-bar {
-      position: fixed; z-index: 900;
-      left: 50%; transform: translateX(-50%);
-      bottom: calc(env(safe-area-inset-bottom, 0px) + 88px);
-      width: min(calc(100% - 32px), 640px);
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 8px 8px 8px 18px;
-      border-radius: 22px;
-      background: var(--ios-material);
-      backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 0.5px solid rgba(var(--ink), 0.1);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      font-family: var(--ios-font);
-    }
-    .cq-bar-info { display: flex; flex-direction: column; min-width: 0; }
-    .cq-bar-label { font-size: 12px; color: var(--ios-label-2); }
-    .cq-bar-total { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 24px; line-height: 28px; font-weight: 700; color: var(--text); }
-    .cq-bar-sub { font-size: 12px; color: var(--ios-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cq-bar-btn {
-      flex-shrink: 0; border: none; border-radius: 999px; min-height: 48px; padding: 0 20px;
-      background: var(--ios-green); color: var(--ios-on-accent);
-      font-family: var(--ios-font); font-size: 16px; font-weight: 600; cursor: pointer;
-      transition: transform 120ms;
-    }
-    .cq-bar-btn:active { transform: scale(0.96); }
-    @media (min-width: 900px) {
-      .cq-bar { bottom: 20px; left: calc(32px + min(680px, 100% - 64px) / 2); width: min(680px, calc(100% - 64px)); }
-    }
-    @media (max-width: 380px) { .cq-row2 { grid-template-columns: 1fr; } .cq-bar-total { font-size: 21px; } }
-    @media print { .cq-bar, .cq-tpl-row, .cq-actions { display: none !important; } }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923i" />
-  <link rel="stylesheet" href="nav.css?v=20260923i" />
+  <link rel="stylesheet" href="ios.css?v=20260923j" />
+  <link rel="stylesheet" href="nav.css?v=20260923j" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923i"></script>
+  <script type="module" src="firebase-sync.js?v=20260923j"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -2098,6 +1946,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260923i"></script>
+  <script src="nav.js?v=20260923j"></script>
 </body>
 </html>

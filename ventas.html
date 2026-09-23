@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260923i"></script>
+  <script src="theme.js?v=20260923j"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923i" />
+  <link rel="stylesheet" href="styles.css?v=20260923j" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -86,15 +86,15 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923i" />
-  <link rel="stylesheet" href="nav.css?v=20260923i" />
+  <link rel="stylesheet" href="ios.css?v=20260923j" />
+  <link rel="stylesheet" href="nav.css?v=20260923j" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923i"></script>
+  <script type="module" src="firebase-sync.js?v=20260923j"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -109,55 +109,63 @@
           </div>
         </div>
 
-        <!-- Register form -->
-        <div class="form-card">
-          <div class="form-card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Nueva venta
-          </div>
-          <div class="grid-4" style="margin-bottom:12px;">
-            <div class="field">
-              <label>Pieza vendida</label>
-              <select id="venta-pieza"><option value="">— Selecciona pieza —</option></select>
+        <!-- Registrar venta -->
+        <div class="cq-wrap vs-wrap" id="vs-form">
+          <!-- 1. Qué se vendió -->
+          <section class="form-card cq-step" aria-labelledby="vs-s1">
+            <h2 class="cq-step-title" id="vs-s1"><span class="cq-num">1</span>¿Qué vendiste?</h2>
+            <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
+            <div class="vs-grid" id="vs-grid" role="list"></div>
+          </section>
+
+          <!-- 2. Pedido -->
+          <section class="form-card cq-step" aria-labelledby="vs-s2" id="vs-pedido" hidden>
+            <h2 class="cq-step-title" id="vs-s2"><span class="cq-num">2</span>Pedido</h2>
+            <div class="vs-cart" id="carrito-list"></div>
+          </section>
+
+          <!-- 3. Pago -->
+          <section class="form-card cq-step" aria-labelledby="vs-s3">
+            <h2 class="cq-step-title" id="vs-s3"><span class="cq-num" id="vs-num-pago">2</span>Pago</h2>
+            <div class="cq-seg" data-for="venta-estatus" role="radiogroup" aria-label="Estatus del pago">
+              <button type="button" data-v="pagado">Ya pagó</button>
+              <button type="button" data-v="pendiente">Pendiente</button>
             </div>
-            <div class="field"><label>Cantidad</label><input type="number" id="venta-cantidad" value="1" min="1" /></div>
-            <div class="field"><label>Precio unitario ($)</label><input type="number" id="venta-precio" placeholder="0.00" min="0" step="0.01" /></div>
-            <div class="field" style="align-self:flex-end;">
-              <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="agregarAlCarrito()">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Agregar al pedido
-              </button>
-            </div>
-          </div>
-          <div id="carrito-section" class="carrito-section">
-            <div id="carrito-list"></div>
-            <div class="carrito-subtotal">
-              <span class="cs-lbl">Total del pedido:</span>
-              <span class="cs-val" id="carrito-total-val">$0.00</span>
-            </div>
-          </div>
-          <div class="grid-4" style="margin-top:12px;">
+            <select id="venta-estatus" hidden onchange="toggleMetodoPago()">
+              <option value="pagado">Pagado</option>
+              <option value="pendiente">Pendiente</option>
+            </select>
             <div class="field" id="campo-metodo">
-              <label>Método de pago</label>
-              <select id="venta-metodo">
+              <label>¿Cómo pagó?</label>
+              <div class="cq-seg" data-for="venta-metodo" role="radiogroup" aria-label="Método de pago">
+                <button type="button" data-v="Efectivo">Efectivo</button>
+                <button type="button" data-v="Transferencia">Transferencia</button>
+                <button type="button" data-v="Tarjeta">Tarjeta</button>
+              </div>
+              <select id="venta-metodo" hidden>
                 <option value="Efectivo">Efectivo</option>
                 <option value="Transferencia">Transferencia</option>
                 <option value="Tarjeta">Tarjeta</option>
               </select>
             </div>
-            <div class="field"><label>Notas (opcional)</label><input type="text" id="venta-notas" placeholder="Observaciones..." /></div>
-            <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
+            <details class="vs-more">
+              <summary>Fecha y notas <span id="vs-more-sub">Hoy</span></summary>
+              <div class="cq-row2">
+                <div class="field"><label for="venta-fecha">Fecha</label><input type="date" id="venta-fecha" /></div>
+                <div class="field"><label for="venta-notas">Notas</label><input type="text" id="venta-notas" placeholder="Opcional" /></div>
+              </div>
+            </details>
+          </section>
+        </div>
+
+        <!-- Barra fija: total y registrar -->
+        <div class="cq-bar" aria-live="polite">
+          <div class="cq-bar-info">
+            <span class="cq-bar-label">Total de la venta</span>
+            <span class="cq-bar-total" id="carrito-total-val">$0.00</span>
+            <span class="cq-bar-sub" id="vs-bar-sub">Toca una pieza para agregarla</span>
           </div>
-          <div class="btn-row">
-            <select id="venta-estatus" onchange="toggleMetodoPago()" style="background:rgba(var(--ink), 0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
-              <option value="pagado">Pagado</option>
-              <option value="pendiente">Pendiente</option>
-            </select>
-            <button class="btn btn-primary" id="btn-registrar" onclick="registrarOrden()" disabled>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Registrar orden
-            </button>
-          </div>
+          <button class="cq-bar-btn" id="btn-registrar" type="button" onclick="registrarOrden()" disabled>Registrar venta</button>
         </div>
 
         <!-- History -->
@@ -243,81 +251,153 @@
     function saveVentas() { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch(e) {} }
 
     const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    function today() { return new Date().toISOString().split('T')[0]; }
+    // Fecha local (toISOString usa UTC y en la noche daba el día siguiente)
+    function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
     function showToast(msg) {
       const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
       clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
     }
 
+    // ── Registro de venta: piezas en tarjetas + pedido editable ──
+    function escapeHtml(t) { return String(t).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]); }
+    const attr = t => escapeHtml(t).replace(/`/g, '&#96;');
+
+    // Último precio al que se vendió la pieza (o el de su cotización aceptada)
+    function ultimoPrecio(pieza) {
+      for (const v of sortedVentas()) {
+        const it = ventaItems(v).find(x => x.pieza === pieza && x.precio > 0);
+        if (it) return it.precio;
+      }
+      let cots = [];
+      try { cots = JSON.parse(localStorage.getItem('mp_cotizaciones') || '[]'); } catch (e) {}
+      const c = cots.find(c => c.pieza === pieza && c.total > 0);
+      return c ? Math.round((c.total / (c.cantidad || 1)) * 100) / 100 : 0;
+    }
+    function enCarrito(pieza) { return carrito.find(it => it.pieza === pieza); }
+    function disponible(pieza) { return DB.piezas[pieza] || 0; }
+
     function refreshPiezaSelect() {
-      const sel = document.getElementById('venta-pieza');
-      const reservado = {};
-      carrito.forEach(it => { reservado[it.pieza] = (reservado[it.pieza] || 0) + it.cantidad; });
-      const piezas = Object.keys(DB.piezas);
-      sel.innerHTML = '<option value="">— Selecciona pieza —</option>' +
-        piezas.map(p => {
-          const disp = (DB.piezas[p] || 0) - (reservado[p] || 0);
-          return disp > 0 ? `<option value="${p}">${p} (${disp} disp.)</option>` : '';
-        }).join('');
+      const q = (document.getElementById('vs-buscar')?.value || '').trim().toLowerCase();
+      const grid = document.getElementById('vs-grid');
+      const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0).sort((a, b) => a.localeCompare(b, 'es'));
+      const visibles = q ? piezas.filter(p => p.toLowerCase().includes(q)) : piezas;
+      if (!piezas.length) {
+        grid.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`;
+        return;
+      }
+      if (!visibles.length) { grid.innerHTML = `<div class="vs-empty">Sin resultados para "${escapeHtml(q)}"</div>`; return; }
+      grid.innerHTML = visibles.map(p => {
+        const item = enCarrito(p);
+        const libres = disponible(p) - (item ? item.cantidad : 0);
+        const precio = ultimoPrecio(p);
+        return `<button type="button" role="listitem" class="vs-tile${item ? ' is-added' : ''}" data-pieza="${attr(p)}" ${libres <= 0 ? 'disabled' : ''}
+                  aria-label="Agregar ${attr(p)}, ${libres} disponibles">
+          <span class="vs-tile-name">${escapeHtml(p)}</span>
+          <span class="vs-tile-meta">${libres} disp.${precio ? ' · ' + fmt(precio) : ''}</span>
+          ${item ? `<span class="vs-tile-badge">${item.cantidad}</span>` : '<span class="vs-tile-plus" aria-hidden="true">+</span>'}
+        </button>`;
+      }).join('');
     }
 
-    function agregarAlCarrito() {
-      const pieza    = document.getElementById('venta-pieza').value;
-      const cantidad = parseInt(document.getElementById('venta-cantidad').value) || 0;
-      const precio   = parseFloat(document.getElementById('venta-precio').value) || 0;
-
-      if (!pieza)        return showToast('Selecciona una pieza');
-      if (cantidad <= 0) return showToast('Cantidad inválida');
-      if (precio <= 0)   return showToast('Ingresa el precio de venta');
-
-      const reservado = carrito.filter(it => it.pieza === pieza).reduce((s, it) => s + it.cantidad, 0);
-      const disponible = (DB.piezas[pieza] || 0) - reservado;
-      if (disponible < cantidad)
-        return showToast(`Solo hay ${disponible} disponibles de "${pieza}"`);
-
-      carrito.push({ pieza, cantidad, precio });
+    function agregarAlCarrito(pieza) {
+      const item = enCarrito(pieza);
+      if (item) {
+        if (item.cantidad >= disponible(pieza)) return showToast(`Solo hay ${disponible(pieza)} de "${pieza}"`);
+        item.cantidad++;
+      } else {
+        carrito.push({ pieza, cantidad: 1, precio: ultimoPrecio(pieza) });
+      }
       renderCarrito();
-      document.getElementById('venta-pieza').value    = '';
-      document.getElementById('venta-cantidad').value = 1;
-      document.getElementById('venta-precio').value   = '';
       refreshPiezaSelect();
     }
 
+    function cambiarCantidad(i, d) {
+      const it = carrito[i]; if (!it) return;
+      const n = it.cantidad + d;
+      if (n <= 0) return quitarDelCarrito(i);
+      if (n > disponible(it.pieza)) return showToast(`Solo hay ${disponible(it.pieza)} de "${it.pieza}"`);
+      it.cantidad = n;
+      renderCarrito(); refreshPiezaSelect();
+    }
+    function cambiarPrecio(i, val) {
+      if (!carrito[i]) return;
+      carrito[i].precio = Math.max(0, parseFloat(val) || 0);
+      actualizarTotal();
+    }
     function quitarDelCarrito(i) {
       carrito.splice(i, 1);
       renderCarrito();
       refreshPiezaSelect();
     }
 
-    function renderCarrito() {
-      const section = document.getElementById('carrito-section');
-      const list    = document.getElementById('carrito-list');
-      const totalEl = document.getElementById('carrito-total-val');
-      const btnReg  = document.getElementById('btn-registrar');
-
-      if (!carrito.length) {
-        section.classList.remove('visible');
-        btnReg.disabled = true;
-        return;
-      }
-      section.classList.add('visible');
-      btnReg.disabled = false;
-
+    function actualizarTotal() {
       const total = carrito.reduce((s, it) => s + it.precio * it.cantidad, 0);
-      totalEl.textContent = fmt(total);
-      list.innerHTML = carrito.map((it, i) => `
-        <div class="carrito-item">
-          <span class="ci-name">${it.pieza}</span>
-          <span class="ci-meta">${it.cantidad} × ${fmt(it.precio)}</span>
-          <span class="ci-total">${fmt(it.precio * it.cantidad)}</span>
-          <button class="btn btn-ghost" style="padding:3px 8px;" onclick="quitarDelCarrito(${i})" title="Quitar">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>
-        </div>`).join('');
+      const uds = carrito.reduce((s, it) => s + it.cantidad, 0);
+      const sinPrecio = carrito.filter(it => !(it.precio > 0)).length;
+      document.getElementById('carrito-total-val').textContent = fmt(total);
+      document.getElementById('vs-bar-sub').textContent = !carrito.length
+        ? 'Toca una pieza para agregarla'
+        : sinPrecio ? `Falta el precio de ${sinPrecio} pieza${sinPrecio > 1 ? 's' : ''}` : `${uds} pieza${uds > 1 ? 's' : ''}`;
+      document.getElementById('btn-registrar').disabled = !carrito.length || sinPrecio > 0;
     }
+
+    function renderCarrito() {
+      const section = document.getElementById('vs-pedido');
+      const list    = document.getElementById('carrito-list');
+      section.hidden = !carrito.length;
+      document.getElementById('vs-num-pago').textContent = carrito.length ? '3' : '2';
+      list.innerHTML = carrito.map((it, i) => `
+        <div class="vs-item">
+          <div class="vs-item-top">
+            <span class="vs-item-name">${escapeHtml(it.pieza)}</span>
+            <button type="button" class="vs-item-del" onclick="quitarDelCarrito(${i})" aria-label="Quitar ${attr(it.pieza)}">✕</button>
+          </div>
+          <div class="vs-item-row">
+            <div class="cq-stepper vs-qty">
+              <button type="button" aria-label="Menos" onclick="cambiarCantidad(${i}, -1)">−</button>
+              <input type="number" value="${it.cantidad}" readonly aria-label="Cantidad" />
+              <button type="button" aria-label="Más" onclick="cambiarCantidad(${i}, 1)">+</button>
+            </div>
+            <label class="vs-price">
+              <span>$</span>
+              <input type="number" inputmode="decimal" min="0" step="0.5" placeholder="Precio c/u" value="${it.precio > 0 ? it.precio : ''}"
+                     oninput="cambiarPrecio(${i}, this.value)" aria-label="Precio por pieza de ${attr(it.pieza)}" />
+            </label>
+          </div>
+        </div>`).join('');
+      actualizarTotal();
+    }
+
+    // Tocar una tarjeta agrega la pieza
+    document.getElementById('vs-grid').addEventListener('click', e => {
+      const t = e.target.closest('.vs-tile');
+      if (t && !t.disabled) agregarAlCarrito(t.dataset.pieza);
+    });
+    document.getElementById('vs-buscar').addEventListener('input', refreshPiezaSelect);
+
+    // Controles segmentados de pago
+    function syncSeg() {
+      document.querySelectorAll('.cq-seg[data-for]').forEach(g => {
+        const sel = document.getElementById(g.dataset.for);
+        g.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.v === sel.value)));
+      });
+      const f = document.getElementById('venta-fecha').value;
+      document.getElementById('vs-more-sub').textContent = (!f || f === today()) ? 'Hoy' : f;
+    }
+    document.addEventListener('click', e => {
+      const b = e.target.closest('.cq-seg[data-for] button');
+      if (!b) return;
+      const sel = document.getElementById(b.parentElement.dataset.for);
+      sel.value = b.dataset.v;
+      sel.dispatchEvent(new Event('change'));
+      syncSeg();
+    });
+    document.getElementById('venta-fecha').addEventListener('change', syncSeg);
 
     async function registrarOrden() {
       if (!carrito.length) return;
+      const sinPrecio = carrito.find(it => !(it.precio > 0));
+      if (sinPrecio) return showToast(`Falta el precio de "${sinPrecio.pieza}"`);
       const fecha = document.getElementById('venta-fecha').value || today();
       const estatusPago = document.getElementById('venta-estatus').value;
       const metodoPago  = estatusPago === 'pendiente' ? null : document.getElementById('venta-metodo').value;
@@ -346,7 +426,10 @@
       renderVentas();
       refreshPiezaSelect();
       document.getElementById('venta-fecha').value = today();
-      showToast(`Orden registrada: ${fmt(total)}`);
+      document.getElementById('venta-notas').value = '';
+      document.getElementById('vs-buscar').value = '';
+      refreshPiezaSelect(); syncSeg();
+      showToast(`Venta registrada: ${fmt(total)}`);
     }
 
     let _pendingPagoId = null;
@@ -501,11 +584,13 @@
       loadDB();
       document.getElementById('venta-fecha').value = today();
       refreshPiezaSelect();
+      renderCarrito();
+      syncSeg();
       renderVentas();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); refreshPiezaSelect(); renderVentas(); });
   </script>
-  <script src="nav.js?v=20260923i"></script>
+  <script src="nav.js?v=20260923j"></script>
 </body>
 </html>
