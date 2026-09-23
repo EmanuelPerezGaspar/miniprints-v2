@@ -29,16 +29,16 @@ function syncBadge(state) {
       'position:fixed', 'bottom:72px', 'right:16px', 'z-index:9998',
       'font-size:0.68rem', 'font-weight:700', 'padding:4px 10px',
       'border-radius:20px', 'pointer-events:none', 'transition:opacity 0.4s',
-      'font-family:"Plus Jakarta Sans",sans-serif'
+      'font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif'
     ].join(';');
     document.body.appendChild(el);
   }
   clearTimeout(el._t);
   el.style.opacity = '1';
   const cfg = {
-    connecting: ['#1e293b','#94a3b8','#334155', '⟳ Conectando...', 0],
-    ok:         ['#052e16','#4ade80','#166534', '✓ Guardado',       3000],
-    error:      ['#450a0a','#f87171','#7f1d1d', '⚠ Error de sync',  0],
+    connecting: ['#2c2c2e','#aeaeb2','#3a3a3c', '⟳ Conectando...', 0],
+    ok:         ['#052e16','#30d158','#166534', '✓ Guardado',       3000],
+    error:      ['#450a0a','#ff6961','#7f1d1d', '⚠ Error de sync',  0],
     local:      ['#1c1917','#78716c','#292524', '● Modo local',     5000],
   }[state];
   if (!cfg) return;
@@ -69,15 +69,15 @@ function showPinGate(onUnlock) {
   if (localStorage.getItem('mp_pin_ok') === '1') { onUnlock(); return; }
   const overlay = document.createElement('div');
   overlay.id = 'mp-pin-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:#0a0f1a;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:"Plus Jakarta Sans",sans-serif;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;';
   overlay.innerHTML = `
-    <div style="background:#111827;border:1px solid #1f2937;border-radius:16px;padding:32px;max-width:320px;width:90%;text-align:center;">
+    <div style="background:#1c1c1e;border:none;border-radius:26px;padding:32px 24px;max-width:320px;width:90%;text-align:center;">
       <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-      <h2 style="color:#e2e8f0;font-size:1.1rem;margin-bottom:16px;">MiniPrints</h2>
+      <h2 style="color:#fff;font-size:22px;font-weight:700;margin-bottom:4px;">MiniPrints</h2><p style="color:rgba(235,235,245,0.6);font-size:15px;margin-bottom:20px;">Ingresa tu PIN</p>
       <input id="mp-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" autocomplete="off"
-        style="width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:1.2rem;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;box-sizing:border-box;" />
-      <button id="mp-pin-btn" style="width:100%;padding:12px;border-radius:10px;border:none;background:#22c55e;color:#fff;font-weight:700;font-size:0.95rem;cursor:pointer;">Entrar</button>
-      <div id="mp-pin-err" style="color:#ef4444;font-size:0.8rem;margin-top:10px;display:none;">PIN incorrecto</div>
+        style="width:100%;padding:12px;min-height:50px;border-radius:14px;border:none;background:rgba(118,118,128,0.24);color:#fff;font-size:22px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;box-sizing:border-box;" />
+      <button id="mp-pin-btn" style="width:100%;padding:14px;min-height:50px;border-radius:999px;border:none;background:#30d158;color:#000;font-weight:600;font-size:17px;cursor:pointer;">Entrar</button>
+      <div id="mp-pin-err" style="color:#ff453a;font-size:13px;margin-top:10px;display:none;">PIN incorrecto</div>
     </div>`;
   document.body.appendChild(overlay);
   const input = overlay.querySelector('#mp-pin-input');

@@ -6,19 +6,18 @@
   <title>MiniPrints — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=4" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="ios-charts.js"></script>
+  <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#030303" />
+  <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
   <script type="module" src="firebase-sync.js"></script>
-  <div id="particles-bg" aria-hidden="true">
-    <div id="particles-vignette"></div>
-  </div>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -162,13 +161,13 @@
       const totalMateriales = Object.keys(DB.materials).length;
       const critico = Object.values(DB.materials).filter(m=>m.pesoTotal<=200).length;
       const margen = ingresos > 0 ? ((ganancia/ingresos)*100).toFixed(1) : '0';
-      const gananciaColor = parseFloat(margen)>=20?'#22c55e':parseFloat(margen)>=10?'#eab308':'#ef4444';
+      const gananciaColor = parseFloat(margen)>=20?'#30d158':parseFloat(margen)>=10?'#ffd60a':'#ff453a';
 
       const costoProduccion = DB.cotizaciones.reduce((s,c)=>s+(c.costo_base||0),0);
       const coverageRatio  = costoProduccion > 0 ? ingresos / costoProduccion : (ingresos > 0 ? 1 : 0);
       const coveragePct    = (coverageRatio * 100).toFixed(1);
       const coverageFrac   = Math.min(coverageRatio, 1);
-      const dotColor       = coverageRatio >= 1 ? '#22c55e' : coverageRatio >= 0.5 ? '#eab308' : '#ef4444';
+      const dotColor       = coverageRatio >= 1 ? '#30d158' : coverageRatio >= 0.5 ? '#ffd60a' : '#ff453a';
 
       const outerDots = genDots(36, 68, 80, 80);
       const innerDots = genDots(24, 52, 80, 80);
@@ -192,7 +191,7 @@
           <div class="kc-bottom">
             <div class="kc-stat">
               <div class="kc-stat-header">
-                <div class="kc-stat-bar" style="background:#a78bfa;"></div>
+                <div class="kc-stat-bar" style="background:#bf5af2;"></div>
                 <span class="kc-stat-label">Costo Prod.</span>
               </div>
               <div class="kc-stat-value">${fmt(costoProduccion)}</div>
@@ -209,8 +208,8 @@
           </div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">PIEZAS EN STOCK</span>
-            <div class="kpi-icon" style="background:rgba(59,130,246,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
+          <div class="kpi-top"><span class="kpi-label">Piezas en stock</span>
+            <div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div>
           </div>
           <div class="kpi-value">${totalPiezas}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${Object.keys(DB.piezas).length} modelos</div>
@@ -226,7 +225,7 @@
               return `<div class="psi" style="animation-delay:${delay}s">
                 <div class="psi-left">
                   <div class="psi-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                   </div>
                   <div class="psi-info">
                     <div class="psi-name" title="${nombre}">${nombre}</div>
@@ -245,11 +244,11 @@
           })()}
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><span class="kpi-label">MATERIALES</span>
-            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ef4444':'#a78bfa'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          <div class="kpi-top"><span class="kpi-label">Materiales</span>
+            <div class="kpi-icon" style="background:rgba(${critico>0?'239,68,68':'167,139,250'},0.12);"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="${critico>0?'#ff453a':'#bf5af2'}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
           </div>
           <div class="kpi-value">${totalMateriales}</div>
-          <div class="kpi-change neutral" style="color:${critico>0?'#ef4444':'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
+          <div class="kpi-change neutral" style="color:${critico>0?'#ff453a':'var(--text-dim)'};">${critico>0?critico+' en stock crítico':'Stock OK'}</div>
         </div>`;
 
       const now = new Date();
@@ -271,7 +270,7 @@
             return `<tr>
               <td${titleAttr}>${piezaLbl}</td>
               <td>${cantV}</td>
-              <td style="color:#22c55e;font-weight:600;">${fmt(totalV)}</td>
+              <td style="color:#30d158;font-weight:600;">${fmt(totalV)}</td>
               <td style="color:var(--text-dim);font-size:0.8rem;">${v.fecha||'—'}</td>
             </tr>`;
           }).join('')
@@ -332,7 +331,7 @@
       const meta   = parseFloat(localStorage.getItem('mp_meta_mensual')||'0');
       const ingEste = DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
       const pct    = meta>0 ? Math.min(ingEste/meta*100,100) : 0;
-      const barClr = pct>=100?'#22c55e':pct>=60?'#eab308':'#ef4444';
+      const barClr = pct>=100?'#30d158':pct>=60?'#ffd60a':'#ff453a';
       document.getElementById('goal-card').innerHTML = `
         <div class="goal-header">
           <span class="goal-label">Meta del mes</span>
@@ -366,11 +365,11 @@
           .forEach(v=>{ ventaItems(v).forEach(it=>{ (hist[it.pieza]||[]).forEach(e=>{ gramsPerMat[e.matId]=(gramsPerMat[e.matId]||0)+e.grams*it.cantidad; }); }); });
         Object.entries(DB.materials).forEach(([id,mat])=>{
           const daily = (gramsPerMat[id]||0)/30;
-          if (daily>0) { const days=Math.round(mat.pesoTotal/daily); if(days<=DAYS) alerts.push({mat,days,clr:days<=3?'#ef4444':days<=7?'#f97316':'#eab308'}); }
-          else if (mat.pesoTotal<=200 && !alerts.find(a=>a.mat.id===id)) alerts.push({mat,days:null,clr:'#ef4444'});
+          if (daily>0) { const days=Math.round(mat.pesoTotal/daily); if(days<=DAYS) alerts.push({mat,days,clr:days<=3?'#ff453a':days<=7?'#ff9f0a':'#ffd60a'}); }
+          else if (mat.pesoTotal<=200 && !alerts.find(a=>a.mat.id===id)) alerts.push({mat,days:null,clr:'#ff453a'});
         });
       } catch(e) {
-        Object.values(DB.materials).filter(m=>m.pesoTotal<=200).forEach(mat=>alerts.push({mat,days:null,clr:'#ef4444'}));
+        Object.values(DB.materials).filter(m=>m.pesoTotal<=200).forEach(mat=>alerts.push({mat,days:null,clr:'#ff453a'}));
       }
       const el = document.getElementById('alert-banner');
       if (!alerts.length) { el.innerHTML=''; return; }
@@ -388,7 +387,7 @@
       const maxPeso = Math.max(...mats.map(m=>m.pesoTotal), 1);
       document.getElementById('mat-list').innerHTML = mats.length
         ? mats.map((m,i)=>{
-            const color = m.pesoTotal<=200?'#ef4444':m.pesoTotal<=500?'#eab308':'#22c55e';
+            const color = m.pesoTotal<=200?'#ff453a':m.pesoTotal<=500?'#ffd60a':'#30d158';
             const pct = Math.round((m.pesoTotal/maxPeso)*100);
             return `<div class="top-product-row">
               <span class="tp-rank">#${i+1}</span>
@@ -411,8 +410,6 @@
     }
 
     function renderCharts() {
-      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-      const grid = 'rgba(255,255,255,0.06)', tick = '#64748b';
 
       // Ingresos line chart
       if (chartRev) { chartRev.destroy(); chartRev = null; }
@@ -420,10 +417,15 @@
       for (let i=5;i>=0;i--) { const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-i); meses.push(localYM(d)); }
       const ingPorMes = meses.map(m=>DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===m).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0));
       const labM = meses.map(m=>{ const [y,mo]=m.split('-').map(Number); return new Date(y,mo-1,1).toLocaleDateString('es-MX',{month:'short',year:'2-digit'}); });
+      // Barras por mes estilo app Salud: el mes actual resaltado
+      const ultimo = ingPorMes.length - 1;
       chartRev = new Chart(document.getElementById('chartRevenue'),{
-        type:'line',
-        data:{labels:labM,datasets:[{label:'Ingresos',data:ingPorMes,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.10)',borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#22c55e',tension:0.4,fill:true}]},
-        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'rgba(255,255,255,0.10)',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:12,callbacks:{label:ctx=>' $'+ctx.parsed.y.toLocaleString('es-MX')}}},scales:{x:{grid:{color:grid},ticks:{color:tick,font:{size:11}}},y:{grid:{color:grid},ticks:{color:tick,font:{size:11},callback:v=>'$'+(v/1000).toFixed(1)+'k'}}}}
+        type:'bar',
+        data:{labels:labM,datasets:[{label:'Ingresos',data:ingPorMes,
+          backgroundColor:ingPorMes.map((_,i)=>i===ultimo?IOS.green:'rgba(48,209,88,0.38)'),
+          hoverBackgroundColor:IOS.green,maxBarThickness:44,borderRadius:8}]},
+        options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fmt(ctx.parsed.y)}}},
+          scales:IOS.scales(v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v)}
       });
 
       // Piezas bar chart
@@ -431,7 +433,7 @@
     }
 
     function renderPiezasChart() {
-      const grid = 'rgba(255,255,255,0.06)', tick = '#64748b';
+      const grid = 'rgba(255,255,255,0.06)', tick = '#8e8e93';
       if (chartTop) { chartTop.destroy(); chartTop = null; }
       const piezaMap = {};
       DB.ventas.forEach(v=>{
@@ -446,11 +448,13 @@
         const vals = sorted.map(([,d])=>d[piezasMode]);
         chartTop = new Chart(document.getElementById('chartStatus'),{
           type:'bar',
-          data:{labels:sorted.map(([p])=>p.length>16?p.substring(0,16)+'…':p),datasets:[{label:piezasMode==='uds'?'Unidades':'Ingresos',data:vals,backgroundColor:'rgba(34,197,94,0.55)',borderRadius:5}]},
-          options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
-            plugins:{legend:{display:false},tooltip:{backgroundColor:'#1e293b',borderColor:'rgba(255,255,255,0.10)',borderWidth:1,titleColor:'#f1f5f9',bodyColor:'#94a3b8',padding:12,
-              callbacks:{label:ctx=>piezasMode==='uds'?` ${ctx.raw} uds`:` ${fmt(ctx.raw)}`}}},
-            scales:{x:{grid:{color:grid},ticks:{color:tick,font:{size:10},callback:v=>piezasMode==='ing'?'$'+(v/1000).toFixed(1)+'k':v}},y:{grid:{color:'transparent'},ticks:{color:tick,font:{size:10}}}}}
+          data:{labels:sorted.map(([p])=>p.length>16?p.substring(0,16)+'…':p),datasets:[{label:piezasMode==='uds'?'Unidades':'Ingresos',data:vals,
+            backgroundColor:vals.map((_,i)=>i===0?IOS.green:'rgba(48,209,88,0.45)'),hoverBackgroundColor:IOS.green,barThickness:18,borderRadius:999}]},
+          options:{indexAxis:'y',interaction:{mode:'nearest',axis:'y',intersect:false},
+            plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>piezasMode==='uds'?`${ctx.raw} uds`:fmt(ctx.raw)}}},
+            scales:{
+              x:{position:'top',grid:{color:IOS.grid,drawTicks:false},border:{display:false,dash:[3,3]},ticks:{color:IOS.label2,maxTicksLimit:5,padding:6,callback:v=>piezasMode==='ing'?(v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v):v}},
+              y:{grid:{display:false},border:{display:false},ticks:{color:'#fff',font:{size:13},padding:10}}}}
         });
       } else {
         const el = document.getElementById('chartStatus');
@@ -471,8 +475,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="glass.js"></script>
-  <script type="module" src="particles.js"></script>
   <script src="nav.js"></script>
 </body>
 </html>
