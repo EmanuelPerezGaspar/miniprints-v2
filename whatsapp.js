@@ -1,5 +1,5 @@
 // MiniPrints — mensajes de WhatsApp (ventas).
-// Las ventas se envían al grupo configurado (ver enviarAGrupo).
+// Ventas y cotizaciones se envían con enviarAGrupo() según el modo elegido.
 (function () {
   const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -65,14 +65,21 @@
     return ok;
   }
 
-  // Devuelve 'grupo' si abrió el grupo configurado o 'elegir' si no hay grupo
+  // Modo de envío:
+  //  'escrito' (por defecto): WhatsApp se abre con el mensaje ya escrito y se elige el chat.
+  //  'grupo': se copia el mensaje y se abre el grupo configurado; se pega y se envía.
+  const KEY_MODO = 'mp_wa_modo';
+  function modo() { try { return localStorage.getItem(KEY_MODO) === 'grupo' ? 'grupo' : 'escrito'; } catch (e) { return 'escrito'; } }
+  function guardarModo(m) { try { localStorage.setItem(KEY_MODO, m === 'grupo' ? 'grupo' : 'escrito'); } catch (e) {} }
+
+  // Devuelve 'grupo' si abrió el grupo (mensaje copiado) o 'elegir' si abrió con el mensaje escrito
   function enviarAGrupo(texto) {
     const g = grupo();
-    if (!g) { abrir(texto); return 'elegir'; }
+    if (modo() !== 'grupo' || !g) { abrir(texto); return 'elegir'; }
     copiar(texto);
     abrirUrl(g);
     return 'grupo';
   }
 
-  window.MP_WA = { venta, abrir, grupo, guardarGrupo, enviarAGrupo, copiar };
+  window.MP_WA = { venta, abrir, grupo, guardarGrupo, modo, guardarModo, enviarAGrupo, copiar };
 })();

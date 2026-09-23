@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260923o"></script>
+  <script src="theme.js?v=20260923p"></script>
+  <script src="whatsapp.js?v=20260923p"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923o" />
+  <link rel="stylesheet" href="styles.css?v=20260923p" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -541,15 +542,15 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923o" />
-  <link rel="stylesheet" href="nav.css?v=20260923o" />
+  <link rel="stylesheet" href="ios.css?v=20260923p" />
+  <link rel="stylesheet" href="nav.css?v=20260923p" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923o"></script>
+  <script type="module" src="firebase-sync.js?v=20260923p"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1587,10 +1588,6 @@ tbody td:not(:first-child){text-align:right}
     <span class="info-value">${cliente}</span>
   </div>
   <div>
-    <span class="info-label">Teléfono</span>
-    <span class="info-value">${c.telefono || '—'}</span>
-  </div>
-  <div>
     <span class="info-label">Tipo de pieza</span>
     <span class="info-value">${c.tipoPieza || '—'}</span>
   </div>
@@ -1642,7 +1639,6 @@ tbody td:not(:first-child){text-align:right}
       if (!state.lastCalc) { showToast('Calcula primero'); return; }
       const c      = state.lastCalc;
       const cliente = document.getElementById('inp-cliente').value.trim();
-      const tel    = c.telefono;
       const urgLabels = { express: '⚡ Express (2-3 días)', urgente: '🔥 Urgente (24 hrs)' };
 
       let msg = '🖨️ *Cotización MiniPrints*\n';
@@ -1667,11 +1663,9 @@ tbody td:not(:first-child){text-align:right}
       if (c.urgenciaMonto > 0) msg += `• Sobrecargo urgencia: ${fmt(c.urgenciaMonto)}\n`;
       msg += `\n¿Tienes alguna duda? Con gusto te ayudo 🙌\n_Si me recomiendas con alguien, tu siguiente pedido tiene envío gratis_ 🎁`;
 
-      const waUrl = tel
-        ? `https://wa.me/52${tel.replace(/\D/g,'')}?text=` + encodeURIComponent(msg)
-        : `https://wa.me/?text=` + encodeURIComponent(msg);
-
-      window.open(waUrl, '_blank');
+      // Mismo envío que en Ventas (mensaje escrito o grupo directo, según el ajuste)
+      const envio = MP_WA.enviarAGrupo(msg);
+      showToast(envio === 'grupo' ? 'Mensaje copiado, pégalo en el grupo' : 'Elige tu grupo en WhatsApp');
     }
 
     /* ── Templates ────────────────────────────── */
@@ -1946,6 +1940,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260923o"></script>
+  <script src="nav.js?v=20260923p"></script>
 </body>
 </html>
