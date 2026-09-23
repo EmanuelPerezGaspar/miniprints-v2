@@ -30,17 +30,17 @@
 
   const SECTIONS = [
     { label: 'Negocio', rows: [
-      { href: 'historial-ventas.html', icon: 'ventas', color: '#30d158', title: 'Historial de ventas' },
-      { href: 'cotizaciones.html',   icon: 'historial', color: '#0a84ff', title: 'Historial de cotizaciones' },
-      { href: 'finanzas.html',       icon: 'finanzas',  color: '#5e5ce6', title: 'Finanzas' },
+      { href: 'historial-ventas.html', icon: 'ventas', color: '#30d158', title: 'Historial de ventas', sub: 'Ventas registradas y cobros' },
+      { href: 'cotizaciones.html',   icon: 'historial', color: '#0a84ff', title: 'Historial de cotizaciones', sub: 'Cotizaciones guardadas' },
+      { href: 'finanzas.html',       icon: 'finanzas',  color: '#5e5ce6', title: 'Finanzas', sub: 'Ingresos, costos y ganancia' },
     ]},
     { label: 'Inventario', rows: [
-      { href: 'stock-piezas.html',   icon: 'piezas',    color: '#ff9f0a', title: 'Piezas terminadas' },
-      { href: 'stock-material.html', icon: 'material',  color: '#bf5af2', title: 'Filamentos y material' },
+      { href: 'stock-piezas.html',   icon: 'piezas',    color: '#ff9f0a', title: 'Piezas terminadas', sub: 'Stock listo para vender' },
+      { href: 'stock-material.html', icon: 'material',  color: '#bf5af2', title: 'Filamentos y material', sub: 'Rollos y gramos disponibles' },
     ]},
     { label: 'Cuenta', rows: [
-      { action: 'lock',              icon: 'bloquear',  color: '#8e8e93', title: 'Bloquear app' },
-      { href: 'reset.html',          icon: 'reset',     color: '#ff453a', title: 'Restablecer datos', danger: true },
+      { action: 'lock',              icon: 'bloquear',  color: '#8e8e93', title: 'Bloquear app', sub: 'Pedir el PIN otra vez' },
+      { href: 'reset.html',          icon: 'reset',     color: '#ff453a', title: 'Restablecer datos', sub: 'Borrar la información guardada', danger: true },
     ]},
   ];
 
@@ -48,6 +48,7 @@
   const CHEVRON = '<svg class="sheet-chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg>';
 
   const activeTab = TABS.find(t => t.pages.includes(page));
+  const marcarVT = t => window.MP_VT && MP_VT.marcar(t);
 
   /* ── Tab bar ──────────────────────────────────────── */
   function buildTabbar() {
@@ -79,7 +80,7 @@
     new ResizeObserver(() => moveBubble(currentEl())).observe(nav);
     document.fonts && document.fonts.ready.then(() => moveBubble(currentEl()));
 
-    nav.querySelectorAll('a.tab').forEach(a => a.addEventListener('click', () => moveBubble(a)));
+    nav.querySelectorAll('a.tab').forEach(a => a.addEventListener('click', () => { moveBubble(a); marcarVT('tab'); }));
     nav.querySelector('[data-tab="mas"]').addEventListener('click', e => openSheet(e.currentTarget));
 
     // Compactar al bajar, expandir al subir
@@ -105,6 +106,7 @@
     seg.setAttribute('aria-label', 'Tipo de inventario');
     seg.innerHTML = [['stock-piezas.html', 'Piezas'], ['stock-material.html', 'Material']]
       .map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('');
+    seg.addEventListener('click', e => { if (e.target.closest('a')) marcarVT('seg'); });
     main.prepend(seg);
   }
 
@@ -123,7 +125,6 @@
     sheet.setAttribute('aria-modal', 'true');
     sheet.setAttribute('aria-labelledby', 'sheet-title');
     sheet.innerHTML = `
-      <div class="sheet-grabber" aria-hidden="true"></div>
       <div class="sheet-head">
         <h2 id="sheet-title">Más</h2>
         <button class="sheet-close" type="button" aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
@@ -134,8 +135,10 @@
           const current = r.href === page;
           const cls = `sheet-row${r.danger ? ' danger' : ''}${current ? ' is-current' : ''}`;
           const body = `<span class="sheet-icon" style="background:${r.color}">${svg(SHEET_ICONS[r.icon])}</span>
-            <span class="sheet-row-body"><span>${r.title}</span>
-              <span style="display:flex;align-items:center;gap:8px">${current ? '<span class="sheet-row-sub">Aquí estás</span>' : ''}${r.href ? CHEVRON : ''}</span>
+            <span class="sheet-row-body">
+              <span class="sheet-row-text"><span class="sheet-row-title">${r.title}</span>
+                <span class="sheet-row-sub">${current ? 'Aquí estás' : r.sub}</span></span>
+              ${r.href ? CHEVRON : ''}
             </span>`;
           return r.href
             ? `<a class="${cls}" href="${r.href}"${current ? ' aria-current="page"' : ''}>${body}</a>`
@@ -145,6 +148,10 @@
 
     document.body.append(backdrop, sheet);
 
+    // Ir a una pantalla de la barra desde la hoja cuenta como cambio de pestaña
+    sheet.querySelectorAll('a.sheet-row').forEach(a => a.addEventListener('click', () => {
+      if (TABS.some(t => t.href === a.getAttribute('href'))) marcarVT('tab');
+    }));
     backdrop.addEventListener('click', closeSheet);
     sheet.querySelector('.sheet-close').addEventListener('click', closeSheet);
     sheet.querySelector('[data-action="lock"]').addEventListener('click', () => {
@@ -226,5 +233,8 @@
     buildSegmented();
   }
 
-  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+  // nav.js se carga al final del <body>: se construye ya, para que la barra exista
+  // en el primer cuadro y la transición entre páginas la deje fija
+  document.body && document.querySelector('.dash-main') ? init()
+    : document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })();

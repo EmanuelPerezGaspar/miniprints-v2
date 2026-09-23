@@ -38,3 +38,43 @@
     window.dispatchEvent(new CustomEvent('mp-sync-update'));
   });
 })();
+
+// Transiciones entre pantallas (View Transitions entre documentos, iOS 18.2+).
+// Entrar a una sección se desliza desde la derecha, regresar se desliza a la derecha
+// y cambiar de pestaña hace un fundido suave. nav.js marca el tipo al tocar la barra.
+(function () {
+  const DEPTH = { 'historial-ventas.html': 1, 'cotizaciones.html': 1, 'finanzas.html': 1, 'reset.html': 1 };
+  const pageOf = href => (new URL(href, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
+  const here = pageOf(location.href);
+  const ss = {
+    get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { v == null ? sessionStorage.removeItem(k) : sessionStorage.setItem(k, v); } catch (e) {} },
+  };
+
+  const recordarOrigen = () => ss.set('mp-vt-from', here);
+  window.addEventListener('pageswap', recordarOrigen);
+  document.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (a && a.origin === location.origin && !a.target) recordarOrigen();
+  }, true);
+
+  function tipo() {
+    const marcado = ss.get('mp-vt');
+    ss.set('mp-vt', null);
+    if (marcado) return marcado;
+    const d0 = DEPTH[ss.get('mp-vt-from')] || 0, d1 = DEPTH[here] || 0;
+    return d1 > d0 ? 'push' : d1 < d0 ? 'back' : 'tab';
+  }
+
+  window.addEventListener('pagereveal', e => {
+    if (!e.viewTransition) { ss.set('mp-vt', null); return; }
+    const root = document.documentElement;
+    root.dataset.vt = tipo();
+    e.viewTransition.finished.finally(() => { delete root.dataset.vt; });
+  });
+
+  // Navegadores sin transiciones entre páginas: la pantalla entra con un fundido
+  if (!document.startViewTransition) document.documentElement.classList.add('mp-enter');
+
+  window.MP_VT = { marcar: t => ss.set('mp-vt', t) };
+})();
