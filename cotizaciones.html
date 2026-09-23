@@ -3,39 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MiniPrints — Historial de Cotizaciones</title>
-  <script src="theme.js?v=20260923s"></script>
+  <title>MiniPrints — Cotizaciones</title>
+  <script src="theme.js?v=20260923t"></script>
+  <script src="inventario.js?v=20260923t"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923s" />
+  <link rel="stylesheet" href="styles.css?v=20260923t" />
   <style>
-    .filters-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-    .filters-row input, .filters-row select {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
-      color: var(--text); font-family: var(--font); font-size: 0.85rem; padding: 9px 14px; outline: none;
-    }
-    .filters-row input { flex: 1; min-width: 180px; }
-    .filters-row select { cursor: pointer; }
-    .cot-row-cliente { font-weight: 700; color: var(--text); }
-    .cot-row-pieza { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    /* Prevent overflow */
-    .filters-row { min-width: 0; }
-    .filters-row input, .filters-row select { min-width: 0; box-sizing: border-box; }
-    @media (max-width: 700px) {
-      .table-wrap table { font-size: 0.8rem; }
-      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
-    }
-    @media (max-width: 600px) {
-      .filters-row { flex-direction: column; }
-      .filters-row input, .filters-row select { width: 100%; }
-      /* hide ganancia col on very small */
-      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
-    }
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923s" />
-  <link rel="stylesheet" href="nav.css?v=20260923s" />
+  <link rel="stylesheet" href="ios.css?v=20260923t" />
+  <link rel="stylesheet" href="nav.css?v=20260923t" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -46,173 +25,262 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923s"></script>
+  <script type="module" src="firebase-sync.js?v=20260923t"></script>
 
-  <!-- CONTENT -->
   <div class="page-container">
-    <div class="dash-layout">
-      <main class="dash-main">
-        <div class="dash-header">
-          <div>
-            <h1 class="dash-title">Historial de Cotizaciones</h1>
-            <p class="dash-subtitle">Todas las cotizaciones generadas en el Cotizador, aceptadas o no.</p>
-          </div>
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Cotizaciones</h1>
+          <p class="dash-subtitle" id="hx-sub">Lo que has cotizado y qué se aceptó.</p>
+        </div>
+        <div class="inv-actions">
+          <a class="inv-icon-btn is-primary" href="cotizador.html" aria-label="Nueva cotización">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="hx-wrap">
+        <div class="cq-seg" data-for="f-periodo" role="radiogroup" aria-label="Periodo">
+          <button type="button" data-v="mes">Este mes</button>
+          <button type="button" data-v="pasado">Anterior</button>
+          <button type="button" data-v="todo">Todo</button>
+          <button type="button" data-v="rango">Fechas</button>
+        </div>
+        <input type="hidden" id="f-periodo" value="todo" />
+        <div class="hx-dates" id="f-rango" hidden>
+          <label>Desde<input type="date" id="f-desde" /></label>
+          <label>Hasta<input type="date" id="f-hasta" /></label>
         </div>
 
-        <!-- KPI row -->
-        <div class="kpi-grid" id="kpi-row" style="margin-bottom:24px;"></div>
+        <div class="inv-sum is-4" id="hx-sum"></div>
 
-        <!-- Filters -->
-        <div class="filters-row">
-          <input type="text" id="filtro-texto" placeholder="Buscar por cliente o pieza..." oninput="renderList()" />
-          <select id="filtro-estado" onchange="renderList()">
-            <option value="">Todos los estados</option>
-            <option value="true">Aceptadas</option>
-            <option value="false">No aceptadas</option>
-            <option value="null">Pendientes</option>
-          </select>
-        </div>
+        <input type="search" id="f-buscar" class="hx-search" placeholder="Buscar cliente o pieza" autocomplete="off" aria-label="Buscar cotización" />
+        <div class="vs-cats" id="f-estado" role="radiogroup" aria-label="Filtrar por estado"></div>
+        <div class="hx-info" id="hx-info"></div>
 
-        <!-- Table -->
-        <div class="empty-table" id="cot-table-wrap">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Cliente / Pieza</th>
-                  <th>Fecha</th>
-                  <th style="text-align:right;">Total</th>
-                  <th style="text-align:right;">Ganancia esp.</th>
-                  <th>Estado</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="tbody-cot"></tbody>
-            </table>
-          </div>
-          <div class="empty-table-body" id="cot-empty" style="display:none;">
-            <h3>Sin cotizaciones</h3>
-            <p>Las cotizaciones que generes en el Cotizador aparecerán aquí.</p>
-          </div>
-        </div>
-      </main>
+        <div id="hx-list" style="display:flex;flex-direction:column;gap:18px;"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hoja: detalle de la cotización -->
+  <div class="sheet inv-sheet" id="sh-cot" role="dialog" aria-modal="true" aria-labelledby="sh-cot-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-cot-t">Cotización</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-hero" id="c-hero"></div>
+    <div class="inv-group" id="c-datos"></div>
+    <div class="inv-group" id="c-desglose"></div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">¿El cliente la aceptó?</span>
+      <div class="cq-seg" data-for="c-estado" role="radiogroup" aria-label="Estado de la cotización">
+        <button type="button" data-v="si">Aceptada</button>
+        <button type="button" data-v="no">No aceptada</button>
+      </div>
+      <input type="hidden" id="c-estado" value="" />
+      <p class="inv-hint">Cambiar el estado no mueve el inventario; para sumar piezas usa Inventario.</p>
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn is-danger" onclick="eliminarCot()">Eliminar cotización</button>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <div id="toast" role="status"></div>
 
   <script>
+    const { esc, money, fecha: F } = MP_INV;
     const DB = { cotizaciones: [] };
+    const POR_PAGINA = 40;
+    let limite = POR_PAGINA, estadoFiltro = 'todas';
 
     function loadDB() {
-      try { const c = localStorage.getItem('mp_cotizaciones'); if (c) DB.cotizaciones = JSON.parse(c); } catch(e) {}
+      try { DB.cotizaciones = JSON.parse(localStorage.getItem('mp_cotizaciones')) || []; } catch (e) { DB.cotizaciones = []; }
     }
-    function saveDB() {
-      try { localStorage.setItem('mp_cotizaciones', JSON.stringify(DB.cotizaciones)); } catch(e) {}
+    const saveDB = () => { try { localStorage.setItem('mp_cotizaciones', JSON.stringify(DB.cotizaciones)); } catch (e) {} };
+
+    // El id es la marca de tiempo de cuando se guardó; es más confiable que el texto de fecha
+    const fechaDe = c => (c.id > 1e11 ? F.isoDe(new Date(c.id)) : '') || F.iso(c.fecha);
+    const estadoDe = c => c.fue_aceptada === true ? 'si' : c.fue_aceptada === false ? 'no' : 'pend';
+    const ESTADO = {
+      si:   { cls: 'st-ok',   txt: 'Aceptada' },
+      no:   { cls: 'st-mute', txt: 'No aceptada' },
+      pend: { cls: 'st-low',  txt: 'Sin respuesta' },
+    };
+
+    function rango() {
+      const p = document.getElementById('f-periodo').value;
+      const d = new Date();
+      if (p === 'mes') return [F.isoDe(new Date(d.getFullYear(), d.getMonth(), 1)), ''];
+      if (p === 'pasado') return [F.isoDe(new Date(d.getFullYear(), d.getMonth() - 1, 1)), F.isoDe(new Date(d.getFullYear(), d.getMonth(), 0))];
+      if (p === 'rango') return [document.getElementById('f-desde').value, document.getElementById('f-hasta').value];
+      return ['', ''];
+    }
+    function enPeriodo() {
+      const [desde, hasta] = rango();
+      return DB.cotizaciones.filter(c => { const f = fechaDe(c); return (!desde || f >= desde) && (!hasta || f <= hasta); });
     }
 
-    const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    function showToast(msg) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
-      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
-    }
-
-    function renderKPIs() {
-      const cots = DB.cotizaciones;
-      const total = cots.length;
-      const aceptadas = cots.filter(c => c.fue_aceptada === true).length;
-      const noAceptadas = cots.filter(c => c.fue_aceptada === false).length;
-      const gananciaEsp = cots.filter(c => c.fue_aceptada === true).reduce((s, c) => s + (c.ganancia || 0), 0);
-      document.getElementById('kpi-row').innerHTML = `
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Total cotizaciones</div><div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div></div>
-          <div class="kpi-value">${total}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">generadas en total</div>
+    function render() {
+      const periodo = enPeriodo();
+      const q = document.getElementById('f-buscar').value.trim().toLowerCase();
+      const acept = periodo.filter(c => c.fue_aceptada === true);
+      const decididas = periodo.filter(c => c.fue_aceptada === true || c.fue_aceptada === false).length;
+      const tasa = decididas ? Math.round(acept.length / decididas * 100) : 0;
+      const monto = acept.reduce((s, c) => s + (c.total || 0), 0);
+      const gan = acept.reduce((s, c) => s + (c.ganancia || 0), 0);
+      document.getElementById('hx-sum').innerHTML = `
+        <div class="inv-tile" style="--tile-color:var(--ios-blue)">
+          <span class="inv-tile-lbl"><i></i>Cotizadas</span>
+          <span class="inv-tile-num">${periodo.length}</span>
+          <span class="inv-tile-sub">en el periodo</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Aceptadas</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.green}" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div></div>
-          <div class="kpi-value" style="color:var(--ios-green);">${aceptadas}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">se imprimieron</div>
+        <div class="inv-tile" style="--tile-color:var(--ios-green)">
+          <span class="inv-tile-lbl"><i></i>Aceptación</span>
+          <span class="inv-tile-num">${tasa}<small>%</small></span>
+          <span class="inv-tile-sub">${acept.length} de ${decididas}</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">No aceptadas</div><div class="kpi-icon" style="background:rgba(255,69,58,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.red}" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div></div>
-          <div class="kpi-value" style="color:var(--ios-red);">${noAceptadas}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">solo cotizadas</div>
+        <div class="inv-tile" style="--tile-color:var(--ios-orange)">
+          <span class="inv-tile-lbl"><i></i>Aceptado</span>
+          <span class="inv-tile-num">${MP_INV.money0(monto)}</span>
+          <span class="inv-tile-sub">en cotizaciones</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Ganancia esperada</div><div class="kpi-icon" style="background:rgba(191,90,242,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.purple}" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
-          <div class="kpi-value" style="font-size:1.4rem;color:var(--ios-purple);">${fmt(gananciaEsp)}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">de las aceptadas</div>
+        <div class="inv-tile" style="--tile-color:var(--ios-purple)">
+          <span class="inv-tile-lbl"><i></i>Ganancia</span>
+          <span class="inv-tile-num">${MP_INV.money0(gan)}</span>
+          <span class="inv-tile-sub">esperada</span>
         </div>`;
-    }
 
-    function estadoBadge(c) {
-      if (c.fue_aceptada === true)  return '<span class="badge badge-success"><span class="badge-dot" style="background:var(--ios-green);"></span>Aceptada</span>';
-      if (c.fue_aceptada === false) return '<span class="badge badge-error"><span class="badge-dot" style="background:var(--ios-red);"></span>No aceptada</span>';
-      return '<span class="badge badge-warning"><span class="badge-dot" style="background:var(--ios-yellow);"></span>Pendiente</span>';
-    }
+      const cuenta = { todas: periodo.length, si: 0, no: 0, pend: 0 };
+      periodo.forEach(c => cuenta[estadoDe(c)]++);
+      document.getElementById('f-estado').innerHTML = [['todas', 'Todas'], ['si', 'Aceptadas'], ['no', 'No aceptadas'], ['pend', 'Sin respuesta']]
+        .filter(([id]) => id === 'todas' || cuenta[id] || id === estadoFiltro)
+        .map(([id, n]) => `<button type="button" role="radio" data-f="${id}" aria-checked="${id === estadoFiltro}">${n} <span>${cuenta[id]}</span></button>`).join('');
 
-    function eliminarCot(id) {
-      if (!confirm('¿Eliminar esta cotización del historial?')) return;
-      DB.cotizaciones = DB.cotizaciones.filter(c => c.id !== id);
-      saveDB();
-      renderKPIs();
-      renderList();
-      showToast('Cotización eliminada');
-    }
+      const lista = periodo
+        .filter(c => estadoFiltro === 'todas' || estadoDe(c) === estadoFiltro)
+        .filter(c => !q || `${c.cliente || ''} ${c.pieza || ''}`.toLowerCase().includes(q))
+        .sort((a, b) => fechaDe(b).localeCompare(fechaDe(a)) || b.id - a.id);
 
-    function renderList() {
-      const texto  = document.getElementById('filtro-texto').value.trim().toLowerCase();
-      const estado = document.getElementById('filtro-estado').value;
-      let cots = DB.cotizaciones;
+      document.getElementById('hx-sub').textContent = DB.cotizaciones.length
+        ? `${DB.cotizaciones.length} cotizaci${DB.cotizaciones.length !== 1 ? 'ones' : 'ón'} guardadas`
+        : 'Lo que has cotizado y qué se aceptó.';
+      document.getElementById('hx-info').innerHTML = periodo.length
+        ? `<span>${lista.length} de ${periodo.length} en el periodo</span>${estadoFiltro !== 'todas' || q ? '<button type="button" onclick="limpiar()">Quitar filtros</button>' : ''}`
+        : '';
 
-      if (texto) {
-        cots = cots.filter(c =>
-          (c.cliente || '').toLowerCase().includes(texto) ||
-          (c.pieza || '').toLowerCase().includes(texto)
-        );
-      }
-      if (estado === 'true')  cots = cots.filter(c => c.fue_aceptada === true);
-      if (estado === 'false') cots = cots.filter(c => c.fue_aceptada === false);
-      if (estado === 'null')  cots = cots.filter(c => c.fue_aceptada === null || c.fue_aceptada === undefined);
-
-      const tbody = document.getElementById('tbody-cot');
-      const empty = document.getElementById('cot-empty');
-      const wrap  = document.querySelector('#cot-table-wrap .table-wrap');
-
-      if (!cots.length) {
-        tbody.innerHTML = '';
-        wrap.style.display = 'none';
-        empty.style.display = 'flex';
+      const cont = document.getElementById('hx-list');
+      if (!DB.cotizaciones.length) {
+        cont.innerHTML = `<div class="hx-empty"><b>Aún no hay cotizaciones</b>Se guardan cuando confirmas una en Cotizar.<br><a class="btn btn-primary" href="cotizador.html">Nueva cotización</a></div>`;
         return;
       }
-      wrap.style.display = '';
-      empty.style.display = 'none';
-
-      tbody.innerHTML = cots.map(c => `
-        <tr>
-          <td>
-            <div class="cot-row-cliente">${c.cliente || 'Sin nombre'}</div>
-            ${c.pieza ? `<div class="cot-row-pieza">${c.pieza}${c.cantidad ? ' × ' + c.cantidad : ''}</div>` : ''}
-          </td>
-          <td>${c.fecha || '—'}</td>
-          <td style="text-align:right;color:var(--text);font-weight:600;">${fmt(c.total)}</td>
-          <td style="text-align:right;color:var(--ios-purple);">${fmt(c.ganancia)}</td>
-          <td>${estadoBadge(c)}</td>
-          <td style="text-align:right;">
-            <button class="btn btn-ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="eliminarCot(${c.id})">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-            </button>
-          </td>
-        </tr>`).join('');
+      if (!lista.length) {
+        cont.innerHTML = `<div class="hx-empty"><b>Sin resultados</b>No hay cotizaciones con estos filtros.<br><button type="button" class="btn btn-ghost" onclick="verTodo()">Ver todas</button></div>`;
+        return;
+      }
+      const dias = [];
+      lista.slice(0, limite).forEach(c => {
+        const f = fechaDe(c), g = dias[dias.length - 1];
+        if (g && g.f === f) g.cots.push(c); else dias.push({ f, cots: [c] });
+      });
+      cont.innerHTML = dias.map(g => `<section class="hx-day">
+          <div class="hx-day-head"><span>${F.diaLargo(g.f)}</span><span></span></div>
+          <div class="hx-list">${g.cots.map(fila).join('')}</div>
+        </section>`).join('')
+        + (lista.length > limite ? `<button type="button" class="hx-more" onclick="verMas()">Ver ${Math.min(POR_PAGINA, lista.length - limite)} más</button>` : '');
     }
 
+    const ICO = {
+      si: '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+      no: '<svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7 7 17"/></svg>',
+      pend: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    };
+    function fila(c) {
+      const e = estadoDe(c), st = ESTADO[e];
+      const detalle = [c.pieza ? `${c.pieza}${c.cantidad ? ' × ' + c.cantidad : ''}` : '', st.txt].filter(Boolean).join(' · ');
+      return `<button type="button" class="hx-row ${st.cls}" data-id="${c.id}">
+        <span class="hx-ico">${ICO[e]}</span>
+        <span class="hx-text">
+          <span class="hx-title">${esc(c.cliente || 'Sin nombre')}</span>
+          <span class="hx-meta">${esc(detalle)}</span>
+        </span>
+        <span class="hx-right"><span class="hx-amt">${money(c.total)}</span></span>
+      </button>`;
+    }
 
-    function mpInit() { loadDB(); renderKPIs(); renderList(); }
+    function verMas() { limite += POR_PAGINA; render(); }
+    function limpiar() { estadoFiltro = 'todas'; document.getElementById('f-buscar').value = ''; limite = POR_PAGINA; render(); }
+    function verTodo() { document.getElementById('f-periodo').value = 'todo'; cambioPeriodo(); limpiar(); }
+    function cambioPeriodo() {
+      const p = document.getElementById('f-periodo').value;
+      document.getElementById('f-rango').hidden = p !== 'rango';
+      if (p === 'rango' && !document.getElementById('f-desde').value) {
+        const d = new Date(); d.setDate(d.getDate() - 30);
+        document.getElementById('f-desde').value = F.isoDe(d);
+        document.getElementById('f-hasta').value = F.hoy();
+      }
+      MP_INV.syncChips(); limite = POR_PAGINA; render();
+    }
+    document.getElementById('f-periodo').addEventListener('change', cambioPeriodo);
+    ['f-desde', 'f-hasta'].forEach(id => document.getElementById(id).addEventListener('change', render));
+    document.getElementById('f-buscar').addEventListener('input', () => { limite = POR_PAGINA; render(); });
+    document.getElementById('f-estado').addEventListener('click', e => {
+      const b = e.target.closest('[data-f]'); if (b) { estadoFiltro = b.dataset.f; limite = POR_PAGINA; render(); }
+    });
+    document.getElementById('hx-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirCot(Number(r.dataset.id)); });
+
+    // ── Detalle ──
+    let actual = null;
+    const URG = { normal: 'Normal', express: 'Express (+25%)', urgente: 'Urgente (+50%)' };
+    function abrirCot(id) {
+      const c = DB.cotizaciones.find(x => x.id === id);
+      if (!c) return;
+      actual = id;
+      const e = estadoDe(c);
+      document.getElementById('sh-cot-t').textContent = c.cliente || 'Sin nombre';
+      document.getElementById('c-hero').className = 'inv-hero ' + ESTADO[e].cls;
+      document.getElementById('c-hero').innerHTML = `
+        <span class="inv-hero-num is-small">${money(c.total)}</span>
+        <span class="hx-tag">${ESTADO[e].txt}</span>`;
+      const row = (a, b) => b ? `<div class="inv-group-row"><span>${a}</span><span>${b}</span></div>` : '';
+      document.getElementById('c-datos').innerHTML =
+        row('Fecha', esc(F.diaLargo(fechaDe(c))))
+        + row('Pieza', c.pieza ? esc(c.pieza) + (c.cantidad ? ' × ' + c.cantidad : '') : '')
+        + row('Tipo', c.tipo_pieza ? esc(c.tipo_pieza.charAt(0).toUpperCase() + c.tipo_pieza.slice(1)) : '')
+        + row('Entrega', c.urgencia ? URG[c.urgencia] || esc(c.urgencia) : '');
+      document.getElementById('c-desglose').innerHTML =
+        row('Costo de producción', money(c.costo_base))
+        + row('Ganancia', money(c.ganancia))
+        + (c.iva ? row('IVA', money(c.iva)) : '')
+        + `<div class="inv-group-row hx-total-row"><span>Total</span><span>${money(c.total)}</span></div>`;
+      document.getElementById('c-estado').value = e === 'pend' ? '' : e;
+      MP_INV.syncChips();
+      MP_INV.abrir('sh-cot');
+    }
+    document.getElementById('c-estado').addEventListener('change', e => {
+      const c = DB.cotizaciones.find(x => x.id === actual);
+      if (!c) return;
+      c.fue_aceptada = e.target.value === 'si';
+      saveDB(); render();
+      const est = ESTADO[estadoDe(c)];
+      const hero = document.getElementById('c-hero');
+      hero.className = 'inv-hero ' + est.cls;
+      hero.querySelector('.hx-tag').textContent = est.txt;
+      MP_INV.toast(`Marcada como ${est.txt.toLowerCase()}`);
+    });
+    function eliminarCot() {
+      if (!confirm('¿Eliminar esta cotización del historial?')) return;
+      DB.cotizaciones = DB.cotizaciones.filter(c => c.id !== actual);
+      saveDB(); MP_INV.cerrar(); render();
+      MP_INV.toast('Cotización eliminada');
+    }
+
+    function mpInit() { loadDB(); MP_INV.syncChips(); render(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923s"></script>
+  <script src="nav.js?v=20260923t"></script>
 </body>
 </html>
