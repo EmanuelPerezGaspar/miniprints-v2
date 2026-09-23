@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20260923n"></script>
-  <script src="categorias.js?v=20260923n"></script>
-  <script src="whatsapp.js?v=20260923n"></script>
+  <script src="theme.js?v=20260923o"></script>
+  <script src="categorias.js?v=20260923o"></script>
+  <script src="whatsapp.js?v=20260923o"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923n" />
+  <link rel="stylesheet" href="styles.css?v=20260923o" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -88,15 +88,15 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923n" />
-  <link rel="stylesheet" href="nav.css?v=20260923n" />
+  <link rel="stylesheet" href="ios.css?v=20260923o" />
+  <link rel="stylesheet" href="nav.css?v=20260923o" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923n"></script>
+  <script type="module" src="firebase-sync.js?v=20260923o"></script>
   <div class="page-container">
     <div class="dash-layout">
       <main class="dash-main">
@@ -338,7 +338,7 @@
             ${!pagada ? `<button class="btn btn-ghost" style="padding:5px 9px;color:var(--ios-green);" onclick="marcarPagado(${v.id})" title="Marcar como pagado">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </button>` : ''}
-            <button class="btn btn-ghost" style="padding:5px 9px;color:#25d366;" onclick="reenviarVenta(${v.id})" title="Enviar por WhatsApp" aria-label="Enviar por WhatsApp">
+            <button class="btn btn-ghost" style="padding:5px 9px;color:#25d366;" onclick="reenviarVenta(${v.id})" title="Enviar al grupo de WhatsApp" aria-label="Enviar al grupo de WhatsApp">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
             </button>
             <button class="btn btn-ghost" style="padding:5px 9px;" onclick="eliminarVenta(${v.id})" title="Eliminar" aria-label="Eliminar venta">
@@ -352,7 +352,9 @@
 
     function reenviarVenta(id) {
       const v = DB.ventas.find(x => x.id === id);
-      if (v) MP_WA.abrir(MP_WA.venta(v));
+      if (!v) return;
+      const envio = MP_WA.enviarAGrupo(MP_WA.venta(v));
+      showToast(envio === 'grupo' ? 'Mensaje copiado, pégalo en el grupo' : 'Elige el chat en WhatsApp');
     }
 
     function mpInit() {
@@ -362,6 +364,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); renderVentas(); });
   </script>
-  <script src="nav.js?v=20260923n"></script>
+  <script src="nav.js?v=20260923o"></script>
 </body>
 </html>

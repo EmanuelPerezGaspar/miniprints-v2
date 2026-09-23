@@ -1248,3 +1248,19 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .vs-header > div:first-child { min-width: 0; }
 .vs-header .dash-toolbar { width: auto !important; flex-shrink: 0; }
 .vs-header .dash-toolbar .btn { flex: none !important; padding: 8px 14px !important; min-height: 36px; }
+
+/* Grupo de WhatsApp de ventas */
+.vs-wa { padding: 0 !important; }
+.vs-wa summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+.vs-wa summary::-webkit-details-marker { display: none; }
+.vs-wa-ico { width: 32px; height: 32px; flex-shrink: 0; display: grid; place-items: center; border-radius: 9px; background: #25d366; color: #fff; }
+.vs-wa-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.vs-wa-text { display: flex; flex-direction: column; min-width: 0; }
+.vs-wa-title { font-size: 17px; font-weight: 600; color: var(--text); }
+.vs-wa-sub { font-size: 13px; color: var(--ios-orange); }
+.vs-wa-sub.is-ok { color: var(--ios-label-2); }
+.vs-wa-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; color: var(--ios-label-2); }
+.vs-wa-body ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.vs-wa-body b { color: var(--text); font-weight: 600; }
+.vs-wa-row { display: flex; gap: 8px; }
+.form-card .vs-wa-row input { flex: 1; min-width: 0; width: auto !important; font-size: 16px !important; }

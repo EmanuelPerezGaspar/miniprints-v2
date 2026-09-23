@@ -10,7 +10,7 @@ const firebaseConfig = {
 };
 
 const PIN       = "0343";
-const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias'];
+const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo'];
 
 const _origSetItem = localStorage.setItem.bind(localStorage);
 let applyingRemote    = false;
