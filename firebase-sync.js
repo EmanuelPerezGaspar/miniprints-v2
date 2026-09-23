@@ -9,7 +9,8 @@ const firebaseConfig = {
   appId: "1:688625548823:web:984352167469cba3402652"
 };
 
-const PIN       = "0343";
+// Solo la cuenta autorizada puede leer y escribir (lo exigen las reglas de Firestore);
+// este archivo ya no guarda ningún PIN ni contraseña.
 const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo'];
 
 const _origSetItem = localStorage.setItem.bind(localStorage);
@@ -18,6 +19,7 @@ let pushTimer         = null;
 let _schedulePush     = () => {};
 let _pendingLocalWrite  = false;
 let _lastLocalWriteTime = 0;
+const AUTH_FLAG = 'mp_auth_ok';
 
 // Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
 function syncBadge(state) {
@@ -40,8 +42,9 @@ function syncBadge(state) {
     ok:         ['#052e16','#30d158','#166534', '✓ Guardado',       3000],
     error:      ['#450a0a','#ff6961','#7f1d1d', '⚠ Error de sync',  0],
     local:      ['#1c1917','#78716c','#292524', '● Modo local',     5000],
+    denied:     ['#450a0a','#ff6961','#7f1d1d', '⚠ Sin permiso',   0],
   }[state];
-  if (!cfg) return;
+  if (!cfg) { el.style.opacity = '0'; return; }
   el.style.background = cfg[0];
   el.style.color       = cfg[1];
   el.style.border      = `1px solid ${cfg[2]}`;
@@ -65,127 +68,220 @@ function applyRemoteData(data) {
   window.dispatchEvent(new CustomEvent('mp-sync-update'));
 }
 
-function showPinGate(onUnlock) {
-  if (localStorage.getItem('mp_pin_ok') === '1') { onUnlock(); return; }
-  const overlay = document.createElement('div');
-  overlay.id = 'mp-pin-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:var(--ios-bg);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;';
-  overlay.innerHTML = `
-    <div style="background:var(--ios-bg-2);border:none;border-radius:26px;padding:32px 24px;max-width:320px;width:90%;text-align:center;">
-      <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-      <h2 style="color:var(--text);font-size:22px;font-weight:700;margin-bottom:4px;">MiniPrints</h2><p style="color:var(--ios-label-2);font-size:15px;margin-bottom:20px;">Ingresa tu PIN</p>
-      <input id="mp-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" autocomplete="off"
-        style="width:100%;padding:12px;min-height:50px;border-radius:14px;border:none;background:var(--ios-fill);color:var(--text);font-size:22px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;box-sizing:border-box;" />
-      <button id="mp-pin-btn" style="width:100%;padding:14px;min-height:50px;border-radius:999px;border:none;background:var(--ios-green);color:var(--ios-on-accent);font-weight:600;font-size:17px;cursor:pointer;">Entrar</button>
-      <div id="mp-pin-err" style="color:var(--ios-red);font-size:13px;margin-top:10px;display:none;">PIN incorrecto</div>
-    </div>`;
-  document.body.appendChild(overlay);
-  const input = overlay.querySelector('#mp-pin-input');
-  const btn   = overlay.querySelector('#mp-pin-btn');
-  const err   = overlay.querySelector('#mp-pin-err');
-  function tryUnlock() {
-    if (input.value === PIN) {
-      _origSetItem('mp_pin_ok', '1');
-      overlay.remove();
-      onUnlock();
-    } else {
-      err.style.display = 'block';
-      input.value = '';
-      input.focus();
+const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
+
+// ── Pantalla de inicio de sesión ──────────────────
+const ERRORES = {
+  'auth/invalid-credential':     'Correo o contraseña incorrectos.',
+  'auth/invalid-login-credentials': 'Correo o contraseña incorrectos.',
+  'auth/wrong-password':         'Correo o contraseña incorrectos.',
+  'auth/user-not-found':         'Correo o contraseña incorrectos.',
+  'auth/invalid-email':          'Ese correo no es válido.',
+  'auth/missing-password':       'Escribe tu contraseña.',
+  'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
+  'auth/network-request-failed': 'Sin conexión. Revisa tu internet.',
+  'auth/operation-not-allowed':  'El inicio de sesión con correo no está activado en Firebase.',
+  'auth/user-disabled':          'Esta cuenta está desactivada.',
+};
+const errorDe = e => ERRORES[e && e.code] || 'No se pudo iniciar sesión. Intenta de nuevo.';
+
+function mostrarLogin(api) {
+  return new Promise(resolve => {
+    let el = document.getElementById('mp-login');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'mp-login';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-modal', 'true');
+      el.setAttribute('aria-labelledby', 'mp-login-t');
+      el.innerHTML = `
+        <form class="auth-card" novalidate>
+          <img class="auth-icon" src="icon-180.png" alt="" width="72" height="72" />
+          <h1 id="mp-login-t">MiniPrints</h1>
+          <p class="auth-sub">Inicia sesión para ver tu negocio.</p>
+          <div class="auth-fields">
+            <input id="mp-login-email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Correo" aria-label="Correo" required />
+            <input id="mp-login-pass" type="password" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña" required />
+          </div>
+          <p class="auth-msg" id="mp-login-msg" role="alert"></p>
+          <button class="auth-btn" type="submit" id="mp-login-btn">Iniciar sesión</button>
+          <button class="auth-link" type="button" id="mp-login-olvide">¿Olvidaste tu contraseña?</button>
+        </form>`;
+      document.body.appendChild(el);
     }
-  }
-  btn.addEventListener('click', tryUnlock);
-  input.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-  setTimeout(() => input.focus(), 150);
+    document.documentElement.style.overflow = 'hidden';
+    const form = el.querySelector('form');
+    const email = el.querySelector('#mp-login-email');
+    const pass = el.querySelector('#mp-login-pass');
+    const msg = el.querySelector('#mp-login-msg');
+    const btn = el.querySelector('#mp-login-btn');
+    const aviso = (t, ok) => { msg.textContent = t || ''; msg.classList.toggle('is-ok', !!ok); };
+
+    if (!api) {
+      aviso('Sin conexión. Conéctate a internet para iniciar sesión.');
+      btn.disabled = true;
+      return;
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      if (!email.value.trim() || !pass.value) return aviso('Escribe tu correo y contraseña.');
+      btn.disabled = true; btn.textContent = 'Entrando…'; aviso('');
+      try {
+        const cred = await api.signInWithEmailAndPassword(api.auth, email.value.trim(), pass.value);
+        el.remove();
+        document.documentElement.style.overflow = '';
+        resolve(cred.user);
+      } catch (err) {
+        aviso(errorDe(err));
+        btn.disabled = false; btn.textContent = 'Iniciar sesión';
+        pass.select();
+      }
+    });
+    el.querySelector('#mp-login-olvide').addEventListener('click', async () => {
+      if (!email.value.trim()) { aviso('Escribe tu correo y vuelve a tocar aquí.'); email.focus(); return; }
+      try {
+        await api.sendPasswordResetEmail(api.auth, email.value.trim());
+        aviso('Si el correo está registrado, te llegará un enlace para cambiar la contraseña.', true);
+      } catch (err) { aviso(errorDe(err)); }
+    });
+    setTimeout(() => email.focus(), 200);
+  });
 }
 
-async function initSync() {
+// Cerrar sesión: se borra la copia local (sin sincronizar el borrado) y se vuelve a pedir acceso
+let _salir = null;
+window.MP_AUTH = {
+  salir() {
+    if (_salir) return _salir();
+    localStorage.removeItem(AUTH_FLAG);
+    location.reload();
+  },
+  usuario: null,
+};
+
+// ── Arranque ──────────────────────────────────────
+let _listo = false;
+function listo() {
+  if (_listo) return;
+  _listo = true;
   window.dispatchEvent(new CustomEvent('mp-sync-ready'));
+}
+
+async function iniciar() {
+  // Si ya iniciaste sesión en este dispositivo, la app se muestra al momento con los datos
+  // guardados; la sesión se confirma en segundo plano.
+  const recordado = localStorage.getItem(AUTH_FLAG) === '1';
+  if (recordado) listo();
   syncBadge('connecting');
 
+  let mods;
   try {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
-    const { getAuth, signInAnonymously, setPersistence, browserSessionPersistence } =
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
-    const { getFirestore, doc, getDoc, setDoc, onSnapshot } =
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
-
-    const app    = initializeApp(firebaseConfig);
-    const auth   = getAuth(app);
-    const db     = getFirestore(app);
-    const docRef = doc(db, 'negocio', 'data');
-
-    let _authReady = false;
-
-    // Push con reintentos — si falla por red lo intenta hasta 3 veces
-    async function executeSetDoc(payload) {
-      for (let i = 0; i < 3; i++) {
-        try {
-          await setDoc(docRef, payload, { merge: true });
-          syncBadge('ok');
-          return;
-        } catch (e) {
-          if (i === 2) { console.error('mp sync push error', e); syncBadge('error'); }
-          else await new Promise(r => setTimeout(r, 800 * (i + 1)));
-        }
-      }
-    }
-
-    function flushPush() {
-      clearTimeout(pushTimer);
-      // Sin auth confirmada no llamar setDoc — _pendingLocalWrite queda true para el check de initSync
-      if (!_authReady) return;
-      _pendingLocalWrite = false;
-      const payload = {};
-      SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-      executeSetDoc(payload);
-    }
-
-    _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
-
-    document.addEventListener('visibilitychange', () => { if (document.hidden) flushPush(); });
-    window.addEventListener('pagehide', flushPush);
-
-    // BFCache: al restaurar página desde caché en iOS, refrescar datos
-    window.addEventListener('pageshow', e => {
-      if (e.persisted && _authReady) {
-        getDoc(docRef).then(s => {
-          if (s.exists() && Date.now() - _lastLocalWriteTime > 2000) applyRemoteData(s.data());
-        }).catch(() => {});
-      }
-    });
-
-    // browserSessionPersistence es más confiable en iOS Safari que IndexedDB (default)
-    try { await setPersistence(auth, browserSessionPersistence); } catch (_) {}
-
-    await signInAnonymously(auth);
-    _authReady = true;
-
-    const snap = await getDoc(docRef);
-
-    if (_pendingLocalWrite) {
-      // Cambios locales que esperaban auth — pushear ahora
-      flushPush();
-    } else if (snap.exists() && Date.now() - _lastLocalWriteTime > 2000) {
-      applyRemoteData(snap.data());
-      syncBadge('ok');
-    } else if (!snap.exists()) {
-      const initial = {};
-      SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
-      await setDoc(docRef, initial);
-      syncBadge('ok');
-    }
-
-    onSnapshot(docRef, snap => {
-      if (snap.metadata.hasPendingWrites) return;
-      if (Date.now() - _lastLocalWriteTime < 5000) return;
-      if (snap.exists()) applyRemoteData(snap.data());
-    });
-
+    mods = await Promise.all([import(FB + 'firebase-app.js'), import(FB + 'firebase-auth.js'), import(FB + 'firebase-firestore.js')]);
   } catch (e) {
-    console.warn('Firebase sync no disponible:', e);
-    syncBadge('error');
+    console.warn('Firebase no disponible:', e);
+    if (recordado) { syncBadge('local'); return; }
+    mostrarLogin(null);
+    return;
   }
+  const [{ initializeApp }, A, { getFirestore, doc, getDoc, setDoc, onSnapshot }] = mods;
+  const app  = initializeApp(firebaseConfig);
+  const auth = A.getAuth(app);
+  try { await A.setPersistence(auth, A.indexedDBLocalPersistence); }
+  catch (_) { try { await A.setPersistence(auth, A.browserLocalPersistence); } catch (__) {} }
+  await auth.authStateReady();
+
+  _salir = async () => {
+    try { await A.signOut(auth); } catch (_) {}
+    localStorage.removeItem(AUTH_FLAG);
+    SYNC_KEYS.forEach(k => localStorage.removeItem(k));
+    location.replace('dashboard.html');
+  };
+
+  let user = auth.currentUser;
+  if (user && user.isAnonymous) { try { await A.signOut(auth); } catch (_) {} user = null; }
+  if (!user) {
+    localStorage.removeItem(AUTH_FLAG);
+    syncBadge('none');
+    user = await mostrarLogin({ auth, signInWithEmailAndPassword: A.signInWithEmailAndPassword, sendPasswordResetEmail: A.sendPasswordResetEmail });
+  }
+  _origSetItem(AUTH_FLAG, '1');
+  window.MP_AUTH.usuario = { email: user.email, uid: user.uid };
+  window.dispatchEvent(new CustomEvent('mp-auth', { detail: window.MP_AUTH.usuario }));
+  listo();
+  syncBadge('connecting');
+  iniciarSync({ doc: doc(getFirestore(app), 'negocio', 'data'), getDoc, setDoc, onSnapshot });
+
+  // Si la sesión se cierra en otro lado (o se revoca), se vuelve a pedir acceso
+  A.onAuthStateChanged(auth, u => { if (!u) window.MP_AUTH.salir(); });
 }
 
-showPinGate(initSync);
+function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
+  // Push con reintentos — si falla por red lo intenta hasta 3 veces
+  async function executeSetDoc(payload) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        await setDoc(docRef, payload, { merge: true });
+        syncBadge('ok');
+        return;
+      } catch (e) {
+        if (e && e.code === 'permission-denied') { console.error('mp sync: sin permiso', e); syncBadge('denied'); return; }
+        if (i === 2) { console.error('mp sync push error', e); syncBadge('error'); }
+        else await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+    }
+  }
+
+  function flushPush() {
+    clearTimeout(pushTimer);
+    _pendingLocalWrite = false;
+    const payload = {};
+    SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
+    executeSetDoc(payload);
+  }
+
+  _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
+
+  document.addEventListener('visibilitychange', () => { if (document.hidden && _pendingLocalWrite) flushPush(); });
+  window.addEventListener('pagehide', () => { if (_pendingLocalWrite) flushPush(); });
+
+  // BFCache: al restaurar página desde caché en iOS, refrescar datos
+  window.addEventListener('pageshow', e => {
+    if (e.persisted) {
+      getDoc(docRef).then(s => {
+        if (s.exists() && Date.now() - _lastLocalWriteTime > 2000) applyRemoteData(s.data());
+      }).catch(() => {});
+    }
+  });
+
+  (async () => {
+    try {
+      const snap = await getDoc(docRef);
+      if (_pendingLocalWrite) {
+        // Cambios locales hechos mientras se confirmaba la sesión — subirlos ahora
+        flushPush();
+      } else if (snap.exists() && Date.now() - _lastLocalWriteTime > 2000) {
+        applyRemoteData(snap.data());
+        syncBadge('ok');
+      } else if (!snap.exists()) {
+        const initial = {};
+        SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
+        await setDoc(docRef, initial);
+        syncBadge('ok');
+      } else {
+        syncBadge('ok');
+      }
+
+      onSnapshot(docRef, snap => {
+        if (snap.metadata.hasPendingWrites) return;
+        if (Date.now() - _lastLocalWriteTime < 5000) return;
+        if (snap.exists()) applyRemoteData(snap.data());
+      }, e => { console.warn('mp sync snapshot', e); syncBadge(e && e.code === 'permission-denied' ? 'denied' : 'error'); });
+    } catch (e) {
+      console.warn('Firebase sync no disponible:', e);
+      syncBadge(e && e.code === 'permission-denied' ? 'denied' : 'error');
+    }
+  })();
+}
+
+iniciar();
