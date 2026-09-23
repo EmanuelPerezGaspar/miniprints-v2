@@ -1,0 +1,321 @@
+/* ─────────────────────────────────────────────────
+   MiniPrints — Menú estilo iOS (tab bar Liquid Glass + hoja "Más")
+   Móvil/iPad vertical: barra flotante abajo. Pantallas anchas: arriba.
+───────────────────────────────────────────────── */
+:root {
+  --ios-font:     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", system-ui, sans-serif;
+  --ios-tint:     #30d158;
+  --ios-label:    rgba(235, 235, 245, 0.62);
+  --ios-glass:    rgba(28, 28, 32, 0.66);
+  --ios-stroke:   rgba(255, 255, 255, 0.16);
+  --ios-bubble:   rgba(255, 255, 255, 0.13);
+  --ios-sheet:    #1c1c1e;
+  --ios-group:    #2c2c2e;
+  --ios-sep:      rgba(84, 84, 88, 0.55);
+  --ios-spring:   cubic-bezier(0.32, 0.72, 0, 1);
+  --tabbar-space: calc(env(safe-area-inset-bottom, 0px) + 104px);
+}
+
+/* Transición entre páginas: la burbuja de la pestaña activa se desliza */
+@view-transition { navigation: auto; }
+::view-transition-group(tab-bubble) { animation-duration: 380ms; animation-timing-function: var(--ios-spring); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+
+/* ── Tab bar ─────────────────────────────────────── */
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: min(calc(100% - 32px), 440px);
+  font-family: var(--ios-font);
+  transition: width 420ms var(--ios-spring), transform 420ms var(--ios-spring);
+}
+.tabbar-glass {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--ios-glass);
+  backdrop-filter: blur(22px) saturate(190%);
+  -webkit-backdrop-filter: blur(22px) saturate(190%);
+  border: 0.5px solid var(--ios-stroke);
+  /* El nombre de transición va aquí (no en .tabbar) para que el desenfoque vea el contenido de la página */
+  view-transition-name: tabbar;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 10px 36px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+}
+/* Reflejo especular superior */
+.tabbar-glass::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 18%; right: 18%;
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  pointer-events: none;
+}
+
+.tab-bubble {
+  position: absolute;
+  top: 4px; bottom: 4px;
+  left: 0; width: 0;
+  border-radius: 999px;
+  background: var(--ios-bubble);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  view-transition-name: tab-bubble;
+  transition: left 380ms var(--ios-spring), width 380ms var(--ios-spring), opacity 200ms;
+  pointer-events: none;
+}
+.tab-bubble.no-anim { transition: none; }
+
+.tab {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 56px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  border-radius: 999px;
+  color: var(--ios-label);
+  font: inherit;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 200ms, transform 160ms var(--ios-spring);
+}
+.tab:active { transform: scale(0.9); }
+.tab:focus-visible { outline: 2px solid var(--ios-tint); outline-offset: -2px; }
+.tab svg {
+  width: 25px; height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 300ms var(--ios-spring);
+}
+.tab span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tab[aria-current="page"], .tab.is-open { color: var(--ios-tint); }
+/* Símbolo relleno en la pestaña activa, como SF Symbols ".fill" */
+.tab[aria-current="page"] .i-fill, .tab.is-open .i-fill { fill: currentColor; }
+.tab[aria-current="page"] .i-cut,  .tab.is-open .i-cut  { stroke: #111214; stroke-width: 1.9; }
+
+/* Al hacer scroll hacia abajo la barra se compacta (como iOS) */
+.tabbar.is-compact { width: min(calc(100% - 96px), 300px); }
+.tabbar.is-compact .tab { height: 46px; }
+.tabbar.is-compact .tab span { display: none; }
+.tabbar.is-compact .tab svg { transform: scale(0.94); }
+
+/* Pantallas anchas (iPad horizontal / escritorio): barra arriba, iconos con texto al lado */
+@media (min-width: 900px) {
+  .tabbar {
+    top: 14px;
+    bottom: auto;
+    width: auto;
+  }
+  .tabbar.is-compact { width: auto; }
+  .tab {
+    flex: 0 0 auto;
+    flex-direction: row;
+    gap: 7px;
+    height: 42px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .tab svg { width: 20px; height: 20px; }
+  .tabbar.is-compact .tab { height: 42px; }
+  .tabbar.is-compact .tab span { display: inline; }
+}
+
+/* ── Espacio para la barra en el contenido ───────── */
+@media (max-width: 899px) {
+  .page-container {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+    padding-bottom: var(--tabbar-space);
+  }
+  /* Avisos y badge de sincronización por encima de la barra */
+  #toast { bottom: calc(var(--tabbar-space) + 4px) !important; }
+  #mp-sync-badge { bottom: calc(var(--tabbar-space) + 4px) !important; }
+}
+/* La hoja "Más" queda por encima del badge de sincronización */
+#mp-sync-badge { z-index: 1050 !important; }
+
+/* Selector de segmento (Piezas / Material) en Inventario */
+.ios-segmented {
+  position: relative;
+  display: flex;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 0 20px;
+  padding: 2px;
+  border-radius: 10px;
+  background: rgba(118, 118, 128, 0.24);
+  font-family: var(--ios-font);
+}
+.ios-segmented a {
+  flex: 1;
+  text-align: center;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(235, 235, 245, 0.8);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ios-segmented a[aria-current="page"] {
+  background: #636366;
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
+  view-transition-name: seg-thumb;
+}
+
+/* ── Hoja "Más" (bottom sheet estilo Ajustes) ────── */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 320ms var(--ios-spring);
+}
+.sheet-backdrop.open { opacity: 1; }
+
+.sheet {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 1101;
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  border-radius: 22px 22px 0 0;
+  background: var(--ios-sheet);
+  color: #fff;
+  font-family: var(--ios-font);
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
+  transform: translateY(100%);
+  transition: transform 440ms var(--ios-spring);
+}
+.sheet.open { transform: translateY(0); }
+.sheet.dragging { transition: none; }
+
+.sheet-grabber {
+  width: 36px; height: 5px;
+  margin: 0 auto 10px;
+  border-radius: 3px;
+  background: rgba(235, 235, 245, 0.3);
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 14px;
+}
+.sheet-head h2 { font-size: 22px; font-weight: 700; letter-spacing: 0.2px; }
+.sheet-close {
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(118, 118, 128, 0.24);
+  color: rgba(235, 235, 245, 0.7);
+  cursor: pointer;
+}
+.sheet-close svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
+
+.sheet-label {
+  padding: 0 16px 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: rgba(235, 235, 245, 0.6);
+}
+.sheet-group {
+  margin-bottom: 26px;
+  border-radius: 12px;
+  background: var(--ios-group);
+  overflow: hidden;
+}
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sheet-row:active { background: rgba(255, 255, 255, 0.08); }
+.sheet-row:focus-visible { outline: 2px solid var(--ios-tint); outline-offset: -2px; }
+.sheet-row + .sheet-row .sheet-row-body { border-top: 0.5px solid var(--ios-sep); }
+.sheet-row-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  align-self: stretch;
+}
+.sheet-row-sub { font-size: 13px; color: rgba(235, 235, 245, 0.5); }
+.sheet-row.is-current .sheet-row-sub { color: var(--ios-tint); }
+.sheet-icon {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: grid; place-items: center;
+  border-radius: 7px;
+  color: #fff;
+}
+.sheet-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-chev { width: 8px; height: 14px; flex-shrink: 0; stroke: rgba(235, 235, 245, 0.3); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-row.danger { color: #ff453a; }
+.sheet-foot { text-align: center; font-size: 12px; color: rgba(235, 235, 245, 0.35); padding-top: 2px; }
+
+/* En pantallas anchas la hoja es una tarjeta centrada */
+@media (min-width: 900px) {
+  .sheet {
+    left: 50%; right: auto; bottom: auto; top: 50%;
+    width: 420px;
+    border-radius: 22px;
+    padding-bottom: 20px;
+    transform: translate(-50%, -46%) scale(0.96);
+    opacity: 0;
+    transition: transform 360ms var(--ios-spring), opacity 220ms;
+  }
+  .sheet.open { transform: translate(-50%, -50%); opacity: 1; }
+  .sheet-grabber { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabbar, .tab, .tab svg, .tab-bubble, .sheet, .sheet-backdrop { transition: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+@media print {
+  .tabbar, .sheet, .sheet-backdrop, .ios-segmented { display: none !important; }
+}
