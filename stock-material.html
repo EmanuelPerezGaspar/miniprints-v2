@@ -1,360 +1,419 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MiniPrints — Stock Material</title>
-  <script src="theme.js?v=20260923q"></script>
+  <title>MiniPrints — Material</title>
+  <script src="theme.js?v=20260923r"></script>
+  <script src="inventario.js?v=20260923r"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923q" />
+  <link rel="stylesheet" href="styles.css?v=20260923r" />
   <style>
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label {
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px;
-      text-transform: uppercase; color: var(--text-dim);
-    }
-    .field input, .field select {
-      width: 100%; background: rgba(var(--ink), 0.05); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
-      font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
-      -moz-appearance: textfield;
-    }
-    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(48,209,88,0.12); }
-    .grid-5 { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; }
-    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
-    .form-card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-    .btn-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
-    .msg { font-size: 0.8rem; margin-top: 6px; min-height: 20px; }
-    /* Material items */
-    .mat-item {
-      display: grid; grid-template-columns: 1fr auto auto;
-      gap: 12px; align-items: center;
-      padding: 16px 20px; margin-bottom: 10px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); transition: border-color 180ms, transform 180ms;
-    }
-    .mat-item:hover { border-color: rgba(var(--ink), 0.18); transform: translateX(2px); }
-    .mat-info {}
-    .mat-name { font-size: 0.9rem; font-weight: 700; margin-bottom: 2px; }
-    .mat-sub { font-size: 0.75rem; color: var(--text-dim); }
-    .mat-stat { text-align: center; min-width: 80px; }
-    .mat-stat-val { font-size: 0.95rem; font-weight: 800; }
-    .mat-stat-lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-dim); margin-top: 2px; }
-    .pbar { height: 5px; background: rgba(var(--ink), 0.07); border-radius: 99px; overflow: hidden; margin-top: 5px; width: 100%; max-width: 80px; }
-    .pbar-fill { height: 100%; border-radius: 99px; }
-    .pbar-green { background: linear-gradient(90deg, var(--ios-green), var(--ios-green)); }
-    .pbar-yellow { background: linear-gradient(90deg, var(--ios-yellow), var(--ios-yellow)); }
-    .pbar-red { background: linear-gradient(90deg, var(--ios-red), var(--ios-red)); }
-    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
-    .empty-state svg { margin: 0 auto 12px; opacity: 0.4; }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    .mat-stats { display: flex; gap: 18px; flex-wrap: wrap; }
-    /* Prevent overflow */
-    .form-card { min-width: 0; }
-    .grid-5 { min-width: 0; }
-    .mat-item { min-width: 0; }
-    @media (max-width: 800px) {
-      .grid-5 { grid-template-columns: 1fr 1fr; }
-      .mat-item {
-        grid-template-columns: 1fr auto;
-        grid-template-areas: "info actions" "stats stats";
-      }
-      .mat-info    { grid-area: info; }
-      .mat-actions { grid-area: actions; }
-      .mat-stats   { grid-area: stats; margin-top: 10px; gap: 22px; }
-      .mat-stat    { text-align: left; }
-    }
-    @media (max-width: 600px) {
-      .grid-5 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 480px) {
-      .mat-name { font-size: 0.82rem; }
-      .mat-stat-val { font-size: 0.85rem; }
-    }
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923q" />
-  <link rel="stylesheet" href="nav.css?v=20260923q" />
+  <link rel="stylesheet" href="ios.css?v=20260923r" />
+  <link rel="stylesheet" href="nav.css?v=20260923r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923q"></script>
+  <script type="module" src="firebase-sync.js?v=20260923r"></script>
 
   <div class="page-container">
     <main class="dash-main">
-        <div class="dash-header">
-          <div>
-            <h1 class="dash-title">Stock de Material</h1>
-            <p class="dash-subtitle">Inventario de filamentos · Cambios se sincronizan con el cotizador.</p>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-ghost" onclick="exportarJSON()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exportar
-            </button>
-            <button class="btn btn-ghost" onclick="abrirImport()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 5 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Importar
-            </button>
-          </div>
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Material</h1>
+          <p class="dash-subtitle" id="inv-sub">Filamentos disponibles para imprimir.</p>
         </div>
-
-        <!-- Import modal -->
-        <div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;">
-          <div style="background:var(--ios-bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;width:100%;max-width:560px;">
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:6px;">Importar materiales</h3>
-            <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;">Pega el JSON copiado desde tu sistema anterior. Los materiales existentes con el mismo ID se actualizarán, los nuevos se agregarán.</p>
-            <p style="font-size:0.75rem;color:var(--ios-yellow);margin-bottom:12px;background:rgba(255,214,10,0.1);border:1px solid rgba(255,214,10,0.2);border-radius:6px;padding:8px 12px;">
-              Para obtener el JSON: abre <strong>miniprints-preview.html</strong> en Chrome → F12 → Console → escribe <code style="background:rgba(var(--ink), 0.1);padding:1px 5px;border-radius:3px;">copy(localStorage.getItem('mp_materials'))</code> → Enter
-            </p>
-            <textarea id="import-json" placeholder='{"creality-pla-negro":{"id":"creality-pla-negro","marca":"CREALITY",...}}' style="width:100%;height:140px;background:rgba(var(--ink), 0.04);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:monospace;font-size:0.78rem;padding:10px;resize:vertical;outline:none;box-sizing:border-box;"></textarea>
-            <div id="import-msg" style="font-size:0.8rem;min-height:20px;margin-top:8px;"></div>
-            <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
-              <button class="btn btn-ghost" onclick="cerrarImport()">Cancelar</button>
-              <button class="btn btn-primary" onclick="importarJSON()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Importar
-              </button>
-            </div>
-          </div>
+        <div class="inv-actions">
+          <button type="button" class="inv-icon-btn" onclick="MP_INV.abrir('sh-respaldo')" aria-label="Respaldo: exportar o importar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v13M3 13l4 4 4-4M17 20V7M13 11l4-4 4 4"/></svg>
+          </button>
+          <button type="button" class="inv-icon-btn is-primary" onclick="abrirNuevo()" aria-label="Agregar filamento">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
         </div>
+      </div>
 
-        <!-- Add form -->
-        <div class="form-card">
-          <div class="form-card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Agregar / Restock material
-          </div>
-          <div class="grid-5">
-            <div class="field"><label>Marca</label><input type="text" id="mat-marca" placeholder="Creality" /></div>
-            <div class="field"><label>Material</label><input type="text" id="mat-tipo" placeholder="PLA MATTE" /></div>
-            <div class="field"><label>Color</label><input type="text" id="mat-color" placeholder="Azul" /></div>
-            <div class="field"><label>Peso (g)</label><input type="number" id="mat-peso" placeholder="1000" min="1" /></div>
-            <div class="field"><label>Precio / kg ($)</label><input type="number" id="mat-costo" placeholder="399" min="0" step="1" /></div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="agregarMaterial()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
-              Guardar
-            </button>
-            <button class="btn btn-ghost" onclick="limpiarForm()">Limpiar</button>
-          </div>
-          <div class="msg" id="form-msg"></div>
-        </div>
+      <div class="inv-wrap">
+        <div class="inv-sum is-4" id="inv-sum"></div>
 
-        <!-- KPI row -->
-        <div class="kpi-grid" style="margin-bottom:24px;" id="kpi-row"></div>
-
-        <!-- Stock list -->
-        <div class="section-lbl">Stock actual</div>
-        <div id="mat-list"></div>
+        <section class="form-card inv-card" aria-label="Filamentos">
+          <input type="search" id="inv-buscar" class="vs-search" placeholder="Buscar filamento" autocomplete="off" aria-label="Buscar filamento" />
+          <div class="vs-cats" id="inv-cats" role="radiogroup" aria-label="Filtrar"></div>
+          <div class="vs-list-head"><span id="inv-count"></span><span>Toca uno para editar</span></div>
+          <div class="inv-list" id="inv-list" role="list"></div>
+        </section>
+      </div>
     </main>
   </div>
 
-  <div id="toast"></div>
+  <!-- Hoja: nuevo filamento / reabastecer -->
+  <div class="sheet inv-sheet" id="sh-nuevo" role="dialog" aria-modal="true" aria-labelledby="sh-nuevo-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-nuevo-t">Agregar filamento</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-row3">
+      <div class="inv-f"><label for="n-tipo">Material</label><input type="text" id="n-tipo" list="l-tipos" placeholder="PLA" autocomplete="off" /></div>
+      <div class="inv-f"><label for="n-color">Color</label><input type="text" id="n-color" list="l-colores" placeholder="Negro" autocomplete="off" /></div>
+      <div class="inv-f"><label for="n-marca">Marca</label><input type="text" id="n-marca" list="l-marcas" placeholder="Creality" autocomplete="off" /></div>
+    </div>
+    <datalist id="l-tipos"></datalist><datalist id="l-colores"></datalist><datalist id="l-marcas"></datalist>
+    <p class="inv-hint" id="n-hint"></p>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Cantidad</span>
+      <div class="cq-chips" data-for="n-rollo" role="radiogroup" aria-label="Tamaño del rollo">
+        <button type="button" data-v="1000">1 rollo · 1 kg</button>
+        <button type="button" data-v="2000">2 rollos · 2 kg</button>
+        <button type="button" data-v="500">500 g</button>
+        <button type="button" data-v="otro">Otro</button>
+      </div>
+      <input type="hidden" id="n-rollo" value="1000" />
+      <input type="number" id="n-peso" placeholder="Gramos" min="1" inputmode="numeric" aria-label="Gramos" hidden />
+    </div>
+    <div class="inv-f">
+      <label for="n-costo">Precio por kg</label>
+      <input type="number" id="n-costo" placeholder="$399" min="0" step="1" inputmode="decimal" />
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" id="n-btn" onclick="guardarNuevo()">Agregar al inventario</button>
+    </div>
+  </div>
+
+  <!-- Hoja: editar filamento -->
+  <div class="sheet inv-sheet" id="sh-mat" role="dialog" aria-modal="true" aria-labelledby="sh-mat-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-mat-t">Filamento</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <p class="inv-sheet-sub" id="e-sub"></p>
+    <div class="inv-hero" id="e-hero"></div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Reabastecer</span>
+      <div class="inv-quick">
+        <button type="button" onclick="sumarPeso(1000)">+ 1 kg</button>
+        <button type="button" onclick="sumarPeso(500)">+ 500 g</button>
+        <button type="button" onclick="sumarPeso(250)">+ 250 g</button>
+      </div>
+    </div>
+    <div class="inv-row2">
+      <div class="inv-f"><label for="e-peso">Gramos restantes</label><input type="number" id="e-peso" min="0" inputmode="numeric" /></div>
+      <div class="inv-f"><label for="e-costo">Precio por kg</label><input type="number" id="e-costo" min="0" step="1" inputmode="decimal" /></div>
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" onclick="guardarMat()">Guardar</button>
+      <button type="button" class="inv-btn is-danger" onclick="eliminarMaterial()">Eliminar filamento</button>
+    </div>
+  </div>
+
+  <!-- Hoja: respaldo -->
+  <div class="sheet inv-sheet" id="sh-respaldo" role="dialog" aria-modal="true" aria-labelledby="sh-respaldo-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-respaldo-t">Respaldo</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <p class="inv-sheet-sub">Guarda tus filamentos en un archivo o trae una lista de otro sistema.</p>
+    <button type="button" class="inv-btn is-plain" onclick="exportarJSON()">Exportar archivo</button>
+    <div class="inv-f">
+      <label for="import-json">Importar (pega el JSON)</label>
+      <textarea id="import-json" placeholder='{"creality-pla-negro":{"id":"creality-pla-negro","marca":"CREALITY",...}}'></textarea>
+      <p class="inv-hint" id="import-msg"></p>
+    </div>
+    <button type="button" class="inv-btn" onclick="importarJSON()">Importar</button>
+  </div>
+
+  <div id="toast" role="status"></div>
 
   <script>
+    const { esc } = MP_INV;
     const DB = { materials: {} };
+    const BAJO = 500, CRITICO = 200;
 
     function loadDB() {
-      try { const m = localStorage.getItem('mp_materials'); if (m) DB.materials = JSON.parse(m); } catch(e) {}
+      try { DB.materials = JSON.parse(localStorage.getItem('mp_materials')) || {}; } catch (e) { DB.materials = {}; }
     }
-    function saveDB() {
-      try { localStorage.setItem('mp_materials', JSON.stringify(DB.materials)); } catch(e) {}
-    }
+    function saveDB() { try { localStorage.setItem('mp_materials', JSON.stringify(DB.materials)); } catch (e) {} }
 
     const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    function showToast(msg) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
-      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
-    }
-    function matsSorted() {
-      return Object.values(DB.materials).sort((a, b) => (a.marca + a.tipo + a.color).localeCompare(b.marca + b.tipo + b.color));
-    }
-    function matLabel(m) { return `${m.marca} · ${m.tipo} · ${m.color}`; }
-    function matId(marca, tipo, color) {
-      return (marca + '-' + tipo + '-' + color).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    }
+    const fmt0 = n => '$' + Math.round(n || 0).toLocaleString('es-MX');
+    const gramos = g => Math.round(g).toLocaleString('es-MX');
+    const matId = (marca, tipo, color) => (marca + '-' + tipo + '-' + color).toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const matsSorted = () => Object.values(DB.materials).sort((a, b) => (a.tipo + a.color + a.marca).localeCompare(b.tipo + b.color + b.marca, 'es'));
 
-    async function agregarMaterial() {
-      const marca = document.getElementById('mat-marca').value.trim().toUpperCase();
-      const tipo  = document.getElementById('mat-tipo').value.trim().toUpperCase();
-      const color = document.getElementById('mat-color').value.trim().toUpperCase();
-      const peso  = parseFloat(document.getElementById('mat-peso').value);
-      const costo = parseFloat(document.getElementById('mat-costo').value);
-      const msg   = document.getElementById('form-msg');
-
-      if (!marca || !tipo || !color) { msg.innerHTML = '<span style="color:var(--ios-red);">Completa marca, material y color.</span>'; return; }
-      if (!peso || peso <= 0) { msg.innerHTML = '<span style="color:var(--ios-red);">Peso inválido.</span>'; return; }
-      if (isNaN(costo) || costo < 0) { msg.innerHTML = '<span style="color:var(--ios-red);">Precio inválido.</span>'; return; }
-
-      const id = matId(marca, tipo, color);
-      const existing = DB.materials[id];
-      if (existing) {
-        DB.materials[id] = { ...existing, pesoTotal: existing.pesoTotal + peso, costo, marca, tipo, color };
-        msg.innerHTML = `<span style="color:var(--primary);">Actualizado: ${matLabel(DB.materials[id])} — total: ${DB.materials[id].pesoTotal}g</span>`;
-      } else {
-        DB.materials[id] = { id, marca, tipo, color, pesoTotal: peso, costo };
-        msg.innerHTML = `<span style="color:var(--primary);">Agregado: ${matLabel(DB.materials[id])}</span>`;
-      }
-      saveDB();
-      renderKPIs();
-      renderList();
-      limpiarForm();
+    function estado(g) {
+      if (g > BAJO) return { cls: 'st-ok', txt: 'Suficiente' };
+      if (g > CRITICO) return { cls: 'st-low', txt: 'Queda poco' };
+      return { cls: 'st-crit', txt: g > 0 ? 'Por acabarse' : 'Agotado' };
     }
 
-    function limpiarForm() {
-      ['mat-marca','mat-tipo','mat-color','mat-peso','mat-costo'].forEach(id => document.getElementById(id).value = '');
-      setTimeout(() => document.getElementById('form-msg').innerHTML = '', 2500);
-    }
+    // Color aproximado de la muestra según el nombre del color
+    const COLORES = [
+      [/negro|black/i, '#1c1c1e'], [/blanc|white|natural/i, '#f5f5f0'], [/gris|gray|grey|plata|silver/i, '#9a9aa0'],
+      [/rojo|red/i, '#e5322d'], [/naranja|orange/i, '#ff8a1f'], [/amarill|yellow/i, '#ffd21f'],
+      [/verde|green/i, '#34c759'], [/azul|blue|marino/i, '#2f6bff'], [/celeste|cian|cyan|turquesa|aqua/i, '#35c7e6'],
+      [/morado|purpura|púrpura|violeta|lila|purple/i, '#9b5de5'], [/rosa|pink|fucsia|magenta/i, '#ff5fa2'],
+      [/caf[eé]|marr[oó]n|brown|madera|wood|chocolate/i, '#8b5a2b'], [/dorad|oro|gold/i, '#d4a72c'],
+      [/beige|crema|arena|piel/i, '#e3cfa4'], [/transl|transp|clear|cristal/i, 'rgba(160,200,255,0.35)'],
+    ];
+    const swatch = color => (COLORES.find(([re]) => re.test(color || '')) || [0, 'var(--ios-fill)'])[1];
 
-    function editarPeso(id, val) {
-      if (DB.materials[id]) { DB.materials[id].pesoTotal = Math.max(0, parseFloat(val) || 0); saveDB(); renderKPIs(); }
-    }
-
-    async function eliminarMaterial(id) {
-      if (!confirm(`Eliminar "${matLabel(DB.materials[id])}"?`)) return;
-      delete DB.materials[id];
-      saveDB();
-      renderKPIs();
-      renderList();
-      showToast('Material eliminado');
-    }
-
-    function renderKPIs() {
+    // ── Resumen ──
+    let filtro = 'todos';
+    function renderResumen() {
       const mats = matsSorted();
-      const totalVal = mats.reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
-      const totalPeso = mats.reduce((s, m) => s + m.pesoTotal, 0);
-      const criticos = mats.filter(m => m.pesoTotal <= 200).length;
-      document.getElementById('kpi-row').innerHTML = `
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Materiales</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.green}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div></div>
-          <div class="kpi-value">${mats.length}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">tipos en stock</div>
+      const peso = mats.reduce((s, m) => s + m.pesoTotal, 0);
+      const valor = mats.reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
+      const bajos = mats.filter(m => m.pesoTotal <= CRITICO).length;
+      document.getElementById('inv-sub').textContent = mats.length
+        ? `${mats.length} filamento${mats.length !== 1 ? 's' : ''} · ${(peso / 1000).toLocaleString('es-MX', { maximumFractionDigits: 1 })} kg disponibles`
+        : 'Filamentos disponibles para imprimir.';
+      document.getElementById('inv-sum').innerHTML = `
+        <div class="inv-tile" style="--tile-color:var(--ios-purple)">
+          <span class="inv-tile-lbl"><i></i>Filamentos</span>
+          <span class="inv-tile-num">${mats.length}</span>
+          <span class="inv-tile-sub">registrados</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Peso total</div><div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
-          <div class="kpi-value">${(totalPeso / 1000).toFixed(2)}<span style="font-size:1rem;font-weight:500;color:var(--text-dim);">kg</span></div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">${totalPeso.toLocaleString('es-MX')}g en total</div>
+        <div class="inv-tile" style="--tile-color:var(--ios-blue)">
+          <span class="inv-tile-lbl"><i></i>Peso total</span>
+          <span class="inv-tile-num">${(peso / 1000).toLocaleString('es-MX', { maximumFractionDigits: 1 })}<small>kg</small></span>
+          <span class="inv-tile-sub">${gramos(peso)} g</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Valor inventario</div><div class="kpi-icon" style="background:rgba(191,90,242,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.purple}" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
-          <div class="kpi-value" style="font-size:1.5rem;">${fmt(totalVal)}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">en materiales</div>
+        <div class="inv-tile" style="--tile-color:var(--ios-green)">
+          <span class="inv-tile-lbl"><i></i>Valor</span>
+          <span class="inv-tile-num">${fmt0(valor)}</span>
+          <span class="inv-tile-sub">en material</span>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Stock crítico</div><div class="kpi-icon" style="background:rgba(255,69,58,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.red}" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div></div>
-          <div class="kpi-value" style="color:${criticos > 0 ? IOSC.red : IOSC.green};">${criticos}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">materiales ≤ 200g</div>
-        </div>`;
+        <button type="button" class="inv-tile${bajos ? ' is-alert' : ''}${filtro === 'bajos' ? ' is-on' : ''}" style="--tile-color:${bajos ? 'var(--ios-red)' : 'var(--ios-green)'}"
+                onclick="setFiltro(filtro === 'bajos' ? 'todos' : 'bajos')" aria-pressed="${filtro === 'bajos'}">
+          <span class="inv-tile-lbl"><i></i>Por acabarse</span>
+          <span class="inv-tile-num">${bajos}</span>
+          <span class="inv-tile-sub">${bajos ? `≤ ${CRITICO} g · toca para ver` : 'todo bien'}</span>
+        </button>`;
     }
 
-    function renderList() {
-      const container = document.getElementById('mat-list');
+    // ── Lista ──
+    function setFiltro(f) { filtro = f; renderResumen(); renderLista(); }
+
+    function renderCats(mats) {
+      const cuenta = { todos: mats.length, bajos: mats.filter(m => m.pesoTotal <= CRITICO).length };
+      mats.forEach(m => { const t = 't:' + m.tipo; cuenta[t] = (cuenta[t] || 0) + 1; });
+      const tipos = [...new Set(mats.map(m => m.tipo))].sort((a, b) => a.localeCompare(b, 'es'));
+      const ops = [{ id: 'todos', nombre: 'Todos' }, { id: 'bajos', nombre: 'Por acabarse' }, ...tipos.map(t => ({ id: 't:' + t, nombre: t }))]
+        .filter(o => o.id === 'todos' || cuenta[o.id] || o.id === filtro);
+      if (tipos.length < 2) ops.splice(2);
+      document.getElementById('inv-cats').innerHTML = ops.map(o =>
+        `<button type="button" role="radio" data-f="${esc(o.id)}" aria-checked="${o.id === filtro}">${esc(o.nombre)} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+    }
+
+    function renderLista() {
+      const list = document.getElementById('inv-list');
+      const q = document.getElementById('inv-buscar').value.trim().toLowerCase();
       const mats = matsSorted();
+      renderCats(mats);
       if (!mats.length) {
-        container.innerHTML = `<div class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-          <p style="font-size:0.9rem;font-weight:600;margin-bottom:6px;">Sin materiales registrados</p>
-          <p style="font-size:0.8rem;">Agrega tu primer filamento usando el formulario.</p>
-        </div>`;
+        document.getElementById('inv-count').textContent = '';
+        list.innerHTML = `<div class="inv-empty"><b>Sin filamentos</b>Registra tus rollos para que Cotizar calcule el costo del material.<br>
+          <button type="button" class="btn btn-primary" onclick="abrirNuevo()">Agregar filamento</button></div>`;
         return;
       }
-      container.innerHTML = mats.map(m => {
-        const pct = Math.min(100, (m.pesoTotal / 1000) * 100);
-        const barCls = m.pesoTotal > 500 ? 'pbar-green' : m.pesoTotal > 200 ? 'pbar-yellow' : 'pbar-red';
-        const badgeCls = m.pesoTotal > 500 ? 'badge-success' : m.pesoTotal > 200 ? 'badge-warning' : 'badge-error';
-        const badgeTxt = m.pesoTotal > 500 ? 'OK' : m.pesoTotal > 200 ? 'Bajo' : 'Crítico';
-        const valorMat = (m.pesoTotal / 1000) * m.costo;
-        return `<div class="mat-item">
-          <div class="mat-info">
-            <div class="mat-name">${m.marca} · ${m.tipo} · ${m.color}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
-              <div class="pbar" style="max-width:120px;"><div class="pbar-fill ${barCls}" style="width:${pct.toFixed(0)}%;"></div></div>
-              <span class="badge ${badgeCls}">${badgeTxt}</span>
-            </div>
+      const vis = mats
+        .filter(m => filtro === 'todos' || (filtro === 'bajos' ? m.pesoTotal <= CRITICO : 't:' + m.tipo === filtro))
+        .filter(m => !q || `${m.marca} ${m.tipo} ${m.color}`.toLowerCase().includes(q));
+      document.getElementById('inv-count').textContent = `${vis.length} de ${mats.length} filamentos`;
+      if (!vis.length) { list.innerHTML = `<div class="inv-empty">Sin resultados${q ? ` para "${esc(q)}"` : ''}</div>`; return; }
+      list.innerHTML = vis.map(m => {
+        const st = estado(m.pesoTotal);
+        const pct = Math.min(100, m.pesoTotal / 10);
+        return `<div class="inv-row ${st.cls}" role="listitem">
+          <button type="button" class="inv-row-main" data-id="${esc(m.id)}" aria-label="Editar ${esc(m.tipo + ' ' + m.color + ' ' + m.marca)}, ${gramos(m.pesoTotal)} gramos">
+            <span class="inv-swatch" style="--sw:${swatch(m.color)}"></span>
+            <span class="inv-row-text">
+              <span class="inv-row-name">${esc(m.tipo)} · ${esc(m.color)}</span>
+              <span class="inv-row-meta">${esc(m.marca)} · ${fmt0(m.costo)}/kg${m.pesoTotal <= BAJO ? ` · <b>${st.txt}</b>` : ''}</span>
+            </span>
+          </button>
+          <div class="inv-grams" aria-hidden="true">
+            <span class="inv-grams-num">${gramos(m.pesoTotal)}<small>g</small></span>
+            <span class="inv-bar"><i style="width:${pct.toFixed(0)}%"></i></span>
           </div>
-          <div class="mat-stats">
-            <div class="mat-stat">
-              <input type="number" value="${m.pesoTotal}" min="0" class="mat-peso-input" onchange="editarPeso('${m.id}', this.value)" />
-              <div class="mat-stat-lbl">g stock</div>
-            </div>
-            <div class="mat-stat">
-              <div class="mat-stat-val">${fmt(m.costo)}</div>
-              <div class="mat-stat-lbl">$/kg</div>
-            </div>
-            <div class="mat-stat">
-              <div class="mat-stat-val" style="color:var(--primary);">${fmt(valorMat)}</div>
-              <div class="mat-stat-lbl">valor</div>
-            </div>
-          </div>
-          <div class="mat-actions" style="display:flex;gap:6px;">
-            <button class="btn btn-ghost" style="padding:6px 10px;font-size:0.78rem;" onclick="eliminarMaterial('${m.id}')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
-          </div>
+          <svg class="inv-chev" viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg>
         </div>`;
       }).join('');
     }
 
+    document.getElementById('inv-cats').addEventListener('click', e => {
+      const b = e.target.closest('[data-f]');
+      if (b) setFiltro(b.dataset.f);
+    });
+    document.getElementById('inv-buscar').addEventListener('input', renderLista);
+    document.getElementById('inv-list').addEventListener('click', e => {
+      const b = e.target.closest('[data-id]');
+      if (b) abrirMat(b.dataset.id);
+    });
 
-    function abrirImport() {
-      const m = document.getElementById('import-modal');
-      m.style.display = 'flex';
-      document.getElementById('import-json').value = '';
-      document.getElementById('import-msg').innerHTML = '';
+    // ── Nuevo / reabastecer ──
+    function abrirNuevo() {
+      ['n-tipo', 'n-color', 'n-marca', 'n-costo', 'n-peso'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('n-rollo').value = '1000';
+      const lista = (campo) => [...new Set(Object.values(DB.materials).map(m => m[campo]))].sort().map(v => `<option value="${esc(v)}"></option>`).join('');
+      document.getElementById('l-tipos').innerHTML = lista('tipo');
+      document.getElementById('l-colores').innerHTML = lista('color');
+      document.getElementById('l-marcas').innerHTML = lista('marca');
+      cambioRollo();
+      revisarNuevo();
+      MP_INV.abrir('sh-nuevo');
+      setTimeout(() => document.getElementById('n-tipo').focus(), 350);
     }
-    function cerrarImport() {
-      document.getElementById('import-modal').style.display = 'none';
+    function cambioRollo() {
+      const otro = document.getElementById('n-rollo').value === 'otro';
+      document.getElementById('n-peso').hidden = !otro;
+      MP_INV.syncChips(document.getElementById('sh-nuevo'));
+      if (otro) document.getElementById('n-peso').focus();
     }
+    document.getElementById('n-rollo').addEventListener('change', cambioRollo);
+
+    function datosNuevo() {
+      const v = id => document.getElementById(id).value.trim().toUpperCase();
+      const marca = v('n-marca'), tipo = v('n-tipo'), color = v('n-color');
+      return { marca, tipo, color, id: marca && tipo && color ? matId(marca, tipo, color) : '' };
+    }
+    // Si ya existe ese filamento, se reabastece en vez de duplicarse
+    function revisarNuevo() {
+      const { id } = datosNuevo();
+      const m = id && DB.materials[id];
+      const hint = document.getElementById('n-hint');
+      hint.className = 'inv-hint' + (m ? ' is-ok' : '');
+      hint.textContent = m ? `Ya lo tienes (${gramos(m.pesoTotal)} g): se sumará a lo que queda.` : '';
+      document.getElementById('n-btn').textContent = m ? 'Reabastecer' : 'Agregar al inventario';
+      const costo = document.getElementById('n-costo');
+      if (m && !costo.value) costo.placeholder = fmt0(m.costo);
+      else if (!m) costo.placeholder = '$399';
+    }
+    ['n-marca', 'n-tipo', 'n-color'].forEach(id => document.getElementById(id).addEventListener('input', revisarNuevo));
+
+    function guardarNuevo() {
+      const { marca, tipo, color, id } = datosNuevo();
+      if (!tipo || !color || !marca) return MP_INV.toast('Completa material, color y marca');
+      const rollo = document.getElementById('n-rollo').value;
+      const peso = rollo === 'otro' ? parseFloat(document.getElementById('n-peso').value) : parseFloat(rollo);
+      if (!(peso > 0)) return MP_INV.toast('Escribe cuántos gramos agregas');
+      const existente = DB.materials[id];
+      const costoTxt = document.getElementById('n-costo').value;
+      const costo = costoTxt === '' && existente ? existente.costo : parseFloat(costoTxt);
+      if (isNaN(costo) || costo < 0) return MP_INV.toast('Escribe el precio por kg');
+
+      DB.materials[id] = existente
+        ? { ...existente, pesoTotal: existente.pesoTotal + peso, costo, marca, tipo, color }
+        : { id, marca, tipo, color, pesoTotal: peso, costo };
+      saveDB();
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast(existente ? `Reabastecido: ${tipo} ${color} · ${gramos(DB.materials[id].pesoTotal)} g` : `Agregado: ${tipo} ${color}`);
+    }
+
+    // ── Editar ──
+    let editando = null;
+    function pintarHero() {
+      const g = Math.max(0, parseFloat(document.getElementById('e-peso').value) || 0);
+      const costo = parseFloat(document.getElementById('e-costo').value) || 0;
+      const st = estado(g);
+      const hero = document.getElementById('e-hero');
+      hero.className = 'inv-hero ' + st.cls;
+      hero.innerHTML = `<span class="inv-hero-num">${gramos(g)}<small>g</small></span>
+        <span class="inv-bar"><i style="width:${Math.min(100, g / 10).toFixed(0)}%"></i></span>
+        <span class="inv-hero-sub">${st.txt} · vale ${fmt(g / 1000 * costo)}</span>`;
+    }
+    function abrirMat(id) {
+      const m = DB.materials[id];
+      if (!m) return;
+      editando = id;
+      document.getElementById('sh-mat-t').textContent = `${m.tipo} · ${m.color}`;
+      document.getElementById('e-sub').textContent = m.marca;
+      document.getElementById('e-peso').value = Math.round(m.pesoTotal * 10) / 10;
+      document.getElementById('e-costo').value = m.costo;
+      pintarHero();
+      MP_INV.abrir('sh-mat');
+    }
+    function sumarPeso(g) {
+      const i = document.getElementById('e-peso');
+      i.value = Math.round(((parseFloat(i.value) || 0) + g) * 10) / 10;
+      pintarHero();
+    }
+    ['e-peso', 'e-costo'].forEach(id => document.getElementById(id).addEventListener('input', pintarHero));
+
+    function guardarMat() {
+      const m = DB.materials[editando];
+      if (!m) return;
+      const peso = parseFloat(document.getElementById('e-peso').value);
+      const costo = parseFloat(document.getElementById('e-costo').value);
+      if (isNaN(peso) || peso < 0) return MP_INV.toast('Gramos inválidos');
+      if (isNaN(costo) || costo < 0) return MP_INV.toast('Precio inválido');
+      m.pesoTotal = peso; m.costo = costo;
+      saveDB();
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast('Cambios guardados');
+    }
+    function eliminarMaterial() {
+      const m = DB.materials[editando];
+      if (!m || !confirm(`¿Eliminar ${m.tipo} ${m.color} (${m.marca})?`)) return;
+      delete DB.materials[editando];
+      saveDB();
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast('Filamento eliminado');
+    }
+
+    // ── Respaldo ──
     function importarJSON() {
       const raw = document.getElementById('import-json').value.trim();
       const msg = document.getElementById('import-msg');
-      if (!raw) { msg.innerHTML = '<span style="color:var(--ios-red);">Pega el JSON primero.</span>'; return; }
+      const aviso = (t, ok) => { msg.className = 'inv-hint ' + (ok ? 'is-ok' : 'is-warn'); msg.textContent = t; };
+      if (!raw) return aviso('Pega el JSON primero.');
       let data;
-      try { data = JSON.parse(raw); } catch(e) { msg.innerHTML = '<span style="color:var(--ios-red);">JSON inválido.</span>'; return; }
-      // Normalize: accept array (Supabase format) or object (localStorage format)
-      const rows = Array.isArray(data) ? data : Object.values(data);
-      if (!rows.length) { msg.innerHTML = '<span style="color:var(--ios-red);">El JSON está vacío.</span>'; return; }
+      try { data = JSON.parse(raw); } catch (e) { return aviso('El JSON no es válido.'); }
+      // Acepta arreglo (formato Supabase) u objeto (formato localStorage)
+      const rows = Array.isArray(data) ? data : Object.values(data || {});
+      if (!rows.length) return aviso('El JSON está vacío.');
       let added = 0, updated = 0;
       rows.forEach(m => {
-        if (!m.id || !m.marca) return;
-        const normalized = {
-          id: m.id,
-          marca: m.marca,
-          tipo: m.tipo,
-          color: m.color,
+        if (!m || !m.id || !m.marca) return;
+        const n = {
+          id: m.id, marca: m.marca, tipo: m.tipo, color: m.color,
           pesoTotal: parseFloat(m.pesoTotal ?? m.peso_total ?? 1000),
           costo: parseFloat(m.costo ?? 0),
         };
-        if (DB.materials[normalized.id]) updated++; else added++;
-        DB.materials[normalized.id] = normalized;
+        if (DB.materials[n.id]) updated++; else added++;
+        DB.materials[n.id] = n;
       });
       saveDB();
-      msg.innerHTML = `<span style="color:var(--ios-green);">✓ ${added} materiales nuevos, ${updated} actualizados.</span>`;
-      renderKPIs();
-      renderList();
-      setTimeout(cerrarImport, 1800);
+      render();
+      aviso(`${added} nuevos, ${updated} actualizados.`, true);
+      document.getElementById('import-json').value = '';
     }
     function exportarJSON() {
-      const json = JSON.stringify(DB.materials, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
+      const blob = new Blob([JSON.stringify(DB.materials, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'mp_materials_backup.json';
       a.click();
-      showToast('Exportado correctamente.');
+      MP_INV.toast('Archivo exportado');
     }
 
-    function mpInit() { loadDB(); renderKPIs(); renderList(); }
+    function render() { renderResumen(); renderLista(); }
+    function mpInit() { loadDB(); render(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923q"></script>
+  <script src="nav.js?v=20260923r"></script>
 </body>
 </html>
