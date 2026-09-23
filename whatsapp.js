@@ -81,5 +81,15 @@
     return 'grupo';
   }
 
-  window.MP_WA = { venta, abrir, grupo, guardarGrupo, modo, guardarModo, enviarAGrupo, copiar };
+  // Siempre al grupo configurado (sin importar el modo): copia el mensaje y abre el grupo.
+  // Si no hay enlace guardado, abre WhatsApp con el mensaje escrito para elegir el chat.
+  function enviarSiempreAlGrupo(texto) {
+    const g = grupo();
+    if (!g) { abrir(texto); return 'sin-grupo'; }
+    copiar(texto);
+    abrirUrl(g);
+    return 'grupo';
+  }
+
+  window.MP_WA = { venta, abrir, grupo, guardarGrupo, modo, guardarModo, enviarAGrupo, enviarSiempreAlGrupo, copiar };
 })();
