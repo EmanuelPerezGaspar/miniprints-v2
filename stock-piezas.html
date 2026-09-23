@@ -1,365 +1,400 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MiniPrints — Stock Piezas</title>
-  <script src="theme.js?v=20260923q"></script>
+  <title>MiniPrints — Piezas</title>
+  <script src="theme.js?v=20260923r"></script>
+  <script src="categorias.js?v=20260923r"></script>
+  <script src="inventario.js?v=20260923r"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923q" />
+  <link rel="stylesheet" href="styles.css?v=20260923r" />
   <style>
-    .field { display: flex; flex-direction: column; gap: 5px; }
-    .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
-    .field input, .field select {
-      width: 100%; background: rgba(var(--ink), 0.05); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
-      font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
-      -moz-appearance: textfield;
-    }
-    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(48,209,88,0.12); }
-    .field select option { background: var(--ios-bg-3); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
-    .form-card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-    .btn-row { display: flex; gap: 8px; margin-top: 16px; }
-    .section-lbl { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); margin: 4px 0 12px; display: flex; align-items: center; gap: 8px; }
-    .section-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .empty-state { text-align: center; padding: 48px 24px; color: var(--text-dim); }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
-    .form-card { min-width: 0; }
-    .grid-2, .grid-3 { min-width: 0; }
-    @media (max-width: 480px) {
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-    }
-
-    /* ── Pieza cards ── */
-    .piezas-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-    }
-    @media (max-width: 1024px) { .piezas-grid { grid-template-columns: repeat(4, 1fr); } }
-    @media (max-width: 600px)  { .piezas-grid { grid-template-columns: repeat(2, 1fr); } }
-
-    .pieza-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      position: relative;
-      transition: border-color 200ms, transform 200ms, box-shadow 200ms;
-    }
-    .pieza-card:hover {
-      border-color: rgba(var(--ink), 0.15);
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
-    }
-
-    /* Gradient top — color según nivel de stock */
-    .pieza-card-top {
-      height: 72px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .pieza-card-top.s-ok       { background: linear-gradient(135deg,#052e16 0%,#14532d 100%); }
-    .pieza-card-top.s-low      { background: linear-gradient(135deg,#422006 0%,#92400e 100%); }
-    .pieza-card-top.s-critical { background: linear-gradient(135deg,#450a0a 0%,#7f1d1d 100%); }
-
-    /* Número grande fantasma en el fondo */
-    .pieza-card-qty-ghost {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 2.6rem;
-      font-weight: 900;
-      color: rgba(var(--ink), 0.07);
-      line-height: 1;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    /* Ícono centrado */
-    .pieza-card-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      background: rgba(var(--ink), 0.1);
-      border: 1px solid rgba(var(--ink), 0.15);
-      display: flex; align-items: center; justify-content: center;
-      position: relative; z-index: 1;
-    }
-
-    /* Botón eliminar — esquina superior derecha */
-    .pieza-card-del {
-      position: absolute; top: 10px; right: 10px;
-      width: 28px; height: 28px;
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(var(--ink), 0.1);
-      color: rgba(var(--ink), 0.35);
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all 180ms; z-index: 2;
-    }
-    .pieza-card-del:hover {
-      background: rgba(255,69,58,0.2);
-      border-color: rgba(255,69,58,0.4);
-      color: var(--ios-red);
-    }
-
-    /* Cuerpo */
-    .pieza-card-body { padding: 10px 12px 12px; }
-    .pieza-card-name {
-      font-size: 0.82rem; font-weight: 700;
-      color: var(--text); margin-bottom: 2px;
-      word-break: break-word; line-height: 1.3;
-    }
-    .pieza-card-meta { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 8px; }
-
-    /* Footer con controles */
-    .pieza-card-footer {
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 8px;
-    }
-    .qty-ctrl {
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(var(--ink), 0.04);
-      border: 1px solid var(--border);
-      border-radius: 8px; padding: 2px 4px;
-    }
-    .qty-btn {
-      width: 22px; height: 22px; border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(var(--ink), 0.06); border: 1px solid var(--border);
-      color: var(--text-muted); cursor: pointer; font-size: 14px; font-weight: 700;
-      transition: all 180ms; line-height: 1; flex-shrink: 0;
-    }
-    .qty-btn:hover { background: var(--surface-hover); color: var(--text); }
-    .qty-num { font-size: 0.85rem; font-weight: 800; min-width: 18px; text-align: center; }
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923q" />
-  <link rel="stylesheet" href="nav.css?v=20260923q" />
+  <link rel="stylesheet" href="ios.css?v=20260923r" />
+  <link rel="stylesheet" href="nav.css?v=20260923r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923q"></script>
+  <script type="module" src="firebase-sync.js?v=20260923r"></script>
 
   <div class="page-container">
-    <div class="dash-layout">
-
-
-
-      <main class="dash-main">
-        <div class="dash-header">
-          <div>
-            <h1 class="dash-title">Stock de Piezas</h1>
-            <p class="dash-subtitle">Piezas impresas disponibles para venta · El cotizador descuenta materiales automáticamente.</p>
-          </div>
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Piezas</h1>
+          <p class="dash-subtitle" id="inv-sub">Piezas impresas listas para vender.</p>
         </div>
-
-        <!-- KPI row -->
-        <div class="kpi-grid" style="margin-bottom:24px;" id="kpi-row"></div>
-
-        <!-- Add piece form -->
-        <div class="form-card">
-          <div class="form-card-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Agregar pieza manualmente
-          </div>
-          <div class="grid-2" style="margin-bottom:14px;">
-            <div class="field"><label>Nombre de la pieza</label><input type="text" id="pieza-nombre" placeholder="Ej: Mini Cebolla" /></div>
-            <div class="field"><label>Cantidad</label><input type="number" id="pieza-cantidad" value="1" min="1" /></div>
-          </div>
-          <div class="section-lbl">Descontar material (opcional)</div>
-          <div class="grid-3" style="margin-bottom:4px;">
-            <div class="field"><label>Material</label><select id="pieza-mat-sel"><option value="">— Sin descontar —</option></select></div>
-            <div class="field"><label>Gramos a usar</label><input type="number" id="pieza-mat-grams" placeholder="0" min="0" step="0.1" /></div>
-            <div></div>
-          </div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="agregarPieza()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Agregar al inventario
-            </button>
-          </div>
+        <div class="inv-actions">
+          <button type="button" class="inv-icon-btn is-primary" onclick="abrirNueva()" aria-label="Agregar piezas">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
         </div>
+      </div>
 
-        <!-- List -->
-        <div class="section-lbl">Inventario actual</div>
-        <div id="piezas-list"></div>
-      </main>
+      <div class="inv-wrap">
+        <div class="inv-sum" id="inv-sum"></div>
+
+        <section class="form-card inv-card" aria-label="Inventario de piezas">
+          <input type="search" id="inv-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
+          <div class="vs-cats" id="inv-cats" role="radiogroup" aria-label="Filtrar"></div>
+          <div class="vs-list-head"><span id="inv-count"></span><span>Toca una pieza para editarla</span></div>
+          <div class="inv-list" id="inv-list" role="list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hoja: agregar piezas -->
+  <div class="sheet inv-sheet" id="sh-nueva" role="dialog" aria-modal="true" aria-labelledby="sh-nueva-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-nueva-t">Agregar piezas</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-f">
+      <label for="n-nombre">Pieza</label>
+      <input type="text" id="n-nombre" list="n-nombres" placeholder="Ej: Llavero corazón" autocomplete="off" />
+      <datalist id="n-nombres"></datalist>
+      <p class="inv-hint" id="n-hint"></p>
+    </div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Cantidad</span>
+      <div class="cq-stepper">
+        <button type="button" aria-label="Menos" onclick="pasoNueva(-1)">−</button>
+        <input type="number" id="n-cant" value="1" min="1" inputmode="numeric" aria-label="Cantidad" />
+        <button type="button" aria-label="Más" onclick="pasoNueva(1)">+</button>
+      </div>
+    </div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Categoría</span>
+      <div class="cq-chips" data-for="n-cat" role="radiogroup" aria-label="Categoría" id="n-cats"></div>
+      <input type="hidden" id="n-cat" value="" />
+    </div>
+    <div class="inv-group">
+      <label class="inv-group-row">
+        <span>Descontar filamento</span>
+        <span class="toggle"><input type="checkbox" id="n-desc" onchange="toggleDescuento()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+      </label>
+      <div class="inv-group-body" id="n-desc-body" hidden>
+        <select id="n-mat" aria-label="Filamento"></select>
+        <input type="number" id="n-grams" placeholder="Gramos usados en total" min="0" step="0.1" inputmode="decimal" aria-label="Gramos usados" />
+      </div>
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" onclick="agregarPieza()">Agregar al inventario</button>
     </div>
   </div>
 
-  <div id="toast"></div>
+  <!-- Hoja: editar una pieza -->
+  <div class="sheet inv-sheet" id="sh-pieza" role="dialog" aria-modal="true" aria-labelledby="sh-pieza-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-pieza-t">Pieza</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <p class="inv-sheet-sub" id="e-sub"></p>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Unidades en stock</span>
+      <div class="cq-stepper">
+        <button type="button" aria-label="Menos" onclick="pasoEdit(-1)">−</button>
+        <input type="number" id="e-cant" min="0" inputmode="numeric" aria-label="Unidades en stock" />
+        <button type="button" aria-label="Más" onclick="pasoEdit(1)">+</button>
+      </div>
+    </div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Categoría</span>
+      <div class="cq-chips" data-for="e-cat" role="radiogroup" aria-label="Categoría" id="e-cats"></div>
+      <input type="hidden" id="e-cat" value="" />
+      <p class="inv-hint" id="e-cat-hint"></p>
+    </div>
+    <div class="inv-group" id="e-mats"></div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" onclick="guardarPieza()">Guardar</button>
+      <button type="button" class="inv-btn is-danger" onclick="eliminarPieza()">Eliminar del inventario</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
 
   <script>
-    const DB = { materials: {}, piezas: {}, historial: {} };
+    const { esc } = MP_INV;
+    const DB = { materials: {}, piezas: {}, historial: {}, categorias: {} };
+    const BAJO = 2, POCO = 5;
 
     function loadDB() {
-      try { const m = localStorage.getItem('mp_materials'); if (m) DB.materials = JSON.parse(m); } catch(e) {}
-      try { const p = localStorage.getItem('mp_piezas');    if (p) DB.piezas    = JSON.parse(p); } catch(e) {}
-      try { const h = localStorage.getItem('mp_historial'); if (h) DB.historial = JSON.parse(h); } catch(e) {}
+      const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+      DB.materials  = get('mp_materials', {});
+      DB.piezas     = get('mp_piezas', {});
+      DB.historial  = get('mp_historial', {});
+      DB.categorias = get('mp_categorias', {});
     }
-    function saveMats() { try { localStorage.setItem('mp_materials', JSON.stringify(DB.materials)); } catch(e) {} }
-    function savePiezas() { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch(e) {} }
-    function saveHistorial() { try { localStorage.setItem('mp_historial', JSON.stringify(DB.historial)); } catch(e) {} }
+    const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+    const saveMats       = () => save('mp_materials', DB.materials);
+    const savePiezas     = () => save('mp_piezas', DB.piezas);
+    const saveHistorial  = () => save('mp_historial', DB.historial);
+    const saveCategorias = () => save('mp_categorias', DB.categorias);
 
-    function showToast(msg) {
-      const t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
-      clearTimeout(t._t); t._t = setTimeout(() => t.style.display = 'none', 3200);
+    const catDe = p => MP_CAT.de(p, DB.categorias);
+    const catNombre = id => (MP_CAT.lista.find(c => c.id === id) || {}).nombre || 'Sin categoría';
+    function estado(n) {
+      if (n > POCO) return { cls: 'st-ok', txt: 'En stock' };
+      if (n > BAJO) return { cls: 'st-low', txt: 'Poco stock' };
+      return { cls: 'st-crit', txt: n === 1 ? 'Última unidad' : 'Por agotarse' };
     }
-    function matsSorted() { return Object.values(DB.materials).sort((a, b) => (a.marca + a.tipo + a.color).localeCompare(b.marca + b.tipo + b.color)); }
-    function matLabel(m) { return `${m.marca} · ${m.tipo} · ${m.color}`; }
+    const ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>';
+    const matLabel = m => `${m.tipo} ${m.color} · ${m.marca}`;
+    const matsSorted = () => Object.values(DB.materials).sort((a, b) => (a.tipo + a.color + a.marca).localeCompare(b.tipo + b.color + b.marca, 'es'));
 
-    function refreshMatSelect() {
-      const sel = document.getElementById('pieza-mat-sel');
+    // ── Resumen ──
+    let filtro = 'todas';
+    function renderResumen() {
+      const piezas = Object.entries(DB.piezas);
+      const uds = piezas.reduce((s, [, n]) => s + n, 0);
+      const bajas = piezas.filter(([, n]) => n <= BAJO).length;
+      document.getElementById('inv-sub').textContent = piezas.length
+        ? `${piezas.length} modelo${piezas.length !== 1 ? 's' : ''} · ${uds} unidad${uds !== 1 ? 'es' : ''} listas para vender`
+        : 'Piezas impresas listas para vender.';
+      document.getElementById('inv-sum').innerHTML = `
+        <div class="inv-tile" style="--tile-color:var(--ios-blue)">
+          <span class="inv-tile-lbl"><i></i>Modelos</span>
+          <span class="inv-tile-num">${piezas.length}</span>
+          <span class="inv-tile-sub">distintos</span>
+        </div>
+        <div class="inv-tile" style="--tile-color:var(--ios-green)">
+          <span class="inv-tile-lbl"><i></i>Unidades</span>
+          <span class="inv-tile-num">${uds.toLocaleString('es-MX')}</span>
+          <span class="inv-tile-sub">en stock</span>
+        </div>
+        <button type="button" class="inv-tile${bajas ? ' is-alert' : ''}${filtro === 'bajas' ? ' is-on' : ''}" style="--tile-color:${bajas ? 'var(--ios-orange)' : 'var(--ios-green)'}"
+                onclick="setFiltro(filtro === 'bajas' ? 'todas' : 'bajas')" aria-pressed="${filtro === 'bajas'}">
+          <span class="inv-tile-lbl"><i></i>Bajos</span>
+          <span class="inv-tile-num">${bajas}</span>
+          <span class="inv-tile-sub">${bajas ? 'toca para ver' : 'todo bien'}</span>
+        </button>`;
+    }
+
+    // ── Lista ──
+    function setFiltro(f) { filtro = f; renderResumen(); renderLista(); }
+
+    function renderCats(nombres) {
+      const cuenta = { todas: nombres.length, bajas: 0, otras: 0 };
+      nombres.forEach(p => {
+        const c = catDe(p) || 'otras';
+        cuenta[c] = (cuenta[c] || 0) + 1;
+        if (DB.piezas[p] <= BAJO) cuenta.bajas++;
+      });
+      const ops = [{ id: 'todas', nombre: 'Todas' }, { id: 'bajas', nombre: 'Por agotarse' }, ...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
+        .filter(o => o.id === 'todas' || cuenta[o.id] || o.id === filtro);
+      document.getElementById('inv-cats').innerHTML = ops.map(o =>
+        `<button type="button" role="radio" data-f="${o.id}" aria-checked="${o.id === filtro}">${o.nombre} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+    }
+
+    function renderLista() {
+      const list = document.getElementById('inv-list');
+      const q = document.getElementById('inv-buscar').value.trim().toLowerCase();
+      const nombres = Object.keys(DB.piezas);
+      renderCats(nombres);
+      if (!nombres.length) {
+        document.getElementById('inv-count').textContent = '';
+        list.innerHTML = `<div class="inv-empty"><b>Aún no hay piezas</b>Agrégalas aquí o confirma una impresión en Cotizar.<br>
+          <button type="button" class="btn btn-primary" onclick="abrirNueva()">Agregar piezas</button></div>`;
+        return;
+      }
+      const vis = nombres
+        .filter(p => filtro === 'todas' || (filtro === 'bajas' ? DB.piezas[p] <= BAJO : (catDe(p) || 'otras') === filtro))
+        .filter(p => !q || p.toLowerCase().includes(q))
+        .sort((a, b) => a.localeCompare(b, 'es'));
+      document.getElementById('inv-count').textContent = `${vis.length} de ${nombres.length} piezas`;
+      if (!vis.length) { list.innerHTML = `<div class="inv-empty">Sin resultados${q ? ` para "${esc(q)}"` : ''}</div>`; return; }
+      list.innerHTML = vis.map(p => {
+        const n = DB.piezas[p], st = estado(n), cat = catDe(p);
+        return `<div class="inv-row ${st.cls}" role="listitem" data-p="${esc(p)}">
+          <button type="button" class="inv-row-main" data-act="abrir" aria-label="Editar ${esc(p)}">
+            <span class="inv-mark">${ICON}</span>
+            <span class="inv-row-text">
+              <span class="inv-row-name">${esc(p)}</span>
+              <span class="inv-row-meta"><b>${st.txt}</b>${cat ? ' · ' + catNombre(cat) : ''}</span>
+            </span>
+          </button>
+          <div class="inv-step" role="group" aria-label="Unidades de ${esc(p)}">
+            <button type="button" data-act="menos" aria-label="Quitar una">−</button>
+            <span aria-live="polite">${n}</span>
+            <button type="button" data-act="mas" aria-label="Agregar una">+</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('inv-cats').addEventListener('click', e => {
+      const b = e.target.closest('[data-f]');
+      if (b) setFiltro(b.dataset.f);
+    });
+    document.getElementById('inv-buscar').addEventListener('input', renderLista);
+    document.getElementById('inv-list').addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (!b) return;
+      const p = b.closest('[data-p]').dataset.p;
+      if (b.dataset.act === 'abrir') abrirPieza(p);
+      else ajustarPieza(p, b.dataset.act === 'mas' ? 1 : -1);
+    });
+
+    function ajustarPieza(nombre, delta) {
+      const n = (DB.piezas[nombre] || 0) + delta;
+      if (n <= 0) {
+        if (!confirm(`Ya no quedan unidades de "${nombre}". ¿Quitarla del inventario?`)) return;
+        delete DB.piezas[nombre];
+        MP_INV.toast(`"${nombre}" salió del inventario`);
+      } else {
+        DB.piezas[nombre] = n;
+      }
+      savePiezas();
+      render();
+    }
+
+    function chipsCategoria(contId, valor) {
+      document.getElementById(contId).innerHTML = [...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
+        .map(c => `<button type="button" role="radio" data-v="${c.id}" aria-checked="${c.id === valor}">${c.nombre}</button>`).join('');
+    }
+
+    // ── Agregar ──
+    function abrirNueva() {
+      document.getElementById('n-nombre').value = '';
+      document.getElementById('n-cant').value = 1;
+      document.getElementById('n-desc').checked = false;
+      document.getElementById('n-grams').value = '';
+      document.getElementById('n-nombres').innerHTML = Object.keys(DB.piezas).sort((a, b) => a.localeCompare(b, 'es'))
+        .map(p => `<option value="${esc(p)}"></option>`).join('');
       const mats = matsSorted();
-      sel.innerHTML = '<option value="">— Sin descontar —</option>' +
-        mats.map(m => `<option value="${m.id}">${matLabel(m)} (${m.pesoTotal}g)</option>`).join('');
+      document.getElementById('n-mat').innerHTML = mats.length
+        ? mats.map(m => `<option value="${esc(m.id)}">${esc(matLabel(m))} — ${Math.round(m.pesoTotal)} g</option>`).join('')
+        : '<option value="">No hay filamentos registrados</option>';
+      document.getElementById('n-cat').value = '';
+      chipsCategoria('n-cats', '');
+      toggleDescuento();
+      nombreNueva();
+      MP_INV.abrir('sh-nueva');
+      setTimeout(() => document.getElementById('n-nombre').focus(), 350);
     }
+    function pasoNueva(d) {
+      const i = document.getElementById('n-cant');
+      i.value = Math.max(1, (parseInt(i.value) || 0) + d);
+    }
+    function toggleDescuento() {
+      document.getElementById('n-desc-body').hidden = !document.getElementById('n-desc').checked;
+    }
+    // Si la pieza ya existe se suma y se sugiere su categoría
+    function nombreNueva() {
+      const nombre = document.getElementById('n-nombre').value.trim();
+      const hint = document.getElementById('n-hint');
+      const existe = Object.keys(DB.piezas).find(p => p.toLowerCase() === nombre.toLowerCase());
+      hint.className = 'inv-hint' + (existe ? ' is-ok' : '');
+      hint.textContent = existe ? `Ya tienes ${DB.piezas[existe]}; se sumarán a las existentes.` : '';
+      const cat = nombre ? (catDe(existe || nombre) || '') : '';
+      document.getElementById('n-cat').value = cat;
+      MP_INV.syncChips(document.getElementById('sh-nueva'));
+    }
+    document.getElementById('n-nombre').addEventListener('input', nombreNueva);
 
-    async function agregarPieza() {
-      const nombre = document.getElementById('pieza-nombre').value.trim();
-      const cantidad = parseInt(document.getElementById('pieza-cantidad').value) || 1;
-      const matSel = document.getElementById('pieza-mat-sel').value;
-      const matGrams = parseFloat(document.getElementById('pieza-mat-grams').value) || 0;
+    function agregarPieza() {
+      let nombre = document.getElementById('n-nombre').value.trim();
+      const cantidad = Math.max(1, parseInt(document.getElementById('n-cant').value) || 1);
+      if (!nombre) { MP_INV.toast('Escribe el nombre de la pieza'); return document.getElementById('n-nombre').focus(); }
+      nombre = Object.keys(DB.piezas).find(p => p.toLowerCase() === nombre.toLowerCase()) || nombre;
 
-      if (!nombre) return showToast('Escribe el nombre de la pieza');
-
-      if (matSel && matGrams > 0) {
-        const mat = DB.materials[matSel];
-        if (!mat) return showToast('Material no encontrado');
-        if (mat.pesoTotal < matGrams) return showToast(`Stock insuficiente: solo hay ${mat.pesoTotal}g`);
-        DB.materials[matSel].pesoTotal = Math.max(0, mat.pesoTotal - matGrams);
+      if (document.getElementById('n-desc').checked) {
+        const matId = document.getElementById('n-mat').value;
+        const grams = parseFloat(document.getElementById('n-grams').value) || 0;
+        const mat = DB.materials[matId];
+        if (!mat) return MP_INV.toast('Elige el filamento a descontar');
+        if (grams <= 0) return MP_INV.toast('Escribe los gramos usados');
+        if (mat.pesoTotal < grams) return MP_INV.toast(`Solo quedan ${Math.round(mat.pesoTotal)} g de ese filamento`);
+        mat.pesoTotal = Math.max(0, mat.pesoTotal - grams);
         saveMats();
-        if (!DB.historial[nombre]) DB.historial[nombre] = [];
-        DB.historial[nombre].push({ matId: matSel, grams: matGrams });
+        (DB.historial[nombre] = DB.historial[nombre] || []).push({ matId, grams });
         saveHistorial();
       }
+
+      const cat = document.getElementById('n-cat').value;
+      if (cat && cat !== MP_CAT.de(nombre, {})) { DB.categorias[nombre] = cat; saveCategorias(); }
 
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       savePiezas();
-      renderKPIs();
-      renderList();
-      document.getElementById('pieza-nombre').value = '';
-      document.getElementById('pieza-cantidad').value = 1;
-      document.getElementById('pieza-mat-grams').value = '';
-      document.getElementById('pieza-mat-sel').value = '';
-      showToast(`${cantidad}× "${nombre}" agregadas al inventario`);
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast(`${cantidad} × ${nombre} agregada${cantidad !== 1 ? 's' : ''}`);
     }
 
-    async function ajustarPieza(nombre, delta) {
-      DB.piezas[nombre] = Math.max(0, (DB.piezas[nombre] || 0) + delta);
-      if (DB.piezas[nombre] === 0) delete DB.piezas[nombre];
-      savePiezas();
-      renderKPIs();
-      renderList();
-    }
+    // ── Editar ──
+    let editando = null;
+    function abrirPieza(nombre) {
+      editando = nombre;
+      const n = DB.piezas[nombre] || 0, st = estado(n);
+      document.getElementById('sh-pieza-t').textContent = nombre;
+      document.getElementById('e-sub').innerHTML = `<span class="${st.cls}" style="color:var(--st-color);font-weight:600">${st.txt}</span>`;
+      document.getElementById('e-cant').value = n;
+      const asignada = DB.categorias[nombre] || '';
+      const cat = catDe(nombre) || '';
+      document.getElementById('e-cat').value = cat;
+      chipsCategoria('e-cats', cat);
+      document.getElementById('e-cat-hint').textContent = !asignada && cat ? 'Sugerida por el nombre; toca otra si no es correcta.' : '';
 
-    async function eliminarPieza(nombre) {
-      if (!confirm(`Eliminar "${nombre}" del inventario?`)) return;
-      const matsUsados = DB.historial[nombre] || [];
-      if (matsUsados.length > 0) {
-        matsUsados.forEach(m => {
-          if (DB.materials[m.matId]) DB.materials[m.matId].pesoTotal += parseFloat(m.grams);
-        });
-        saveMats();
-        delete DB.historial[nombre];
-        saveHistorial();
-        showToast('Materiales restaurados al stock');
+      const usados = DB.historial[nombre] || [];
+      const box = document.getElementById('e-mats');
+      box.hidden = !usados.length;
+      box.innerHTML = usados.map(u => {
+        const m = DB.materials[u.matId];
+        return `<div class="inv-group-row"><span>${esc(m ? matLabel(m) : 'Filamento eliminado')}</span><span>${parseFloat(u.grams)} g</span></div>`;
+      }).join('');
+      MP_INV.abrir('sh-pieza');
+    }
+    function pasoEdit(d) {
+      const i = document.getElementById('e-cant');
+      i.value = Math.max(0, (parseInt(i.value) || 0) + d);
+    }
+    function guardarPieza() {
+      if (!editando) return;
+      const n = Math.max(0, parseInt(document.getElementById('e-cant').value) || 0);
+      if (n === 0) {
+        if (!confirm(`Con 0 unidades "${editando}" sale del inventario. ¿Continuar?`)) return;
+        delete DB.piezas[editando];
       } else {
-        showToast(`"${nombre}" eliminada`);
+        DB.piezas[editando] = n;
       }
+      savePiezas();
+      const cat = document.getElementById('e-cat').value;
+      if (cat && cat !== MP_CAT.de(editando, {})) DB.categorias[editando] = cat;
+      else delete DB.categorias[editando];
+      saveCategorias();
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast('Cambios guardados');
+    }
+    // Al eliminar se devuelve al stock el filamento que se descontó al agregarla
+    function eliminarPieza() {
+      const nombre = editando;
+      if (!nombre || !confirm(`¿Eliminar "${nombre}" del inventario?`)) return;
+      const usados = DB.historial[nombre] || [];
+      usados.forEach(u => { if (DB.materials[u.matId]) DB.materials[u.matId].pesoTotal += parseFloat(u.grams); });
+      if (usados.length) { saveMats(); delete DB.historial[nombre]; saveHistorial(); }
       delete DB.piezas[nombre];
       savePiezas();
-      renderKPIs();
-      renderList();
+      MP_INV.cerrar();
+      render();
+      MP_INV.toast(usados.length ? 'Pieza eliminada · filamento devuelto al stock' : 'Pieza eliminada');
     }
 
-    function renderKPIs() {
-      const piezas = Object.entries(DB.piezas);
-      const total = piezas.reduce((s, [, c]) => s + c, 0);
-      const tipos = piezas.length;
-      const bajos = piezas.filter(([, c]) => c <= 2).length;
-      document.getElementById('kpi-row').innerHTML = `
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Tipos de piezas</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.green}" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div></div>
-          <div class="kpi-value">${tipos}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">modelos distintos</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Unidades totales</div><div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div></div>
-          <div class="kpi-value">${total}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">piezas en stock</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Stock bajo</div><div class="kpi-icon" style="background:rgba(255,214,10,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.yellow}" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div></div>
-          <div class="kpi-value" style="color:${bajos > 0 ? IOSC.yellow : IOSC.green};">${bajos}</div>
-          <div class="kpi-change neutral" style="color:var(--text-dim);">con 1-2 unidades</div>
-        </div>`;
-    }
-
-    function renderList() {
-      const container = document.getElementById('piezas-list');
-      refreshMatSelect();
-      const piezas = Object.entries(DB.piezas);
-      if (!piezas.length) {
-        container.innerHTML = `<div class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-          <p style="font-size:0.9rem;font-weight:600;margin-bottom:6px;">Sin piezas en inventario</p>
-          <p style="font-size:0.8rem;">Agrega piezas manualmente o confirma una impresión en el <a href="cotizador.html" style="color:var(--primary);">Cotizador</a>.</p>
-        </div>`;
-        return;
-      }
-      container.innerHTML = `<div class="piezas-grid">${piezas.map(([nombre, cant]) => {
-        const topCls  = cant > 5 ? 's-ok' : cant > 2 ? 's-low' : 's-critical';
-        const badgeCls = cant > 5 ? 'badge-success' : cant > 2 ? 'badge-warning' : 'badge-error';
-        const badgeTxt = cant > 5 ? 'En stock' : cant > 2 ? 'Poco' : 'Último(s)';
-        const escapedName = nombre.replace(/'/g, "\\'");
-        return `<div class="pieza-card">
-          <div class="pieza-card-top ${topCls}">
-            <div class="pieza-card-qty-ghost">${cant}</div>
-            <div class="pieza-card-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(var(--ink), 0.8)" stroke-width="1.8">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-                <line x1="12" y1="22.08" x2="12" y2="12"/>
-              </svg>
-            </div>
-            <button class="pieza-card-del" onclick="eliminarPieza('${escapedName}')">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-            </button>
-          </div>
-          <div class="pieza-card-body">
-            <div class="pieza-card-name">${nombre}</div>
-            <div class="pieza-card-meta">${cant} unidad${cant !== 1 ? 'es' : ''} disponible${cant !== 1 ? 's' : ''}</div>
-            <div class="pieza-card-footer">
-              <div class="qty-ctrl">
-                <button class="qty-btn" onclick="ajustarPieza('${escapedName}', -1)">−</button>
-                <span class="qty-num">${cant}</span>
-                <button class="qty-btn" onclick="ajustarPieza('${escapedName}', 1)">+</button>
-              </div>
-              <span class="badge ${badgeCls}">${badgeTxt}</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}</div>`;
-    }
-
-
-    function mpInit() { loadDB(); renderKPIs(); renderList(); }
+    function render() { renderResumen(); renderLista(); }
+    function mpInit() { loadDB(); render(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923q"></script>
+  <script src="nav.js?v=20260923r"></script>
 </body>
 </html>
