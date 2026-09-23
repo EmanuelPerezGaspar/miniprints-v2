@@ -1260,6 +1260,9 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .vs-wa-sub { font-size: 13px; color: var(--ios-orange); }
 .vs-wa-sub.is-ok { color: var(--ios-label-2); }
 .vs-wa-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 15px; color: var(--ios-label-2); }
+.vs-wa-toggle { border-bottom: 0.5px solid var(--ios-separator) !important; }
+#vs-wa-link-box { display: flex; flex-direction: column; gap: 10px; }
+#vs-wa-link-box[hidden] { display: none; }
 .vs-wa-body ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
 .vs-wa-body b { color: var(--text); font-weight: 600; }
 .vs-wa-row { display: flex; gap: 8px; }
