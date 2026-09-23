@@ -4,20 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20260923c"></script>
+  <script src="theme.js?v=20260923d"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923c" />
-  <link rel="stylesheet" href="ios.css?v=20260923c" />
-  <link rel="stylesheet" href="nav.css?v=20260923c" />
+  <link rel="stylesheet" href="styles.css?v=20260923d" />
+  <link rel="stylesheet" href="ios.css?v=20260923d" />
+  <link rel="stylesheet" href="nav.css?v=20260923d" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923c"></script>
+  <script type="module" src="firebase-sync.js?v=20260923d"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -29,17 +29,42 @@
         </div>
       </div>
 
-      <!-- Meta del mes -->
-      <section class="goal-widget goal-widget--solo" id="goal-card" aria-label="Meta del mes"></section>
+      <div class="home-stack">
+        <!-- Meta del mes -->
+        <section class="goal-widget" id="goal-card" aria-label="Meta del mes"></section>
+
+        <!-- Indicadores rápidos -->
+        <div class="stat-tiles">
+          <a class="stat-tile" href="stock-piezas.html" aria-labelledby="st-stock-lbl" aria-describedby="st-stock-val">
+            <div class="st-top">
+              <span class="st-label" id="st-stock-lbl">Piezas en<br>stock</span>
+              <span class="st-icon st-icon--orange" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2.8 20.2 7.2v9.6L12 21.2l-8.2-4.4V7.2z"/><path d="M3.8 7.2 12 11.6l8.2-4.4M12 11.6v9.6"/></svg>
+              </span>
+            </div>
+            <div class="st-value" id="st-stock-val"><span class="st-num">—</span> <span class="st-unit">piezas</span></div>
+          </a>
+          <a class="stat-tile" href="ventas.html" aria-labelledby="st-ventas-lbl" aria-describedby="st-ventas-val">
+            <div class="st-top">
+              <span class="st-label" id="st-ventas-lbl">Ventas<br>totales</span>
+              <span class="st-icon st-icon--blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.8"/><path d="M6 9.5v5M18 9.5v5"/></svg>
+              </span>
+            </div>
+            <div class="st-value" id="st-ventas-val"><span class="st-num">—</span></div>
+          </a>
+        </div>
+      </div>
     </main>
   </div>
 
   <script>
-    const DB = { ventas: [] };
+    const DB = { ventas: [], piezas: {} };
     function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
     function ventaPagada(v) { return !v.estatusPago || v.estatusPago === 'pagado'; }
     function loadDB() {
       try { const v = localStorage.getItem('mp_ventas');       if (v) DB.ventas       = JSON.parse(v); } catch(e){}
+      try { const p = localStorage.getItem('mp_piezas');       if (p) DB.piezas       = JSON.parse(p); } catch(e){}
     }
 
     function mesKey(v) {
@@ -99,6 +124,18 @@
       if (!isNaN(v)&&v>0) { localStorage.setItem('mp_meta_mensual',v); document.getElementById('goal-input-wrap').classList.remove('open'); renderGoal(); }
     }
 
+    // ── Indicadores: piezas en stock y ventas totales (pagadas) ──
+    function renderTiles() {
+      const stock  = Object.values(DB.piezas).reduce((s, c) => s + (Number(c) || 0), 0);
+      const ventas = DB.ventas.filter(ventaPagada).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+      document.querySelector('#st-stock-val .st-num').textContent  = stock.toLocaleString('es-MX');
+      document.querySelector('#st-stock-val .st-unit').textContent = stock === 1 ? 'pieza' : 'piezas';
+      const numVentas = document.querySelector('#st-ventas-val .st-num');
+      numVentas.textContent = '$' + Math.round(ventas).toLocaleString('es-MX');
+      // Montos largos (ej. $1,250,000) se achican para no partirse en dos líneas
+      numVentas.classList.toggle('st-num--long', numVentas.textContent.length > 8);
+    }
+
     function renderSubtitle() {
       document.getElementById('dash-subtitle').textContent =
         'Actualizado ' + new Date().toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
@@ -108,10 +145,11 @@
       loadDB();
       renderSubtitle();
       renderGoal();
+      renderTiles();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260923c"></script>
+  <script src="nav.js?v=20260923d"></script>
 </body>
 </html>
