@@ -4,11 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260923j"></script>
+  <script src="theme.js?v=20260923k"></script>
+  <script src="categorias.js?v=20260923k"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260923j" />
+  <link rel="stylesheet" href="styles.css?v=20260923k" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -86,15 +87,15 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260923j" />
-  <link rel="stylesheet" href="nav.css?v=20260923j" />
+  <link rel="stylesheet" href="ios.css?v=20260923k" />
+  <link rel="stylesheet" href="nav.css?v=20260923k" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260923j"></script>
+  <script type="module" src="firebase-sync.js?v=20260923k"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -115,7 +116,9 @@
           <section class="form-card cq-step" aria-labelledby="vs-s1">
             <h2 class="cq-step-title" id="vs-s1"><span class="cq-num">1</span>¿Qué vendiste?</h2>
             <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
-            <div class="vs-grid" id="vs-grid" role="list"></div>
+            <div class="vs-cats" id="vs-cats" role="radiogroup" aria-label="Filtrar por categoría"></div>
+            <div class="vs-list-head"><span id="vs-count"></span><span>Más vendidas primero</span></div>
+            <div class="vs-list" id="vs-grid" role="list"></div>
           </section>
 
           <!-- 2. Pedido -->
@@ -276,28 +279,61 @@
     function enCarrito(pieza) { return carrito.find(it => it.pieza === pieza); }
     function disponible(pieza) { return DB.piezas[pieza] || 0; }
 
+    // Unidades vendidas por pieza, para mostrar primero las que más salen
+    let _popularidad = {};
+    function calcularPopularidad() {
+      _popularidad = {};
+      DB.ventas.forEach(v => ventaItems(v).forEach(it => { _popularidad[it.pieza] = (_popularidad[it.pieza] || 0) + (Number(it.cantidad) || 0); }));
+    }
+
+    let catFiltro = 'todas';
+    function renderCats(piezas) {
+      const cuenta = { todas: piezas.length, otras: 0 };
+      piezas.forEach(p => { const c = MP_CAT.de(p) || 'otras'; cuenta[c] = (cuenta[c] || 0) + 1; });
+      const opciones = [{ id: 'todas', nombre: 'Todas' }, ...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
+        .filter(o => o.id === 'todas' || cuenta[o.id]);
+      if (!opciones.some(o => o.id === catFiltro)) catFiltro = 'todas';
+      document.getElementById('vs-cats').innerHTML = opciones.map(o =>
+        `<button type="button" role="radio" data-cat="${o.id}" aria-checked="${o.id === catFiltro}">${o.nombre} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+    }
+
     function refreshPiezaSelect() {
       const q = (document.getElementById('vs-buscar')?.value || '').trim().toLowerCase();
       const grid = document.getElementById('vs-grid');
-      const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0).sort((a, b) => a.localeCompare(b, 'es'));
-      const visibles = q ? piezas.filter(p => p.toLowerCase().includes(q)) : piezas;
+      const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0);
+      renderCats(piezas);
       if (!piezas.length) {
+        document.getElementById('vs-count').textContent = '';
         grid.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`;
         return;
       }
-      if (!visibles.length) { grid.innerHTML = `<div class="vs-empty">Sin resultados para "${escapeHtml(q)}"</div>`; return; }
+      const visibles = piezas
+        .filter(p => catFiltro === 'todas' || (MP_CAT.de(p) || 'otras') === catFiltro)
+        .filter(p => !q || p.toLowerCase().includes(q))
+        .sort((a, b) => (_popularidad[b] || 0) - (_popularidad[a] || 0) || a.localeCompare(b, 'es'));
+      document.getElementById('vs-count').textContent = `${visibles.length} de ${piezas.length} piezas`;
+      if (!visibles.length) { grid.innerHTML = `<div class="vs-empty">Sin resultados${q ? ` para "${escapeHtml(q)}"` : ''}</div>`; return; }
       grid.innerHTML = visibles.map(p => {
         const item = enCarrito(p);
         const libres = disponible(p) - (item ? item.cantidad : 0);
         const precio = ultimoPrecio(p);
-        return `<button type="button" role="listitem" class="vs-tile${item ? ' is-added' : ''}" data-pieza="${attr(p)}" ${libres <= 0 ? 'disabled' : ''}
-                  aria-label="Agregar ${attr(p)}, ${libres} disponibles">
-          <span class="vs-tile-name">${escapeHtml(p)}</span>
-          <span class="vs-tile-meta">${libres} disp.${precio ? ' · ' + fmt(precio) : ''}</span>
-          ${item ? `<span class="vs-tile-badge">${item.cantidad}</span>` : '<span class="vs-tile-plus" aria-hidden="true">+</span>'}
+        return `<button type="button" role="listitem" class="vs-row${item ? ' is-added' : ''}" data-pieza="${attr(p)}" ${libres <= 0 ? 'disabled' : ''}
+                  aria-label="Agregar ${attr(p)}, ${libres} disponibles${item ? ', ' + item.cantidad + ' en el pedido' : ''}">
+          <span class="vs-row-text">
+            <span class="vs-row-name">${escapeHtml(p)}</span>
+            <span class="vs-row-meta">${libres} disp.${precio ? ' · ' + fmt(precio) : ''}</span>
+          </span>
+          ${item ? `<span class="vs-row-badge">${item.cantidad}</span>` : '<span class="vs-row-plus" aria-hidden="true">+</span>'}
         </button>`;
       }).join('');
     }
+
+    document.getElementById('vs-cats').addEventListener('click', e => {
+      const b = e.target.closest('[data-cat]');
+      if (!b) return;
+      catFiltro = b.dataset.cat;
+      refreshPiezaSelect();
+    });
 
     function agregarAlCarrito(pieza) {
       const item = enCarrito(pieza);
@@ -370,7 +406,7 @@
 
     // Tocar una tarjeta agrega la pieza
     document.getElementById('vs-grid').addEventListener('click', e => {
-      const t = e.target.closest('.vs-tile');
+      const t = e.target.closest('.vs-row');
       if (t && !t.disabled) agregarAlCarrito(t.dataset.pieza);
     });
     document.getElementById('vs-buscar').addEventListener('input', refreshPiezaSelect);
@@ -428,7 +464,7 @@
       document.getElementById('venta-fecha').value = today();
       document.getElementById('venta-notas').value = '';
       document.getElementById('vs-buscar').value = '';
-      refreshPiezaSelect(); syncSeg();
+      calcularPopularidad(); refreshPiezaSelect(); syncSeg();
       showToast(`Venta registrada: ${fmt(total)}`);
     }
 
@@ -582,6 +618,7 @@
 
     function mpInit() {
       loadDB();
+      calcularPopularidad();
       document.getElementById('venta-fecha').value = today();
       refreshPiezaSelect();
       renderCarrito();
@@ -589,8 +626,8 @@
       renderVentas();
     }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
-    window.addEventListener('mp-sync-update', () => { loadDB(); refreshPiezaSelect(); renderVentas(); });
+    window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderVentas(); });
   </script>
-  <script src="nav.js?v=20260923j"></script>
+  <script src="nav.js?v=20260923k"></script>
 </body>
 </html>
