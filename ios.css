@@ -1243,3 +1243,8 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .vs-row-plus { background: var(--ios-fill); color: var(--ios-green); }
 .vs-row-badge { background: var(--ios-green); color: var(--ios-on-accent); font-family: var(--ios-font-rounded); font-size: 14px; font-weight: 700; }
 @media (min-width: 900px) { .vs-list { max-height: 460px; } }
+/* En Ventas el acceso al historial es un botón pequeño junto al título */
+.vs-header { flex-direction: row !important; flex-wrap: nowrap !important; align-items: flex-start !important; justify-content: space-between; }
+.vs-header > div:first-child { min-width: 0; }
+.vs-header .dash-toolbar { width: auto !important; flex-shrink: 0; }
+.vs-header .dash-toolbar .btn { flex: none !important; padding: 8px 14px !important; min-height: 36px; }
