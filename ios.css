@@ -48,7 +48,16 @@
   --shadow-glow:   none;
   --font:          var(--ios-font);
 
-  color-scheme: dark;
+  /* Tema: tinta base (para rgba), texto sobre acento y materiales */
+  --ink:              255, 255, 255;
+  --ios-on-accent:    #000000;
+  --ios-accent-hover: #3ade66;
+  --ios-seg-thumb:    #636366;
+  --ios-material:     rgba(37, 37, 39, 0.94);
+  --ios-hud:          rgba(44, 44, 46, 0.92);
+  --ios-toggle-off:   rgba(120, 120, 128, 0.32);
+
+  color-scheme: light dark;
 }
 
 /* ── Base ───────────────────────────────────────── */
@@ -208,7 +217,7 @@ body {
   background-position: right 14px center !important;
   background-size: 11px 15px !important;
 }
-select option { background: var(--ios-bg-3); color: #fff; }
+select option { background: var(--ios-bg-3); color: var(--text); }
 input[type="date"] { color-scheme: dark; }
 .fb-field input[type="date"] { width: 160px; }
 
@@ -220,7 +229,7 @@ input[type="date"] { color-scheme: dark; }
 .toggle-track {
   border: none !important;
   border-radius: 16px !important;
-  background: rgba(120, 120, 128, 0.32) !important;
+  background: var(--ios-toggle-off) !important;
   transition: background 220ms ease !important;
 }
 .toggle input:checked ~ .toggle-track { background: var(--ios-green) !important; }
@@ -253,19 +262,19 @@ input[type="date"] { color-scheme: dark; }
 .btn:hover { transform: none !important; }
 .btn-primary, .btn-calc, .btn-confirm-yes, .goal-save-btn {
   background: var(--ios-green) !important;
-  color: #000 !important;
+  color: var(--ios-on-accent) !important;
   border: none !important;
   box-shadow: none !important;
 }
-.btn-primary:hover, .btn-calc:hover { background: #3ade66 !important; }
-.btn-primary svg, .btn-calc svg { stroke: #000; }
+.btn-primary:hover, .btn-calc:hover { background: var(--ios-accent-hover) !important; }
+.btn-primary svg, .btn-calc svg { stroke: var(--ios-on-accent); }
 .btn-ghost, .btn-confirm-no, .btn-export {
   background: var(--ios-fill) !important;
   color: var(--ios-green) !important;
   border: none !important;
 }
 .btn-ghost:hover, .btn-confirm-no:hover, .btn-export:hover { background: rgba(118, 118, 128, 0.32) !important; color: var(--ios-green) !important; }
-.btn-confirm-no { color: #fff !important; }
+.btn-confirm-no { color: var(--text) !important; }
 .btn-export.wa { color: #25d366 !important; }
 .btn-calc {
   border-radius: 999px !important;
@@ -322,13 +331,13 @@ input[type="date"] { color-scheme: dark; }
   border: none !important;
   border-radius: 7px !important;
   background: transparent !important;
-  color: #fff !important;
+  color: var(--text) !important;
   font-size: 13px !important;
   font-weight: 500 !important;
   padding: 5px 12px !important;
 }
 .ct-btn.active {
-  background: #636366 !important;
+  background: var(--ios-seg-thumb) !important;
   font-weight: 600 !important;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
 }
@@ -367,7 +376,7 @@ input[type="date"] { color-scheme: dark; }
 .bm-card--profit .bm-bar-fill { background: var(--ios-green)  !important; }
 .bm-card--iva    .bm-bar-fill { background: var(--ios-orange) !important; }
 .bm-card--unit   .bm-bar-fill { background: var(--ios-purple) !important; }
-.bm-card--cost .bm-value { color: #7d7aff !important; }
+.bm-card--cost .bm-value { color: var(--ios-indigo) !important; }
 .bm-card--iva  .bm-value { color: var(--ios-orange) !important; }
 .bm-value { font-size: 22px !important; font-weight: 700 !important; }
 .bm-sub, .bm-bar-hint, .bm-bar-pct { font-size: 12px !important; }
@@ -421,7 +430,7 @@ thead th {
 }
 tbody tr { border-bottom: 0.5px solid var(--ios-separator) !important; }
 tbody tr:last-child { border-bottom: none !important; }
-tbody tr:hover { background: rgba(255, 255, 255, 0.03) !important; }
+tbody tr:hover { background: rgba(var(--ink), 0.03) !important; }
 tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .filter-bar { border-bottom: 0.5px solid var(--ios-separator) !important; }
 
@@ -436,7 +445,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 .badge-success { background: rgba(48, 209, 88, 0.18) !important;  color: var(--ios-green) !important; }
 .badge-warning { background: rgba(255, 159, 10, 0.18) !important;  color: var(--ios-orange) !important; }
-.badge-info    { background: rgba(10, 132, 255, 0.18) !important;  color: #409cff !important; }
+.badge-info    { background: rgba(10, 132, 255, 0.18) !important;  color: var(--ios-blue) !important; }
 .badge-error   { background: rgba(255, 69, 58, 0.18) !important;   color: var(--ios-red) !important; }
 
 /* ── Inventario ─────────────────────────────────── */
@@ -465,11 +474,11 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   background: transparent !important;
   border: none !important;
   border-radius: 9px !important;
-  color: #fff !important;
+  color: var(--text) !important;
   font-size: 18px !important;
   font-weight: 500 !important;
 }
-.qty-btn:active { background: rgba(255, 255, 255, 0.1) !important; }
+.qty-btn:active { background: rgba(var(--ink), 0.1) !important; }
 .qty-num { font-size: 15px !important; font-weight: 600 !important; min-width: 22px; }
 
 /* ── Ventas ─────────────────────────────────────── */
@@ -479,7 +488,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 /* ── Modales (alerta / hoja de iOS) ────────────── */
 .modal-overlay, #modal-pago { background: rgba(0, 0, 0, 0.5) !important; backdrop-filter: none !important; }
 .modal-box {
-  background: rgba(37, 37, 39, 0.94) !important;
+  background: var(--ios-material) !important;
   backdrop-filter: blur(30px) saturate(180%);
   -webkit-backdrop-filter: blur(30px) saturate(180%);
   border: none !important;
@@ -504,10 +513,11 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   right: auto !important;
   transform: translateX(-50%);
   max-width: min(92vw, 420px) !important;
-  background: rgba(44, 44, 46, 0.92) !important;
+  background: var(--ios-hud) !important;
+  color: var(--text) !important;
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 0.5px solid rgba(255, 255, 255, 0.1) !important;
+  border: 0.5px solid rgba(var(--ink), 0.1) !important;
   border-radius: 999px !important;
   padding: 12px 20px !important;
   font-size: 15px !important;
@@ -575,7 +585,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   border: none;
   border-radius: 9px;
   background: var(--ios-fill);
-  color: #fff;
+  color: var(--text);
   font-family: var(--ios-font-rounded);
   font-size: 16px;
   font-weight: 600;
@@ -600,7 +610,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   border-radius: 999px !important;
   min-height: 50px;
   background: var(--ios-fill) !important;
-  color: #fff !important;
+  color: var(--text) !important;
   font-size: 17px !important;
   font-weight: 600 !important;
 }
@@ -738,4 +748,64 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   .dash-content > .goal-widget { order: -1; }
   .dash-left { width: 100% !important; margin-bottom: 16px; gap: 12px !important; }
   .dash-left .kpi-grid { display: flex !important; flex-direction: column !important; gap: 12px !important; }
+}
+
+/* ─────────────────────────────────────────────────
+   Modo claro: sigue el tema del sistema (Ajustes › Pantalla y brillo)
+   Colores "accesibles" de iOS para que texto y montos se lean sobre blanco.
+───────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --ios-green:  #248a3d;
+    --ios-blue:   #0040dd;
+    --ios-orange: #c93400;
+    --ios-red:    #d70015;
+    --ios-purple: #8944ab;
+    --ios-indigo: #3634a3;
+    --ios-teal:   #0071a4;
+    --ios-yellow: #b25000;
+    --ios-pink:   #d30f45;
+
+    --ios-bg:        #f2f2f7;
+    --ios-bg-2:      #ffffff;
+    --ios-bg-3:      #f2f2f7;
+    --ios-fill:      rgba(118, 118, 128, 0.12);
+    --ios-fill-2:    rgba(118, 118, 128, 0.08);
+    --ios-separator: rgba(60, 60, 67, 0.29);
+    --ios-label-2:   rgba(60, 60, 67, 0.6);
+    --ios-label-3:   rgba(60, 60, 67, 0.45);
+
+    --primary-dark:  #1f7a35;
+    --surface-hover: #f7f7f9;
+    --border-strong: rgba(36, 138, 61, 0.5);
+    --text:          #000000;
+
+    --ink:              0, 0, 0;
+    --ios-on-accent:    #ffffff;
+    --ios-accent-hover: #1f7a35;
+    --ios-seg-thumb:    #ffffff;
+    --ios-material:     rgba(255, 255, 255, 0.96);
+    --ios-hud:          rgba(255, 255, 255, 0.94);
+    --ios-toggle-off:   rgba(120, 120, 128, 0.16);
+  }
+  ::selection { background: rgba(0, 122, 255, 0.25); }
+  /* El interruptor encendido usa el verde estándar, como en iOS */
+  .toggle input:checked ~ .toggle-track { background: #34c759 !important; }
+  .field input:focus, .field select:focus, .field textarea:focus,
+  .fb-field input:focus, .fb-field select:focus,
+  .filters-row input:focus, .filters-row select:focus,
+  .mat-select:focus, .mat-grams:focus, .goal-input:focus, .select-period:focus,
+  .modal-box input:focus, .modal-box select:focus,
+  .form-card input:focus, .form-card select:focus, .form-card textarea:focus {
+    background-color: rgba(118, 118, 128, 0.16) !important;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.6) !important;
+  }
+  .ct-btn.active { box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04); }
+  .modal-box { box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important; }
+  #toast { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14) !important; }
+  .pieza-card-icon { background: rgba(255, 255, 255, 0.7) !important; }
+  .pieza-card-del { background: rgba(255, 255, 255, 0.7) !important; color: rgba(0, 0, 0, 0.55) !important; }
+  .modal-overlay, #modal-pago, .sheet-backdrop { background: rgba(0, 0, 0, 0.3) !important; }
+  /* El widget de meta se ve igual que en oscuro, con un borde sutil sobre gris claro */
+  .goal-widget { box-shadow: inset 0 0 0 0.5px rgba(20, 40, 12, 0.08); }
 }

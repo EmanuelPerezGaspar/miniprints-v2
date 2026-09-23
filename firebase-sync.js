@@ -69,15 +69,15 @@ function showPinGate(onUnlock) {
   if (localStorage.getItem('mp_pin_ok') === '1') { onUnlock(); return; }
   const overlay = document.createElement('div');
   overlay.id = 'mp-pin-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:var(--ios-bg);z-index:99999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif;';
   overlay.innerHTML = `
-    <div style="background:#1c1c1e;border:none;border-radius:26px;padding:32px 24px;max-width:320px;width:90%;text-align:center;">
+    <div style="background:var(--ios-bg-2);border:none;border-radius:26px;padding:32px 24px;max-width:320px;width:90%;text-align:center;">
       <div style="font-size:2rem;margin-bottom:8px;">🔒</div>
-      <h2 style="color:#fff;font-size:22px;font-weight:700;margin-bottom:4px;">MiniPrints</h2><p style="color:rgba(235,235,245,0.6);font-size:15px;margin-bottom:20px;">Ingresa tu PIN</p>
+      <h2 style="color:var(--text);font-size:22px;font-weight:700;margin-bottom:4px;">MiniPrints</h2><p style="color:var(--ios-label-2);font-size:15px;margin-bottom:20px;">Ingresa tu PIN</p>
       <input id="mp-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="PIN" autocomplete="off"
-        style="width:100%;padding:12px;min-height:50px;border-radius:14px;border:none;background:rgba(118,118,128,0.24);color:#fff;font-size:22px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;box-sizing:border-box;" />
-      <button id="mp-pin-btn" style="width:100%;padding:14px;min-height:50px;border-radius:999px;border:none;background:#30d158;color:#000;font-weight:600;font-size:17px;cursor:pointer;">Entrar</button>
-      <div id="mp-pin-err" style="color:#ff453a;font-size:13px;margin-top:10px;display:none;">PIN incorrecto</div>
+        style="width:100%;padding:12px;min-height:50px;border-radius:14px;border:none;background:var(--ios-fill);color:var(--text);font-size:22px;text-align:center;letter-spacing:6px;outline:none;margin-bottom:12px;box-sizing:border-box;" />
+      <button id="mp-pin-btn" style="width:100%;padding:14px;min-height:50px;border-radius:999px;border:none;background:var(--ios-green);color:var(--ios-on-accent);font-weight:600;font-size:17px;cursor:pointer;">Entrar</button>
+      <div id="mp-pin-err" style="color:var(--ios-red);font-size:13px;margin-top:10px;display:none;">PIN incorrecto</div>
     </div>`;
   document.body.appendChild(overlay);
   const input = overlay.querySelector('#mp-pin-input');

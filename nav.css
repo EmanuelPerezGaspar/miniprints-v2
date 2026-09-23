@@ -12,6 +12,16 @@
   --ios-sheet:    #1c1c1e;
   --ios-group:    #2c2c2e;
   --ios-sep:      rgba(84, 84, 88, 0.55);
+  --nav-text:     #ffffff;
+  --nav-text-2:   rgba(235, 235, 245, 0.6);
+  --nav-text-3:   rgba(235, 235, 245, 0.3);
+  --nav-fill:     rgba(118, 118, 128, 0.24);
+  --nav-cut:      #111214;
+  --nav-seg:      #636366;
+  --nav-press:    rgba(255, 255, 255, 0.08);
+  --nav-danger:   #ff453a;
+  --nav-rim:      rgba(255, 255, 255, 0.22);
+  --nav-shadow:   rgba(0, 0, 0, 0.45);
   --ios-spring:   cubic-bezier(0.32, 0.72, 0, 1);
   --tabbar-space: calc(env(safe-area-inset-bottom, 0px) + 104px);
 }
@@ -45,9 +55,9 @@
   /* El nombre de transición va aquí (no en .tabbar) para que el desenfoque vea el contenido de la página */
   view-transition-name: tabbar;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 var(--nav-rim),
     inset 0 -1px 0 rgba(0, 0, 0, 0.18),
-    0 10px 36px rgba(0, 0, 0, 0.45),
+    0 10px 36px var(--nav-shadow),
     0 2px 6px rgba(0, 0, 0, 0.25);
 }
 /* Reflejo especular superior */
@@ -114,7 +124,7 @@
 .tab[aria-current="page"], .tab.is-open { color: var(--ios-tint); }
 /* Símbolo relleno en la pestaña activa, como SF Symbols ".fill" */
 .tab[aria-current="page"] .i-fill, .tab.is-open .i-fill { fill: currentColor; }
-.tab[aria-current="page"] .i-cut,  .tab.is-open .i-cut  { stroke: #111214; stroke-width: 1.9; }
+.tab[aria-current="page"] .i-cut,  .tab.is-open .i-cut  { stroke: var(--nav-cut); stroke-width: 1.9; }
 
 /* Al hacer scroll hacia abajo la barra se compacta (como iOS) */
 .tabbar.is-compact { width: min(calc(100% - 96px), 300px); }
@@ -166,7 +176,7 @@
   margin: 0 0 20px;
   padding: 2px;
   border-radius: 10px;
-  background: rgba(118, 118, 128, 0.24);
+  background: var(--nav-fill);
   font-family: var(--ios-font);
 }
 .ios-segmented a {
@@ -176,13 +186,13 @@
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: rgba(235, 235, 245, 0.8);
+  color: var(--nav-text);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
 }
 .ios-segmented a[aria-current="page"] {
-  background: #636366;
-  color: #fff;
+  background: var(--nav-seg);
+  color: var(--nav-text);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 3px 1px rgba(0, 0, 0, 0.04);
   view-transition-name: seg-thumb;
 }
@@ -208,7 +218,7 @@
   padding: 8px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
   border-radius: 22px 22px 0 0;
   background: var(--ios-sheet);
-  color: #fff;
+  color: var(--nav-text);
   font-family: var(--ios-font);
   box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
   transform: translateY(100%);
@@ -221,7 +231,7 @@
   width: 36px; height: 5px;
   margin: 0 auto 10px;
   border-radius: 3px;
-  background: rgba(235, 235, 245, 0.3);
+  background: var(--nav-text-3);
 }
 .sheet-head {
   display: flex;
@@ -235,8 +245,8 @@
   display: grid; place-items: center;
   border: none;
   border-radius: 50%;
-  background: rgba(118, 118, 128, 0.24);
-  color: rgba(235, 235, 245, 0.7);
+  background: var(--nav-fill);
+  color: var(--nav-text-2);
   cursor: pointer;
 }
 .sheet-close svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 3; stroke-linecap: round; }
@@ -245,7 +255,7 @@
   padding: 0 16px 6px;
   font-size: 13px;
   text-transform: uppercase;
-  color: rgba(235, 235, 245, 0.6);
+  color: var(--nav-text-2);
 }
 .sheet-group {
   margin-bottom: 26px;
@@ -262,7 +272,7 @@
   padding: 0 14px;
   border: none;
   background: none;
-  color: #fff;
+  color: var(--nav-text);
   font: inherit;
   font-size: 17px;
   text-align: left;
@@ -270,7 +280,7 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.sheet-row:active { background: rgba(255, 255, 255, 0.08); }
+.sheet-row:active { background: var(--nav-press); }
 .sheet-row:focus-visible { outline: 2px solid var(--ios-tint); outline-offset: -2px; }
 .sheet-row + .sheet-row .sheet-row-body { border-top: 0.5px solid var(--ios-sep); }
 .sheet-row-body {
@@ -282,7 +292,7 @@
   min-height: 48px;
   align-self: stretch;
 }
-.sheet-row-sub { font-size: 13px; color: rgba(235, 235, 245, 0.5); }
+.sheet-row-sub { font-size: 13px; color: var(--nav-text-2); }
 .sheet-row.is-current .sheet-row-sub { color: var(--ios-tint); }
 .sheet-icon {
   flex-shrink: 0;
@@ -292,9 +302,9 @@
   color: #fff;
 }
 .sheet-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.sheet-chev { width: 8px; height: 14px; flex-shrink: 0; stroke: rgba(235, 235, 245, 0.3); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
-.sheet-row.danger { color: #ff453a; }
-.sheet-foot { text-align: center; font-size: 12px; color: rgba(235, 235, 245, 0.35); padding-top: 2px; }
+.sheet-chev { width: 8px; height: 14px; flex-shrink: 0; stroke: var(--nav-text-3); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.sheet-row.danger { color: var(--nav-danger); }
+.sheet-foot { text-align: center; font-size: 12px; color: var(--nav-text-3); padding-top: 2px; }
 
 /* En pantallas anchas la hoja es una tarjeta centrada */
 @media (min-width: 900px) {
@@ -314,6 +324,32 @@
 @media (prefers-reduced-motion: reduce) {
   .tabbar, .tab, .tab svg, .tab-bubble, .sheet, .sheet-backdrop { transition: none !important; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ── Modo claro ─────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root {
+    --ios-tint:     #248a3d;
+    --ios-label:    rgba(60, 60, 67, 0.72);
+    --ios-glass:    rgba(250, 250, 252, 0.72);
+    --ios-stroke:   rgba(0, 0, 0, 0.08);
+    --ios-bubble:   rgba(118, 118, 128, 0.14);
+    --ios-sheet:    #f2f2f7;
+    --ios-group:    #ffffff;
+    --ios-sep:      rgba(60, 60, 67, 0.29);
+    --nav-text:     #000000;
+    --nav-text-2:   rgba(60, 60, 67, 0.6);
+    --nav-text-3:   rgba(60, 60, 67, 0.3);
+    --nav-fill:     rgba(118, 118, 128, 0.12);
+    --nav-cut:      #ffffff;
+    --nav-seg:      #ffffff;
+    --nav-press:    rgba(0, 0, 0, 0.05);
+    --nav-danger:   #d70015;
+    --nav-rim:      rgba(255, 255, 255, 0.9);
+    --nav-shadow:   rgba(0, 0, 0, 0.12);
+  }
+  .tabbar-glass::after { background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent); }
+  .sheet { box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15); }
 }
 
 @media print {

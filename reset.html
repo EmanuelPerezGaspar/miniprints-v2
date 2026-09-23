@@ -4,22 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Reset — MiniPrints v2</title>
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: var(--font);
-      background: #000000;
-      color: #f2f2f7;
+      background: var(--ios-bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .card {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(var(--ink), 0.05);
+      border: 1px solid rgba(var(--ink), 0.1);
       border-radius: 16px;
       padding: 2.5rem;
       max-width: 420px;
@@ -28,7 +29,7 @@
     }
     .icon { font-size: 3rem; margin-bottom: 1rem; }
     h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
-    p { color: #aeaeb2; font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
+    p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; line-height: 1.6; }
     .list {
       background: rgba(255,69,58,0.08);
       border: 1px solid rgba(255,69,58,0.2);
@@ -37,7 +38,7 @@
       margin-bottom: 1.5rem;
       text-align: left;
     }
-    .list span { display: block; font-size: 0.85rem; color: #ff6961; padding: 2px 0; }
+    .list span { display: block; font-size: 0.85rem; color: var(--ios-red); padding: 2px 0; }
     .keep {
       background: rgba(48,209,88,0.08);
       border: 1px solid rgba(48,209,88,0.2);
@@ -49,7 +50,7 @@
       text-align: left;
     }
     .btn-reset {
-      background: #ff453a;
+      background: var(--ios-red);
       color: #fff;
       border: none;
       border-radius: 10px;
@@ -64,8 +65,8 @@
     .btn-reset:hover { background: #dc2626; }
     .btn-back {
       background: transparent;
-      color: #aeaeb2;
-      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      border: 1px solid rgba(var(--ink), 0.1);
       border-radius: 10px;
       padding: 0.75rem 2rem;
       font-size: 0.9rem;
@@ -73,10 +74,10 @@
       width: 100%;
       transition: border-color 0.2s;
     }
-    .btn-back:hover { border-color: #30d158; color: #30d158; }
+    .btn-back:hover { border-color: var(--ios-green); color: var(--ios-green); }
     .done {
       display: none;
-      color: #30d158;
+      color: var(--ios-green);
       font-weight: 600;
       font-size: 1.1rem;
       margin-top: 1rem;
@@ -84,7 +85,8 @@
   </style>
   <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
@@ -96,7 +98,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: #000000;
+    background: var(--ios-bg);
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
 }'@

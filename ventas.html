@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -12,14 +13,14 @@
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
     .field input, .field select {
-      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      width: 100%; background: rgba(var(--ink), 0.05); border: 1px solid var(--border);
       border-radius: var(--radius-sm); color: var(--text); font-family: var(--font);
       font-size: 0.875rem; padding: 9px 12px; outline: none; transition: border-color 180ms;
       -moz-appearance: textfield;
     }
     .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
     .field input:focus, .field select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(48,209,88,0.12); }
-    .field select option { background: #2c2c2e; }
+    .field select option { background: var(--ios-bg-3); }
     .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
@@ -30,15 +31,15 @@
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .pill { background: rgba(255,255,255,0.10); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 120px; animation: pillIn 350ms cubic-bezier(0.23,1,0.32,1) both; }
+    .pill { background: rgba(var(--ink), 0.10); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 120px; animation: pillIn 350ms cubic-bezier(0.23,1,0.32,1) both; }
     .pill:nth-child(1) { animation-delay: 0ms; }
     .pill:nth-child(2) { animation-delay: 55ms; }
     .pill:nth-child(3) { animation-delay: 110ms; }
     .pill:nth-child(4) { animation-delay: 165ms; }
     .pill-lbl { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-dim); }
     .pill-val { font-size: 1rem; font-weight: 800; color: var(--text); }
-    .pill-val.green { color: #30d158; }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: #2c2c2e; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    .pill-val.green { color: var(--ios-green); }
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
     /* Prevent overflow */
     .form-card { min-width: 0; }
     .grid-4 { min-width: 0; }
@@ -59,35 +60,36 @@
       .carrito-item { gap: 6px; }
       .ci-meta { min-width: 0; font-size: 0.78rem; }
     }
-    .carrito-section { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin: 12px 0; display: none; }
+    .carrito-section { background: rgba(var(--ink), 0.04); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; margin: 12px 0; display: none; }
     .carrito-section.visible { display: block; }
-    .carrito-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 0.85rem; }
+    .carrito-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(var(--ink), 0.06); font-size: 0.85rem; }
     .carrito-item:last-child { border-bottom: none; }
     .ci-name { flex: 1; font-weight: 600; }
     .ci-meta { color: var(--text-dim); min-width: 100px; text-align: right; }
-    .ci-total { color: #30d158; font-weight: 700; min-width: 70px; text-align: right; }
+    .ci-total { color: var(--ios-green); font-weight: 700; min-width: 70px; text-align: right; }
     .carrito-subtotal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding-top: 10px; margin-top: 6px; border-top: 1px solid var(--border); }
     .cs-lbl { color: var(--text-dim); font-size: 0.85rem; }
-    .cs-val { font-weight: 800; color: #30d158; font-size: 1.05rem; }
+    .cs-val { font-weight: 800; color: var(--ios-green); font-size: 1.05rem; }
     #modal-pago { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:1000; align-items:center; justify-content:center; }
     #modal-pago.open { display:flex; }
-    .modal-box { background:#2c2c2e; border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; width:300px; max-width:92vw; }
+    .modal-box { background:var(--ios-bg-3); border:1px solid var(--border); border-radius:var(--radius); padding:28px 24px; width:300px; max-width:92vw; }
     .modal-title { font-size:0.95rem; font-weight:700; margin-bottom:18px; }
-    .metodo-btn { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.875rem; padding:11px 14px; cursor:pointer; text-align:left; margin-bottom:8px; transition:border-color 180ms,background 180ms; display:block; }
+    .metodo-btn { width:100%; background:rgba(var(--ink), 0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.875rem; padding:11px 14px; cursor:pointer; text-align:left; margin-bottom:8px; transition:border-color 180ms,background 180ms; display:block; }
     .metodo-btn:hover { border-color:var(--primary); background:rgba(48,209,88,0.08); }
     .modal-cancel { background:none; border:none; color:var(--text-dim); font-size:0.82rem; cursor:pointer; margin-top:4px; width:100%; text-align:center; padding:6px; }
     .filter-bar { display:flex; align-items:flex-end; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
     .fb-field { display:flex; flex-direction:column; gap:5px; }
     .fb-field label { font-size:0.68rem; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-dim); }
-    .fb-field input, .fb-field select { background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.82rem; padding:7px 10px; outline:none; transition:border-color 180ms; }
+    .fb-field input, .fb-field select { background:rgba(var(--ink), 0.05); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--font); font-size:0.82rem; padding:7px 10px; outline:none; transition:border-color 180ms; }
     .fb-field input[type="date"] { width: 136px; }
     .fb-field input:focus, .fb-field select:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(48,209,88,0.12); }
-    .fb-field select option { background:#2c2c2e; }
+    .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
   <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
@@ -147,7 +149,7 @@
             <div class="field"><label>Fecha</label><input type="date" id="venta-fecha" /></div>
           </div>
           <div class="btn-row">
-            <select id="venta-estatus" onchange="toggleMetodoPago()" style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
+            <select id="venta-estatus" onchange="toggleMetodoPago()" style="background:rgba(var(--ink), 0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;">
               <option value="pagado">Pagado</option>
               <option value="pendiente">Pendiente</option>
             </select>
@@ -460,7 +462,7 @@
         <div class="pill"><span class="pill-lbl">Unidades</span><span class="pill-val">${unds}</span></div>
         <div class="pill"><span class="pill-lbl">Transacciones</span><span class="pill-val">${lista.length}</span></div>
         <div class="pill"><span class="pill-lbl">Ticket promedio</span><span class="pill-val">${fmt(tkProm)}</span></div>
-        ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:#ffd60a;">${fmt(porCobrar)}</span></div>` : ''}`;
+        ${pendientes.length ? `<div class="pill"><span class="pill-lbl">Por cobrar</span><span class="pill-val" style="color:var(--ios-yellow);">${fmt(porCobrar)}</span></div>` : ''}`;
 
       tbody.innerHTML = lista.map(v => {
         const items  = ventaItems(v);
@@ -472,18 +474,18 @@
         const titleAttr = items.length > 1 ? ` title="${items.map(it => it.pieza + ' ×' + it.cantidad).join(', ')}"` : '';
         const pagada = ventaPagada(v);
         const estatusBadge = pagada
-          ? `<span style="font-size:0.7rem;background:#30d15822;color:#30d158;padding:2px 8px;border-radius:99px;font-weight:700;">Pagado</span>`
-          : `<span style="font-size:0.7rem;background:#ffd60a22;color:#ffd60a;padding:2px 8px;border-radius:99px;font-weight:700;">Pendiente</span>`;
+          ? `<span style="font-size:0.7rem;background:#30d15822;color:var(--ios-green);padding:2px 8px;border-radius:99px;font-weight:700;">Pagado</span>`
+          : `<span style="font-size:0.7rem;background:#ffd60a22;color:var(--ios-yellow);padding:2px 8px;border-radius:99px;font-weight:700;">Pendiente</span>`;
         return `<tr style="${pagada ? '' : 'opacity:0.8;'}">
           <td style="color:var(--text-dim);">${v.fecha}</td>
           <td${titleAttr}>${piezaLbl}${v.notas ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px;">${v.notas}</div>` : ''}</td>
           <td style="color:var(--text-dim);font-size:0.82rem;">${v.metodoPago || '—'}</td>
           <td style="text-align:right;">${cantV}</td>
           <td style="text-align:right;color:var(--text-muted);">${items.length === 1 ? fmt(items[0].precio) : '—'}</td>
-          <td style="text-align:right;color:${pagada ? '#30d158' : '#ffd60a'};font-weight:700;">${fmt(totalV)}</td>
+          <td style="text-align:right;color:${pagada ? IOSC.green : IOSC.yellow};font-weight:700;">${fmt(totalV)}</td>
           <td>${estatusBadge}</td>
           <td style="display:flex;gap:4px;">
-            ${!pagada ? `<button class="btn btn-ghost" style="padding:5px 9px;color:#30d158;" onclick="marcarPagado(${v.id})" title="Marcar como pagado">
+            ${!pagada ? `<button class="btn btn-ghost" style="padding:5px 9px;color:var(--ios-green);" onclick="marcarPagado(${v.id})" title="Marcar como pagado">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             </button>` : ''}
             <button class="btn btn-ghost" style="padding:5px 9px;" onclick="eliminarVenta(${v.id})">

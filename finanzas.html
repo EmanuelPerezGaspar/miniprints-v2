@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Finanzas</title>
+  <script src="theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -16,10 +17,10 @@
     .detail-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; }
     .detail-table-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; font-weight: 700; }
     .empty-row { text-align: center; padding: 32px; color: var(--text-dim); font-size: 0.85rem; }
-    .neg { color: #ff453a; }
-    .pos { color: #30d158; }
+    .neg { color: var(--ios-red); }
+    .pos { color: var(--ios-green); }
     .pct { color: var(--text-dim); font-size: 0.78rem; }
-    #toast { position: fixed; bottom: 24px; right: 24px; background: #2c2c2e; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
+    #toast { position: fixed; bottom: 24px; right: 24px; background: var(--ios-bg-3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 0.85rem; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.50); z-index: 999; display: none; max-width: 320px; }
     /* Prevent overflow */
     .charts-2col { min-width: 0; }
     .detail-table { min-width: 0; }
@@ -33,7 +34,8 @@
   </style>
   <link rel="stylesheet" href="ios.css" />
   <link rel="stylesheet" href="nav.css" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
@@ -145,32 +147,32 @@
       const ganReal     = ingresos - costosProd;
       const margen      = ingresos > 0 ? ((ganReal / ingresos) * 100).toFixed(1) : '0';
       const valorInv    = Object.values(DB.materials).reduce((s, m) => s + (m.pesoTotal / 1000) * m.costo, 0);
-      const margenColor = parseFloat(margen) >= 30 ? '#30d158' : parseFloat(margen) >= 15 ? '#ffd60a' : '#ff453a';
+      const margenColor = parseFloat(margen) >= 30 ? IOSC.green : parseFloat(margen) >= 15 ? IOSC.yellow : IOSC.red;
 
       document.getElementById('kpi-grid').innerHTML = `
         <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Ingresos reales</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
+          <div class="kpi-top"><div class="kpi-label">Ingresos reales</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.green}" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div>
           <div class="kpi-value" style="font-size:1.6rem;">${fmt(ingresos)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${ventas.length} ventas</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Costos producción</div><div class="kpi-icon" style="background:rgba(255,69,58,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div></div>
+          <div class="kpi-top"><div class="kpi-label">Costos producción</div><div class="kpi-icon" style="background:rgba(255,69,58,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.red}" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div></div>
           <div class="kpi-value" style="font-size:1.6rem;">${fmt(costosProd)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">${cots.length} cotizaciones</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Ganancia real</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#30d158" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div></div>
+          <div class="kpi-top"><div class="kpi-label">Ganancia real</div><div class="kpi-icon" style="background:rgba(48,209,88,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.green}" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div></div>
           <div class="kpi-value" style="font-size:1.6rem;color:${margenColor};">${fmt(ganReal)}</div>
           <div class="kpi-change neutral" style="color:${margenColor};">Margen ${margen}%</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Ganancia esperada</div><div class="kpi-icon" style="background:rgba(191,90,242,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#bf5af2" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
-          <div class="kpi-value" style="font-size:1.6rem;color:#bf5af2;">${fmt(ganEsp)}</div>
+          <div class="kpi-top"><div class="kpi-label">Ganancia esperada</div><div class="kpi-icon" style="background:rgba(191,90,242,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.purple}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;color:var(--ios-purple);">${fmt(ganEsp)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">en cotizaciones</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-top"><div class="kpi-label">Valor inventario</div><div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg></div></div>
-          <div class="kpi-value" style="font-size:1.6rem;color:#0a84ff;">${fmt(valorInv)}</div>
+          <div class="kpi-top"><div class="kpi-label">Valor inventario</div><div class="kpi-icon" style="background:rgba(10,132,255,0.12);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${IOSC.blue}" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg></div></div>
+          <div class="kpi-value" style="font-size:1.6rem;color:var(--ios-blue);">${fmt(valorInv)}</div>
           <div class="kpi-change neutral" style="color:var(--text-dim);">en materiales</div>
         </div>`;
     }
@@ -226,7 +228,7 @@
           labels: labelsM,
           datasets: [{
             label: 'Ingresos', data: ingPorMes,
-            borderColor: IOS.green, backgroundColor: IOS.gradient('48,209,88'),
+            borderColor: IOS.green, backgroundColor: IOS.gradient(IOS.greenRgb),
             pointHoverBackgroundColor: IOS.green, fill: true,
           }]
         },
@@ -264,13 +266,13 @@
         const ingresos = ventasByPieza[p] || 0;
         const ganReal = ingresos - c.costoProd;
         const margen = ingresos > 0 ? ((ganReal / ingresos) * 100).toFixed(1) : '—';
-        const mColor = parseFloat(margen) >= 30 ? '#30d158' : parseFloat(margen) >= 15 ? '#ffd60a' : '#ff453a';
+        const mColor = parseFloat(margen) >= 30 ? IOSC.green : parseFloat(margen) >= 15 ? IOSC.yellow : IOSC.red;
         return `<tr>
           <td>${p}</td>
           <td style="text-align:right;color:var(--text-muted);">${fmt(c.costoProd)}</td>
-          <td style="text-align:right;color:#bf5af2;">${fmt(c.ganEsp)}</td>
-          <td style="text-align:right;color:#30d158;">${fmt(ingresos)}</td>
-          <td style="text-align:right;color:${ganReal >= 0 ? '#30d158' : '#ff453a'};font-weight:700;">${fmt(ganReal)}</td>
+          <td style="text-align:right;color:var(--ios-purple);">${fmt(c.ganEsp)}</td>
+          <td style="text-align:right;color:var(--ios-green);">${fmt(ingresos)}</td>
+          <td style="text-align:right;color:${ganReal >= 0 ? IOSC.green : IOSC.red};font-weight:700;">${fmt(ganReal)}</td>
           <td style="text-align:right;color:${margen === '—' ? 'var(--text-dim)' : mColor};">${margen}${margen !== '—' ? '%' : ''}</td>
         </tr>`;
       }).join('');
