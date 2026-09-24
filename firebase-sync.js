@@ -26,7 +26,12 @@ const PENDIENTE = 'mp_sync_pendiente';
 const hayPendientes = () => !!localStorage.getItem(PENDIENTE);
 
 // Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
+// Estado visible en Más (para diagnosticar desde el iPhone)
+window.MP_SYNC = { estado: 'inicio', subida: null, bajada: null, error: '' };
+const hora = () => new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
 function syncBadge(state) {
+  window.MP_SYNC.estado = state;
   let el = document.getElementById('mp-sync-badge');
   if (!el) {
     el = document.createElement('div');
@@ -69,6 +74,7 @@ localStorage.setItem = function (key, value) {
 function applyRemoteData(data) {
   // Nunca se reemplazan datos locales que aún no se han subido
   if (hayPendientes()) return false;
+  window.MP_SYNC.bajada = hora();
   applyingRemote = true;
   SYNC_KEYS.forEach(k => { if (data && data[k] != null) _origSetItem(k, data[k]); });
   applyingRemote = false;
@@ -260,9 +266,11 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
         await setDoc(docRef, payload, { merge: true });
         // Solo se limpia la marca si no hubo más cambios mientras se subía
         if (localStorage.getItem(PENDIENTE) === marca) localStorage.removeItem(PENDIENTE);
+        window.MP_SYNC.subida = hora(); window.MP_SYNC.error = '';
         syncBadge('ok');
         return;
       } catch (e) {
+        window.MP_SYNC.error = (e && (e.code || e.message)) || 'desconocido';
         if (e && e.code === 'permission-denied') { console.error('mp sync: sin permiso', e); syncBadge('denied'); return; }
         if (i === 2) { console.error('mp sync push error', e); syncBadge('error'); }
         else await new Promise(r => setTimeout(r, 800 * (i + 1)));
@@ -315,8 +323,9 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
         if (snap.metadata.hasPendingWrites) return;
         if (Date.now() - _lastLocalWriteTime < 5000) return;
         if (snap.exists()) applyRemoteData(snap.data());
-      }, e => { console.warn('mp sync snapshot', e); syncBadge(e && e.code === 'permission-denied' ? 'denied' : 'error'); });
+      }, e => { window.MP_SYNC.error = (e && (e.code || e.message)) || 'desconocido'; console.warn('mp sync snapshot', e); syncBadge(e && e.code === 'permission-denied' ? 'denied' : 'error'); });
     } catch (e) {
+      window.MP_SYNC.error = (e && (e.code || e.message)) || 'desconocido';
       console.warn('Firebase sync no disponible:', e);
       syncBadge(e && e.code === 'permission-denied' ? 'denied' : 'error');
     }

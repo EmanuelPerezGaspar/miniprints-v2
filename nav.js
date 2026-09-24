@@ -145,7 +145,7 @@
             ? `<a class="${cls}" href="${r.href}"${current ? ' aria-current="page"' : ''}>${body}</a>`
             : `<button class="${cls}" type="button" data-action="${r.action}">${body}</button>`;
         }).join('')}</div>`).join('')}
-      <div class="sheet-foot">MiniPrints</div>`;
+      <div class="sheet-foot" id="sheet-foot">MiniPrints</div>`;
 
     document.body.append(backdrop, sheet);
 
@@ -176,8 +176,20 @@
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 
+  // Versión y estado de sincronización al pie de la hoja
+  const VERSION = ((document.querySelector('script[src*="nav.js"]') || {}).src || '').split('v=')[1] || '—';
+  function pintarPie() {
+    const S = window.MP_SYNC || {};
+    let pend = false;
+    try { pend = !!localStorage.getItem('mp_sync_pendiente'); } catch (_) {}
+    const txt = { ok: 'al día', none: 'al día', connecting: 'conectando', error: 'error', denied: 'sin permiso', local: 'sin conexión', inicio: 'iniciando' }[S.estado] || S.estado || '—';
+    sheet.querySelector('#sheet-foot').innerHTML = `MiniPrints · versión ${VERSION}<br>Sincronización: ${txt}${pend ? ' · cambios sin subir' : ''}`
+      + `${S.subida ? ' · última subida ' + S.subida : ''}${S.error ? '<br>Error: ' + String(S.error).replace(/[<>&]/g, '') : ''}`;
+  }
+
   function openSheet(btn) {
     if (!sheet) buildSheet();
+    pintarPie();
     opener = btn;
     btn.classList.add('is-open');
     btn.setAttribute('aria-expanded', 'true');
