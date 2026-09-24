@@ -20,6 +20,10 @@ let _schedulePush     = () => {};
 let _pendingLocalWrite  = false;
 let _lastLocalWriteTime = 0;
 const AUTH_FLAG = 'mp_auth_ok';
+// Marca de cambios locales que todavía no llegan a la nube. Sobrevive al cambio de
+// pantalla, así la siguiente pantalla sube esos cambios en vez de pisarlos con la nube.
+const PENDIENTE = 'mp_sync_pendiente';
+const hayPendientes = () => !!localStorage.getItem(PENDIENTE);
 
 // Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
 function syncBadge(state) {
@@ -55,6 +59,7 @@ function syncBadge(state) {
 localStorage.setItem = function (key, value) {
   _origSetItem(key, value);
   if (!applyingRemote && SYNC_KEYS.includes(key)) {
+    _origSetItem(PENDIENTE, String(Date.now()));
     _pendingLocalWrite  = true;
     _lastLocalWriteTime = Date.now();
     _schedulePush();
@@ -62,10 +67,13 @@ localStorage.setItem = function (key, value) {
 };
 
 function applyRemoteData(data) {
+  // Nunca se reemplazan datos locales que aún no se han subido
+  if (hayPendientes()) return false;
   applyingRemote = true;
   SYNC_KEYS.forEach(k => { if (data && data[k] != null) _origSetItem(k, data[k]); });
   applyingRemote = false;
   window.dispatchEvent(new CustomEvent('mp-sync-update'));
+  return true;
 }
 
 const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
@@ -214,6 +222,7 @@ async function iniciar() {
       try { await A.signOut(auth); } catch (_) {}
       localStorage.removeItem(AUTH_FLAG);
       SYNC_KEYS.forEach(k => localStorage.removeItem(k));
+    localStorage.removeItem(PENDIENTE);
       location.replace('dashboard.html');
     };
 
@@ -245,10 +254,12 @@ async function iniciar() {
 
 function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
   // Push con reintentos — si falla por red lo intenta hasta 3 veces
-  async function executeSetDoc(payload) {
+  async function executeSetDoc(payload, marca) {
     for (let i = 0; i < 3; i++) {
       try {
         await setDoc(docRef, payload, { merge: true });
+        // Solo se limpia la marca si no hubo más cambios mientras se subía
+        if (localStorage.getItem(PENDIENTE) === marca) localStorage.removeItem(PENDIENTE);
         syncBadge('ok');
         return;
       } catch (e) {
@@ -262,9 +273,10 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
   function flushPush() {
     clearTimeout(pushTimer);
     _pendingLocalWrite = false;
+    const marca = localStorage.getItem(PENDIENTE);
     const payload = {};
     SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-    executeSetDoc(payload);
+    executeSetDoc(payload, marca);
   }
 
   _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
@@ -284,19 +296,19 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
   (async () => {
     try {
       const snap = await getDoc(docRef);
-      if (_pendingLocalWrite) {
-        // Cambios locales hechos mientras se confirmaba la sesión — subirlos ahora
+      if (_pendingLocalWrite || hayPendientes()) {
+        // Cambios locales sin subir (de esta pantalla o de la anterior) — subirlos ahora
         flushPush();
       } else if (snap.exists() && Date.now() - _lastLocalWriteTime > 2000) {
         applyRemoteData(snap.data());
-        syncBadge('ok');
+        syncBadge('none');
       } else if (!snap.exists()) {
         const initial = {};
         SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
         await setDoc(docRef, initial);
         syncBadge('ok');
       } else {
-        syncBadge('ok');
+        syncBadge('none');
       }
 
       onSnapshot(docRef, snap => {
