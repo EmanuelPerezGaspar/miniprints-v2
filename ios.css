@@ -1695,3 +1695,15 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .vs-tile-menos:active { transform: scale(0.9); }
 .vs-tile-menos:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
 @media (prefers-color-scheme: light) { .vs-tile-main { background: var(--ios-bg-3); } .vs-tile-menos { background: #fff; } }
+
+/* Modal "Confirmar impresión": precio y categoría */
+.modal-box { max-height: calc(100dvh - 40px); overflow-y: auto; overscroll-behavior: contain; }
+.modal-box .vs-price { position: relative; display: block; }
+.modal-box .vs-price span { left: var(--pad-card); }
+.modal-box .vs-price input { padding-left: 32px !important; font-family: var(--ios-font-rounded) !important; font-weight: 600; width: 100%; box-sizing: border-box; }
+.modal-hint { display: block; font-size: 12px; line-height: 16px; color: var(--ios-label-2); }
+.modal-hint:empty { display: none; }
+.modal-box .cat-nueva input { flex: 1; min-width: 0; }
+.modal-box .cq-chips button { min-height: 34px; padding: 7px 13px; font-size: 14px; }
+/* Los modales quedan por encima de la barra de pestañas y del aviso de sincronización */
+.modal-overlay { z-index: 1150 !important; }

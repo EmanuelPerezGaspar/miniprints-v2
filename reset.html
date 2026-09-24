@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Restablecer datos</title>
-  <script src="theme.js?v=20260924t"></script>
-  <script src="inventario.js?v=20260924t"></script>
+  <script src="theme.js?v=20260924v"></script>
+  <script src="inventario.js?v=20260924v"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924t" />
+  <link rel="stylesheet" href="styles.css?v=20260924v" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924t" />
-  <link rel="stylesheet" href="nav.css?v=20260924t" />
+  <link rel="stylesheet" href="ios.css?v=20260924v" />
+  <link rel="stylesheet" href="nav.css?v=20260924v" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924t"></script>
+  <script type="module" src="firebase-sync.js?v=20260924v"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -42,6 +42,12 @@
           <button type="button" class="inv-btn is-plain" onclick="descargarRespaldo()">Descargar respaldo</button>
           <button type="button" class="inv-btn is-plain" onclick="document.getElementById('rs-archivo').click()">Restaurar un respaldo</button>
           <input type="file" id="rs-archivo" accept="application/json,.json" hidden />
+        </div>
+
+        <h2 class="fn-sec-title">Mantenimiento</h2>
+        <div class="rs-btns">
+          <button type="button" class="inv-btn is-plain" onclick="pasarAMayusculas()">Pasar registros a MAYÚSCULAS</button>
+          <p class="inv-hint" id="rs-mayus-hint">Convierte piezas, clientes, notas, plantillas y categorías que tengan minúsculas. Las piezas repetidas (por ejemplo "Llavero" y "LLAVERO") se juntan sumando su stock.</p>
         </div>
 
         <div class="hx-info" style="align-items:baseline;padding:0"><h2 class="fn-sec-title" style="padding:6px 0 0">Qué borrar</h2><button type="button" id="rs-todo" onclick="seleccionarTodo()">Seleccionar todo</button></div>
@@ -147,6 +153,50 @@
     }
 
     // ── Respaldo de todo en un archivo ──
+    // ── Registros existentes a MAYÚSCULAS ──
+    const M = t => (t == null ? t : String(t).toLocaleUpperCase('es-MX'));
+    function pasarAMayusculas() {
+      if (!confirm('¿Pasar todos los registros a MAYÚSCULAS? Te recomendamos descargar un respaldo antes.')) return;
+      let cambios = 0;
+      const conteo = (a, b) => { if (a !== b) cambios++; return b; };
+      // Objetos cuya clave es el nombre de la pieza; al juntar repetidas se usa `unir`
+      const renombrar = (obj, unir) => {
+        const out = {};
+        Object.entries(obj || {}).forEach(([k, v]) => {
+          const K = conteo(k, M(k));
+          out[K] = K in out ? unir(out[K], v) : v;
+        });
+        return out;
+      };
+      set('mp_piezas', renombrar(get('mp_piezas', {}), (a, b) => (Number(a) || 0) + (Number(b) || 0)));
+      set('mp_precios', renombrar(get('mp_precios', {}), (a, b) => a || b));
+      set('mp_categorias', renombrar(get('mp_categorias', {}), (a, b) => a || b));
+      set('mp_historial', renombrar(get('mp_historial', {}), (a, b) => [...(a || []), ...(b || [])]));
+      set('mp_ventas', get('mp_ventas', []).map(v => {
+        const n = { ...v };
+        if (n.pieza) n.pieza = conteo(n.pieza, M(n.pieza));
+        if (n.notas) n.notas = conteo(n.notas, M(n.notas));
+        if (Array.isArray(n.items)) n.items = n.items.map(it => ({ ...it, pieza: conteo(it.pieza, M(it.pieza)) }));
+        return n;
+      }));
+      set('mp_cotizaciones', get('mp_cotizaciones', []).map(c => {
+        const n = { ...c };
+        if (n.cliente) n.cliente = conteo(n.cliente, M(n.cliente));
+        if (n.pieza) n.pieza = conteo(n.pieza, M(n.pieza));
+        return n;
+      }));
+      set('mp_templates', get('mp_templates', []).map(t => (t && t.nombre ? { ...t, nombre: conteo(t.nombre, M(t.nombre)) } : t)));
+      set('mp_categorias_lista', get('mp_categorias_lista', []).map(c => (c && c.nombre ? { ...c, nombre: conteo(c.nombre, M(c.nombre)) } : c)));
+      const mats = get('mp_materials', {});
+      Object.values(mats).forEach(m => { ['marca', 'tipo', 'color'].forEach(k => { if (m[k]) m[k] = conteo(m[k], M(m[k])); }); });
+      set('mp_materials', mats);
+      render();
+      const hint = document.getElementById('rs-mayus-hint');
+      hint.className = 'inv-hint is-ok';
+      hint.textContent = cambios ? `Listo: ${cambios} dato${cambios !== 1 ? 's' : ''} pasado${cambios !== 1 ? 's' : ''} a mayúsculas.` : 'Todo ya estaba en mayúsculas.';
+      MP_INV.toast(cambios ? 'Registros en MAYÚSCULAS' : 'Todo ya estaba en mayúsculas');
+    }
+
     function descargarRespaldo() {
       const datos = {};
       SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v != null) datos[k] = v; });
@@ -175,6 +225,6 @@
     window.addEventListener('mp-sync-ready', render, { once: true });
     window.addEventListener('mp-sync-update', render);
   </script>
-  <script src="nav.js?v=20260924t"></script>
+  <script src="nav.js?v=20260924v"></script>
 </body>
 </html>
