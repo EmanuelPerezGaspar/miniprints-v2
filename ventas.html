@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260924m"></script>
-  <script src="categorias.js?v=20260924m"></script>
-  <script src="whatsapp.js?v=20260924m"></script>
+  <script src="theme.js?v=20260924n"></script>
+  <script src="categorias.js?v=20260924n"></script>
+  <script src="whatsapp.js?v=20260924n"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924m" />
+  <link rel="stylesheet" href="styles.css?v=20260924n" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -88,8 +88,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924m" />
-  <link rel="stylesheet" href="nav.css?v=20260924m" />
+  <link rel="stylesheet" href="ios.css?v=20260924n" />
+  <link rel="stylesheet" href="nav.css?v=20260924n" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,7 +100,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924m"></script>
+  <script type="module" src="firebase-sync.js?v=20260924n"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -274,7 +274,7 @@
         .filter(o => o.id === 'todas' || cuenta[o.id]);
       if (!opciones.some(o => o.id === catFiltro)) catFiltro = 'todas';
       document.getElementById('vs-cats').innerHTML = opciones.map(o =>
-        `<button type="button" role="radio" data-cat="${o.id}" aria-checked="${o.id === catFiltro}">${o.nombre} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+        `<button type="button" role="radio" data-cat="${attr(o.id)}" aria-checked="${o.id === catFiltro}">${escapeHtml(o.nombre)} <span>${cuenta[o.id] || 0}</span></button>`).join('');
     }
 
     function refreshPiezaSelect() {
@@ -503,6 +503,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20260924m"></script>
+  <script src="nav.js?v=20260924n"></script>
 </body>
 </html>

@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260924m"></script>
-  <script src="categorias.js?v=20260924m"></script>
-  <script src="inventario.js?v=20260924m"></script>
+  <script src="theme.js?v=20260924n"></script>
+  <script src="categorias.js?v=20260924n"></script>
+  <script src="inventario.js?v=20260924n"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924m" />
+  <link rel="stylesheet" href="styles.css?v=20260924n" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924m" />
-  <link rel="stylesheet" href="nav.css?v=20260924m" />
+  <link rel="stylesheet" href="ios.css?v=20260924n" />
+  <link rel="stylesheet" href="nav.css?v=20260924n" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924m"></script>
+  <script type="module" src="firebase-sync.js?v=20260924n"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -85,6 +85,10 @@
       <span class="inv-f-lbl">Categoría</span>
       <div class="cq-chips" data-for="n-cat" role="radiogroup" aria-label="Categoría" id="n-cats"></div>
       <input type="hidden" id="n-cat" value="" />
+      <div class="cat-nueva" id="n-cat-form" hidden>
+        <input type="text" id="n-cat-nombre" placeholder="Nombre de la categoría" maxlength="24" autocomplete="off" enterkeyhint="done" aria-label="Nombre de la nueva categoría" />
+        <button type="button" class="cat-nueva-ok" onclick="crearCategoria('n')">Agregar</button>
+      </div>
     </div>
     <div class="inv-group">
       <label class="inv-group-row">
@@ -126,6 +130,10 @@
       <span class="inv-f-lbl">Categoría</span>
       <div class="cq-chips" data-for="e-cat" role="radiogroup" aria-label="Categoría" id="e-cats"></div>
       <input type="hidden" id="e-cat" value="" />
+      <div class="cat-nueva" id="e-cat-form" hidden>
+        <input type="text" id="e-cat-nombre" placeholder="Nombre de la categoría" maxlength="24" autocomplete="off" enterkeyhint="done" aria-label="Nombre de la nueva categoría" />
+        <button type="button" class="cat-nueva-ok" onclick="crearCategoria('e')">Agregar</button>
+      </div>
       <p class="inv-hint" id="e-cat-hint"></p>
     </div>
     <div class="inv-group" id="e-mats"></div>
@@ -182,7 +190,7 @@
     }
 
     const catDe = p => MP_CAT.de(p, DB.categorias);
-    const catNombre = id => (MP_CAT.lista.find(c => c.id === id) || {}).nombre || 'Sin categoría';
+    const catNombre = id => MP_CAT.nombre(id);
     function estado(n) {
       if (n > POCO) return { cls: 'st-ok', txt: 'En stock' };
       if (n > BAJO) return { cls: 'st-low', txt: 'Poco stock' };
@@ -233,7 +241,7 @@
       const ops = [{ id: 'todas', nombre: 'Todas' }, { id: 'bajas', nombre: 'Por agotarse' }, ...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
         .filter(o => o.id === 'todas' || cuenta[o.id] || o.id === filtro);
       document.getElementById('inv-cats').innerHTML = ops.map(o =>
-        `<button type="button" role="radio" data-f="${o.id}" aria-checked="${o.id === filtro}">${o.nombre} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+        `<button type="button" role="radio" data-f="${esc(o.id)}" aria-checked="${o.id === filtro}">${esc(o.nombre)} <span>${cuenta[o.id] || 0}</span></button>`).join('');
     }
 
     function renderLista() {
@@ -299,9 +307,33 @@
     }
 
     function chipsCategoria(contId, valor) {
+      const pre = contId.charAt(0);
       document.getElementById(contId).innerHTML = [...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
-        .map(c => `<button type="button" role="radio" data-v="${c.id}" aria-checked="${c.id === valor}">${c.nombre}</button>`).join('');
+        .map(c => `<button type="button" role="radio" data-v="${esc(c.id)}" aria-checked="${c.id === valor}">${esc(c.nombre)}</button>`).join('')
+        + `<button type="button" class="cat-chip-add" onclick="mostrarNuevaCategoria('${pre}')" aria-label="Agregar una categoría nueva">+ Nueva</button>`;
+      document.getElementById(pre + '-cat-form').hidden = true;
     }
+    // Categoría nueva: queda disponible en Piezas, Ventas e Inicio
+    function mostrarNuevaCategoria(pre) {
+      const form = document.getElementById(pre + '-cat-form');
+      form.hidden = false;
+      const inp = document.getElementById(pre + '-cat-nombre');
+      inp.value = '';
+      inp.focus();
+    }
+    function crearCategoria(pre) {
+      const inp = document.getElementById(pre + '-cat-nombre');
+      if (!inp.value.trim()) { MP_INV.toast('Escribe el nombre de la categoría'); return inp.focus(); }
+      const cat = MP_CAT.agregar(inp.value);
+      if (!cat) { MP_INV.toast('Ese nombre no se puede usar'); return inp.focus(); }
+      document.getElementById(pre + '-cat').value = cat.id;
+      chipsCategoria(pre + '-cats', cat.id);
+      renderCats(Object.keys(DB.piezas));
+      MP_INV.toast(`Categoría "${cat.nombre}" lista`);
+    }
+    ['n', 'e'].forEach(pre => document.getElementById(pre + '-cat-nombre').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); crearCategoria(pre); }
+    }));
 
     // ── Agregar ──
     function abrirNueva() {
@@ -446,6 +478,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260924m"></script>
+  <script src="nav.js?v=20260924n"></script>
 </body>
 </html>

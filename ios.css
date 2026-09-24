@@ -1600,3 +1600,18 @@ a.inv-tile:active { transform: scale(0.97); }
 /* Precio de venta en las hojas de Piezas */
 .inv-sheet .inv-precio input { padding-left: 34px; font-family: var(--ios-font-rounded); font-weight: 600; }
 .inv-sheet .inv-precio span { left: var(--pad-card); }
+
+/* Categoría nueva desde la hoja de Piezas */
+.cq-chips .cat-chip-add {
+  background: transparent !important; color: var(--ios-green);
+  box-shadow: inset 0 0 0 1.5px var(--ios-green); font-weight: 600;
+}
+.cat-nueva { display: flex; gap: 8px; margin-top: 10px; }
+.cat-nueva[hidden] { display: none; }
+.inv-sheet .cat-nueva input { flex: 1; min-width: 0; }
+.cat-nueva-ok {
+  flex-shrink: 0; min-height: 46px; padding: 0 18px; border: none; border-radius: var(--r-pill);
+  background: var(--ios-green); color: var(--ios-on-accent);
+  font-family: var(--ios-font); font-size: 16px; font-weight: 600; cursor: pointer;
+}
+.cat-nueva-ok:active { transform: scale(0.96); }

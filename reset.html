@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Restablecer datos</title>
-  <script src="theme.js?v=20260924m"></script>
-  <script src="inventario.js?v=20260924m"></script>
+  <script src="theme.js?v=20260924n"></script>
+  <script src="inventario.js?v=20260924n"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924m" />
+  <link rel="stylesheet" href="styles.css?v=20260924n" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924m" />
-  <link rel="stylesheet" href="nav.css?v=20260924m" />
+  <link rel="stylesheet" href="ios.css?v=20260924n" />
+  <link rel="stylesheet" href="nav.css?v=20260924n" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924m"></script>
+  <script type="module" src="firebase-sync.js?v=20260924n"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -76,7 +76,7 @@
 
   <script>
     const { esc } = MP_INV;
-    const SYNC_KEYS = ['mp_config', 'mp_materials', 'mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial', 'mp_templates', 'mp_meta_mensual', 'mp_categorias', 'mp_wa_grupo', 'mp_wa_modo', 'mp_precios'];
+    const SYNC_KEYS = ['mp_config', 'mp_materials', 'mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial', 'mp_templates', 'mp_meta_mensual', 'mp_categorias', 'mp_wa_grupo', 'mp_wa_modo', 'mp_precios', 'mp_categorias_lista'];
     const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
     // Se escribe vacío (en lugar de quitar la clave) para que el borrado también se sincronice
     const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -102,8 +102,8 @@
         detalle: () => { const n = get('mp_templates', []).length; return `${n} guardada${n !== 1 ? 's' : ''}`; },
         borrar: () => set('mp_templates', []) },
       { id: 'extras', titulo: 'Meta del mes y categorías', color: 'var(--ios-pink)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.8"/>',
-        detalle: () => { const n = Object.keys(get('mp_categorias', {})).length; const m = parseFloat(localStorage.getItem('mp_meta_mensual') || '0'); return `${m > 0 ? 'Meta $' + m.toLocaleString('es-MX') : 'Sin meta'} · ${n} categoría${n !== 1 ? 's' : ''} asignada${n !== 1 ? 's' : ''}`; },
-        borrar: () => { try { localStorage.setItem('mp_meta_mensual', '0'); } catch (e) {} set('mp_categorias', {}); } },
+        detalle: () => { const n = Object.keys(get('mp_categorias', {})).length; const m = parseFloat(localStorage.getItem('mp_meta_mensual') || '0'); const c = get('mp_categorias_lista', []).length; return `${m > 0 ? 'Meta $' + m.toLocaleString('es-MX') : 'Sin meta'} · ${n} asignada${n !== 1 ? 's' : ''}${c ? ` · ${c} nueva${c !== 1 ? 's' : ''}` : ''}`; },
+        borrar: () => { try { localStorage.setItem('mp_meta_mensual', '0'); } catch (e) {} set('mp_categorias', {}); set('mp_categorias_lista', []); } },
     ];
     const elegido = Object.fromEntries(OPCIONES.map(o => [o.id, ['ventas', 'cotizaciones', 'piezas'].includes(o.id)]));
     const activas = () => OPCIONES.filter(o => elegido[o.id] && !(o.oculto && o.oculto()));
@@ -175,6 +175,6 @@
     window.addEventListener('mp-sync-ready', render, { once: true });
     window.addEventListener('mp-sync-update', render);
   </script>
-  <script src="nav.js?v=20260924m"></script>
+  <script src="nav.js?v=20260924n"></script>
 </body>
 </html>
