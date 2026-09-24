@@ -4,16 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20260924v"></script>
-  <script src="categorias.js?v=20260924v"></script>
+  <script src="theme.js?v=20260924w"></script>
+  <script src="categorias.js?v=20260924w"></script>
+  <script src="inventario.js?v=20260924w"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924v" />
+  <link rel="stylesheet" href="styles.css?v=20260924w" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="ios-charts.js?v=20260924v"></script>
-  <link rel="stylesheet" href="ios.css?v=20260924v" />
-  <link rel="stylesheet" href="nav.css?v=20260924v" />
+  <script src="ios-charts.js?v=20260924w"></script>
+  <link rel="stylesheet" href="ios.css?v=20260924w" />
+  <link rel="stylesheet" href="nav.css?v=20260924w" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924v"></script>
+  <script type="module" src="firebase-sync.js?v=20260924w"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -37,8 +38,11 @@
       </div>
 
       <div class="home-stack">
-        <!-- Meta del mes -->
-        <section class="goal-widget" id="goal-card" aria-label="Meta del mes"></section>
+        <!-- Metas: del mes, anual y por evento (se deslizan como una pila de widgets) -->
+        <section class="goals" aria-label="Metas">
+          <div class="goals-track" id="goals-track"></div>
+          <div class="goals-dots" id="goals-dots" aria-hidden="true"></div>
+        </section>
 
         <!-- Indicadores rápidos -->
         <div class="stat-tiles">
@@ -94,6 +98,44 @@
     </main>
   </div>
 
+  <!-- Hoja: meta por evento -->
+  <div class="sheet inv-sheet" id="sh-meta" role="dialog" aria-modal="true" aria-labelledby="sh-meta-t" hidden>
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <div class="sheet-head">
+      <h2 id="sh-meta-t">Nueva meta</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-f">
+      <label for="me-nombre">¿Para qué es?</label>
+      <input type="text" id="me-nombre" placeholder="Ej: Pago de impresora" maxlength="40" autocomplete="off" />
+    </div>
+    <div class="inv-row2">
+      <div class="inv-f">
+        <label for="me-monto">Monto</label>
+        <div class="vs-price inv-precio"><span>$</span><input type="number" id="me-monto" inputmode="decimal" min="0" step="1" placeholder="0" /></div>
+      </div>
+      <div class="inv-f">
+        <label for="me-limite">Fecha límite</label>
+        <input type="date" id="me-limite" aria-describedby="me-limite-h" />
+      </div>
+    </div>
+    <p class="inv-hint" id="me-limite-h">La fecha límite es opcional.</p>
+    <div class="inv-f" id="me-abonos-f">
+      <span class="inv-f-lbl" id="me-abonos-lbl">Abonos</span>
+      <div class="me-abonar">
+        <div class="vs-price inv-precio"><span>$</span><input type="number" id="me-abono" inputmode="decimal" min="0" step="1" placeholder="Cantidad a abonar" aria-label="Cantidad a abonar" enterkeyhint="done" /></div>
+        <button type="button" class="cat-nueva-ok" onclick="abonarMeta()">Abonar</button>
+      </div>
+      <div class="inv-group" id="me-abonos"></div>
+    </div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" onclick="guardarMeta()">Guardar</button>
+      <button type="button" class="inv-btn is-danger" id="me-borrar" onclick="borrarMeta()">Eliminar meta</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
   <script>
     const DB = { ventas: [], piezas: {}, categorias: {} };
     function ventaItems(v) { return v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }]; }
@@ -116,50 +158,209 @@
     function localYM(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
     function getMesActual() { return localYM(new Date()); }
 
-    function renderGoal() {
-      const meta   = parseFloat(localStorage.getItem('mp_meta_mensual')||'0');
-      const ingEste = DB.ventas.filter(v=>ventaPagada(v)&&mesKey(v)===getMesActual()).reduce((s,v)=>s+ventaItems(v).reduce((si,it)=>si+it.precio*it.cantidad,0),0);
-      const pct    = meta>0 ? Math.min(ingEste/meta*100,100) : 0;
-      const R = 38, C = 2 * Math.PI * R;
-      const fmtCorto = n => '$' + Math.round(n).toLocaleString('es-MX');
-      document.getElementById('goal-card').innerHTML = `
+    // ── Metas: del mes, anual y por evento ─────────────
+    const fmtCorto = n => '$' + Math.round(n).toLocaleString('es-MX');
+    const RING_R = 38, RING_C = 2 * Math.PI * RING_R;
+    const GOAL_KEYS = { mes: 'mp_meta_mensual', anual: 'mp_meta_anual' };
+    const ICONO = {
+      mes:    '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+      anual:  '<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+      evento: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+    };
+    const LAPIZ = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>';
+    let metaFoco = null;
+
+    function leer(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }
+    function metasEventos() { const l = leer('mp_metas_eventos', []); return Array.isArray(l) ? l : []; }
+    function guardarEventos(l) { localStorage.setItem('mp_metas_eventos', JSON.stringify(l)); }
+    function abonado(m) { return (m.abonos || []).reduce((s, a) => s + (Number(a.m) || 0), 0); }
+    function ingresos(filtro) {
+      return DB.ventas.filter(v => ventaPagada(v) && filtro(mesKey(v)))
+        .reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+    }
+    function plazo(limite) {
+      if (!limite) return '';
+      const dias = Math.round((new Date(limite + 'T12:00:00') - new Date(MP_INV.fecha.hoy() + 'T12:00:00')) / 864e5);
+      if (dias > 1) return `Faltan ${dias} días`;
+      if (dias === 1) return 'Vence mañana';
+      if (dias === 0) return 'Vence hoy';
+      return `Venció hace ${-dias} ${dias === -1 ? 'día' : 'días'}`;
+    }
+
+    function tarjetaMeta(o) {
+      const pct = o.meta > 0 ? Math.min(o.logrado / o.meta * 100, 100) : 0;
+      const editar = o.tipo === 'evento'
+        ? `onclick="abrirMeta('${o.id}')" aria-label="Editar o abonar a ${MP_INV.esc(o.titulo)}"`
+        : `onclick="toggleGoalInput('${o.tipo}')" aria-label="Editar ${o.chip.toLowerCase()}"`;
+      return `
+      <article class="goal-widget gw--${o.tipo}" data-meta="${o.id || o.tipo}" aria-label="${MP_INV.esc(o.chip)}">
         <div class="gw-top">
-          <span class="gw-chip">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
-            Meta del mes
-          </span>
-          <button class="gw-edit" type="button" onclick="toggleGoalInput()" aria-label="Editar meta">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg>
-          </button>
+          <span class="gw-chip"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONO[o.tipo]}</svg>${MP_INV.esc(o.chip)}</span>
+          <button class="gw-edit" type="button" ${editar}>${LAPIZ}</button>
         </div>
         <div class="gw-body">
           <div class="gw-text">
-            <h2 class="gw-title">${meta>0 ? (pct>=100 ? '¡Meta cumplida!' : 'Tu progreso del mes') : 'Define tu meta del mes'}</h2>
-            <p class="gw-sub">${meta>0 ? `${fmtCorto(ingEste)} de ${fmtCorto(meta)}` : 'Toca el lápiz para fijarla'}</p>
+            <h2 class="gw-title">${MP_INV.esc(o.meta > 0 ? (pct >= 100 ? o.cumplida : o.titulo) : o.vacia)}</h2>
+            <p class="gw-sub">${o.meta > 0 ? `${fmtCorto(o.logrado)} de ${fmtCorto(o.meta)}` : 'Toca el lápiz para fijarla'}</p>
+            ${o.extra ? `<p class="gw-extra">${MP_INV.esc(o.extra)}</p>` : ''}
           </div>
-          <div class="gw-ring" role="img" aria-label="${meta>0 ? pct.toFixed(0)+'% de la meta' : 'Sin meta'}">
+          <div class="gw-ring" role="img" aria-label="${o.meta > 0 ? pct.toFixed(0) + '% de la meta' : 'Sin meta'}">
             <svg viewBox="0 0 96 96" aria-hidden="true">
-              <circle class="gw-track" cx="48" cy="48" r="${R}"/>
-              <circle class="gw-arc" cx="48" cy="48" r="${R}" stroke-dasharray="${C}" stroke-dashoffset="${C}" data-offset="${C * (1 - pct / 100)}"/>
+              <circle class="gw-track" cx="48" cy="48" r="${RING_R}"/>
+              <circle class="gw-arc" cx="48" cy="48" r="${RING_R}" stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}" data-offset="${RING_C * (1 - pct / 100)}"/>
             </svg>
-            <div class="gw-center"><span class="gw-num">${meta>0 ? Math.floor(pct) + '%' : '—'}</span><span class="gw-unit">${meta>0 ? 'logrado' : 'sin meta'}</span></div>
+            <div class="gw-center"><span class="gw-num">${o.meta > 0 ? Math.floor(pct) + '%' : '—'}</span><span class="gw-unit">${o.meta > 0 ? 'logrado' : 'sin meta'}</span></div>
           </div>
         </div>
-        <div class="goal-input-wrap" id="goal-input-wrap">
-          <input class="goal-input" id="goal-input" type="number" inputmode="decimal" placeholder="Ej: 15000" value="${meta||''}" aria-label="Meta mensual en pesos">
-          <button class="goal-save-btn" onclick="saveGoal()">Guardar</button>
-        </div>`;
-      // Anima el anillo desde cero, como los widgets de iOS
+        ${o.tipo === 'evento' ? '' : `
+        <div class="goal-input-wrap" id="goal-input-wrap-${o.tipo}">
+          <input class="goal-input" id="goal-input-${o.tipo}" type="number" inputmode="decimal" placeholder="${o.tipo === 'anual' ? 'Ej: 180000' : 'Ej: 15000'}" value="${o.meta || ''}" aria-label="${o.chip} en pesos">
+          <button class="goal-save-btn" onclick="saveGoal('${o.tipo}')">Guardar</button>
+        </div>`}
+      </article>`;
+    }
+
+    function renderGoal() {
+      const track = document.getElementById('goals-track');
+      const anio = String(new Date().getFullYear());
+      const tarjetas = [
+        tarjetaMeta({ tipo: 'mes', chip: 'Meta del mes', titulo: 'Tu progreso del mes', cumplida: '¡Meta cumplida!', vacia: 'Define tu meta del mes',
+          meta: parseFloat(localStorage.getItem('mp_meta_mensual') || '0'), logrado: ingresos(k => k === getMesActual()) }),
+        tarjetaMeta({ tipo: 'anual', chip: 'Meta anual', titulo: `Tu progreso de ${anio}`, cumplida: '¡Meta del año cumplida!', vacia: 'Define tu meta del año',
+          meta: parseFloat(localStorage.getItem('mp_meta_anual') || '0'), logrado: ingresos(k => k.startsWith(anio)) }),
+        ...metasEventos().map(m => {
+          const logrado = abonado(m);
+          return tarjetaMeta({ tipo: 'evento', id: m.id, chip: 'Meta de evento', titulo: m.nombre, cumplida: '¡Lograda!', vacia: m.nombre,
+            meta: Number(m.monto) || 0, logrado, extra: logrado >= m.monto ? 'Meta completada' : plazo(m.limite) });
+        }),
+        `<button type="button" class="goal-widget gw--nueva" onclick="abrirMeta()">
+          <span class="gw-plus" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="gw-nueva-t">Nueva meta</span>
+          <span class="gw-nueva-s">Pago de impresora, del puesto, material…</span>
+        </button>`,
+      ];
+      const previo = track.scrollLeft;
+      track.innerHTML = tarjetas.join('');
+      document.getElementById('goals-dots').innerHTML = tarjetas.map(() => '<i></i>').join('');
+      // Mantiene la tarjeta que se estaba viendo (también al volver a Inicio)
+      let destino = previo;
+      if (!track.dataset.listo) {
+        track.dataset.listo = '1';
+        try { destino = Number(sessionStorage.getItem('mp_meta_slide')) || 0; } catch (e) {}
+        track.addEventListener('scroll', () => { marcarDot(); clearTimeout(track._t); track._t = setTimeout(recordarSlide, 150); }, { passive: true });
+      }
+      if (metaFoco) {
+        const el = track.querySelector(`[data-meta="${metaFoco}"]`);
+        if (el) destino = el.offsetLeft - track.firstElementChild.offsetLeft;
+        metaFoco = null;
+      }
+      track.scrollLeft = destino;
+      marcarDot();
+      // Anima los anillos desde cero, como los widgets de iOS
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        const arc = document.querySelector('#goal-card .gw-arc');
-        if (arc) arc.style.strokeDashoffset = arc.dataset.offset;
+        track.querySelectorAll('.gw-arc').forEach(arc => { arc.style.strokeDashoffset = arc.dataset.offset; });
       }));
     }
-    function toggleGoalInput() { document.getElementById('goal-input-wrap').classList.toggle('open'); }
-    function saveGoal() {
-      const v = parseFloat(document.getElementById('goal-input').value);
-      if (!isNaN(v)&&v>0) { localStorage.setItem('mp_meta_mensual',v); document.getElementById('goal-input-wrap').classList.remove('open'); renderGoal(); }
+    function slideActual() {
+      const track = document.getElementById('goals-track');
+      const w = track.firstElementChild ? track.firstElementChild.offsetWidth + 12 : 1;
+      return Math.max(0, Math.min(track.children.length - 1, Math.round(track.scrollLeft / w)));
     }
+    function marcarDot() {
+      const i = slideActual();
+      document.querySelectorAll('#goals-dots i').forEach((d, j) => d.classList.toggle('on', j === i));
+    }
+    function recordarSlide() {
+      try { sessionStorage.setItem('mp_meta_slide', String(document.getElementById('goals-track').scrollLeft)); } catch (e) {}
+    }
+    function toggleGoalInput(tipo) {
+      const w = document.getElementById('goal-input-wrap-' + tipo);
+      w.classList.toggle('open');
+      if (w.classList.contains('open')) document.getElementById('goal-input-' + tipo).focus({ preventScroll: true });
+    }
+    function saveGoal(tipo) {
+      const v = parseFloat(document.getElementById('goal-input-' + tipo).value);
+      if (!isNaN(v) && v > 0) { localStorage.setItem(GOAL_KEYS[tipo], v); renderGoal(); }
+    }
+
+    // ── Hoja de meta por evento ──
+    let metaEdit = null;
+    function abrirMeta(id) {
+      const m = id ? metasEventos().find(x => x.id === id) : null;
+      metaEdit = m ? m.id : null;
+      document.getElementById('sh-meta-t').textContent = m ? m.nombre : 'Nueva meta';
+      document.getElementById('me-nombre').value = m ? m.nombre : '';
+      document.getElementById('me-monto').value = m ? m.monto : '';
+      document.getElementById('me-limite').value = m ? (m.limite || '') : '';
+      document.getElementById('me-abono').value = '';
+      document.getElementById('me-abonos-f').hidden = !m;
+      document.getElementById('me-borrar').hidden = !m;
+      if (m) pintarAbonos(m);
+      MP_INV.abrir('sh-meta');
+    }
+    function pintarAbonos(m) {
+      const lista = (m.abonos || []).map((a, i) => ({ ...a, i })).reverse();
+      document.getElementById('me-abonos-lbl').textContent = `Abonos · ${fmtCorto(abonado(m))} de ${fmtCorto(m.monto)}`;
+      document.getElementById('me-abonos').innerHTML = lista.length
+        ? lista.map(a => `<div class="inv-group-row"><span>${MP_INV.fecha.diaLargo(a.f)}</span><span class="me-abono-m">${MP_INV.money(a.m)}<button type="button" class="me-quitar" onclick="quitarAbono(${a.i})" aria-label="Quitar abono de ${MP_INV.money(a.m)}">✕</button></span></div>`).join('')
+        : '<div class="inv-group-row"><span class="me-vacio">Aún no hay abonos</span></div>';
+    }
+    function guardarMeta() {
+      const nombre = document.getElementById('me-nombre').value.trim().toUpperCase();
+      const monto = parseFloat(document.getElementById('me-monto').value);
+      const limite = document.getElementById('me-limite').value;
+      if (!nombre) { MP_INV.toast('Escribe para qué es la meta'); return; }
+      if (!(monto > 0)) { MP_INV.toast('Escribe el monto de la meta'); return; }
+      const l = metasEventos();
+      if (metaEdit) {
+        const m = l.find(x => x.id === metaEdit);
+        if (!m) return;
+        Object.assign(m, { nombre, monto, limite });
+      } else {
+        metaEdit = 'm' + Date.now().toString(36);
+        l.push({ id: metaEdit, nombre, monto, limite, abonos: [], creada: MP_INV.fecha.hoy() });
+      }
+      guardarEventos(l);
+      metaFoco = metaEdit;
+      MP_INV.cerrar();
+      renderGoal();
+      MP_INV.toast('Meta guardada');
+    }
+    function abonarMeta() {
+      const monto = parseFloat(document.getElementById('me-abono').value);
+      if (!(monto > 0)) { MP_INV.toast('Escribe la cantidad a abonar'); return; }
+      const l = metasEventos();
+      const m = l.find(x => x.id === metaEdit);
+      if (!m) return;
+      (m.abonos = m.abonos || []).push({ f: MP_INV.fecha.hoy(), m: monto });
+      guardarEventos(l);
+      document.getElementById('me-abono').value = '';
+      pintarAbonos(m);
+      metaFoco = m.id;
+      renderGoal();
+      MP_INV.toast(abonado(m) >= m.monto ? '¡Meta completada! 🎉' : `Abono de ${MP_INV.money(monto)} registrado`);
+    }
+    function quitarAbono(i) {
+      const l = metasEventos();
+      const m = l.find(x => x.id === metaEdit);
+      if (!m || !m.abonos || !m.abonos[i]) return;
+      if (!confirm(`¿Quitar el abono de ${MP_INV.money(m.abonos[i].m)}?`)) return;
+      m.abonos.splice(i, 1);
+      guardarEventos(l);
+      pintarAbonos(m);
+      metaFoco = m.id;
+      renderGoal();
+    }
+    function borrarMeta() {
+      const l = metasEventos();
+      const m = l.find(x => x.id === metaEdit);
+      if (!m || !confirm(`¿Eliminar la meta "${m.nombre}"?`)) return;
+      guardarEventos(l.filter(x => x.id !== metaEdit));
+      MP_INV.cerrar();
+      renderGoal();
+      MP_INV.toast('Meta eliminada');
+    }
+    document.getElementById('me-abono').addEventListener('keydown', e => { if (e.key === 'Enter') abonarMeta(); });
 
     // ── Indicadores: piezas en stock y número de ventas del mes ──
     function renderTiles() {
@@ -303,6 +504,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260924v"></script>
+  <script src="nav.js?v=20260924w"></script>
 </body>
 </html>

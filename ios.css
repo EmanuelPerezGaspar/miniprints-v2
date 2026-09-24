@@ -754,6 +754,47 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 @media (prefers-reduced-motion: reduce) { .gw-arc { transition: none; } }
 
+/* Variantes de meta: anual (azul) y por evento (naranja) */
+.goal-widget.gw--anual  { --gw-bg: #bfe0ff; --gw-ink: #0b2440; --gw-ink-2: rgba(11, 36, 64, 0.62); --gw-arc: #2f7bf6; }
+.goal-widget.gw--evento { --gw-bg: #ffd9a8; --gw-ink: #3a2208; --gw-ink-2: rgba(58, 34, 8, 0.62); --gw-arc: #f28c18; }
+.gw--evento .gw-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: none; overflow-wrap: anywhere; }
+.gw--evento .gw-chip { max-width: 70%; }
+.gw--evento .gw-chip, .gw-chip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gw-extra { margin-top: 4px; font-size: 13px; font-weight: 600; color: var(--gw-ink-2); }
+
+/* Carrusel de metas: se desliza de lado como una pila de widgets */
+.goals { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.goals-track {
+  display: flex; gap: 12px; align-items: stretch;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory; scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.goals-track::-webkit-scrollbar { display: none; }
+.goals-track > .goal-widget { flex: 0 0 100%; margin: 0; scroll-snap-align: start; scroll-snap-stop: always; box-sizing: border-box; }
+.goals-dots { display: flex; justify-content: center; gap: 7px; }
+.goals-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--nav-text-3); opacity: 0.45; transition: opacity 200ms, transform 200ms; }
+.goals-dots i.on { opacity: 1; background: var(--text); }
+
+.goal-widget.gw--nueva {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  min-height: 150px; border: 1.5px dashed var(--ios-sep); background: var(--ios-bg-2, var(--ios-group));
+  color: var(--text); font-family: var(--ios-font); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.goal-widget.gw--nueva:active { transform: scale(0.98); }
+.gw-plus { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--ios-green); color: #fff; }
+.gw-plus svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.gw-nueva-t { font-size: 17px; font-weight: 600; }
+.gw-nueva-s { font-size: 13px; color: var(--nav-text-2); }
+
+/* Hoja de meta por evento */
+.me-abonar { display: flex; gap: 8px; align-items: center; }
+.me-abonar .vs-price { flex: 1; min-width: 0; }
+.me-abono-m { display: inline-flex; align-items: center; gap: 10px; }
+.me-quitar { width: 28px; height: 28px; border: none; border-radius: 50%; background: var(--ios-fill); color: var(--nav-text-2); font-size: 12px; cursor: pointer; }
+.me-vacio { color: var(--nav-text-2); }
+#me-abonos-f[hidden] { display: none; }
+
 /* En iPhone el widget de meta va primero en la pantalla principal */
 @media (max-width: 768px) {
   .dash-body { flex-direction: column; align-items: stretch !important; gap: 0 !important; }
