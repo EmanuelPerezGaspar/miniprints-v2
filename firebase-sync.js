@@ -13,7 +13,11 @@ const firebaseConfig = {
 // este archivo ya no guarda ningún PIN ni contraseña.
 const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo'];
 
-const _origSetItem = localStorage.setItem.bind(localStorage);
+// Se intercepta Storage.prototype.setItem: en Safari, asignar localStorage.setItem = …
+// no reemplaza la función (guarda un dato llamado "setItem"), y los cambios nunca se subían.
+const _protoSetItem = Storage.prototype.setItem;
+const _origSetItem = (k, v) => _protoSetItem.call(localStorage, k, v);
+try { localStorage.removeItem('setItem'); } catch (_) {}  // restos del método anterior
 let applyingRemote    = false;
 let pushTimer         = null;
 let _schedulePush     = () => {};
@@ -23,7 +27,26 @@ const AUTH_FLAG = 'mp_auth_ok';
 // Marca de cambios locales que todavía no llegan a la nube. Sobrevive al cambio de
 // pantalla, así la siguiente pantalla sube esos cambios en vez de pisarlos con la nube.
 const PENDIENTE = 'mp_sync_pendiente';
-const hayPendientes = () => !!localStorage.getItem(PENDIENTE);
+// Huella de los datos que coincidían con la nube la última vez. Si los datos locales ya no
+// coinciden, hay cambios sin subir aunque no se haya detectado la escritura.
+const BASE = 'mp_sync_base';
+function datosLocales() {
+  const d = {};
+  SYNC_KEYS.forEach(k => { d[k] = localStorage.getItem(k); });
+  return d;
+}
+function huella(d) {
+  const t = JSON.stringify(SYNC_KEYS.map(k => d[k] == null ? null : d[k]));
+  let h = 5381;
+  for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
+  return t.length + ':' + (h >>> 0).toString(36);
+}
+const marcarSincronizado = d => _origSetItem(BASE, huella(d || datosLocales()));
+function hayPendientes() {
+  if (localStorage.getItem(PENDIENTE)) return true;
+  const base = localStorage.getItem(BASE);
+  return !!base && base !== huella(datosLocales());
+}
 
 // Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
 // Estado visible en Más (para diagnosticar desde el iPhone)
@@ -61,9 +84,9 @@ function syncBadge(state) {
   if (cfg[4]) el._t = setTimeout(() => { el.style.opacity = '0'; }, cfg[4]);
 }
 
-localStorage.setItem = function (key, value) {
-  _origSetItem(key, value);
-  if (!applyingRemote && SYNC_KEYS.includes(key)) {
+Storage.prototype.setItem = function (key, value) {
+  _protoSetItem.call(this, key, value);
+  if (this === localStorage && !applyingRemote && SYNC_KEYS.includes(key)) {
     _origSetItem(PENDIENTE, String(Date.now()));
     _pendingLocalWrite  = true;
     _lastLocalWriteTime = Date.now();
@@ -77,6 +100,7 @@ function applyRemoteData(data) {
   window.MP_SYNC.bajada = hora();
   applyingRemote = true;
   SYNC_KEYS.forEach(k => { if (data && data[k] != null) _origSetItem(k, data[k]); });
+  marcarSincronizado();
   applyingRemote = false;
   window.dispatchEvent(new CustomEvent('mp-sync-update'));
   return true;
@@ -229,6 +253,7 @@ async function iniciar() {
       localStorage.removeItem(AUTH_FLAG);
       SYNC_KEYS.forEach(k => localStorage.removeItem(k));
     localStorage.removeItem(PENDIENTE);
+    localStorage.removeItem(BASE);
       location.replace('dashboard.html');
     };
 
@@ -266,6 +291,7 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
         await setDoc(docRef, payload, { merge: true });
         // Solo se limpia la marca si no hubo más cambios mientras se subía
         if (localStorage.getItem(PENDIENTE) === marca) localStorage.removeItem(PENDIENTE);
+        marcarSincronizado(payload);
         window.MP_SYNC.subida = hora(); window.MP_SYNC.error = '';
         syncBadge('ok');
         return;
@@ -282,15 +308,14 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
     clearTimeout(pushTimer);
     _pendingLocalWrite = false;
     const marca = localStorage.getItem(PENDIENTE);
-    const payload = {};
-    SYNC_KEYS.forEach(k => { payload[k] = localStorage.getItem(k); });
-    executeSetDoc(payload, marca);
+    executeSetDoc(datosLocales(), marca);
   }
 
   _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
 
-  document.addEventListener('visibilitychange', () => { if (document.hidden && _pendingLocalWrite) flushPush(); });
-  window.addEventListener('pagehide', () => { if (_pendingLocalWrite) flushPush(); });
+  // Al salir de la pantalla se sube cualquier cambio que no esté en la nube
+  document.addEventListener('visibilitychange', () => { if (document.hidden && (_pendingLocalWrite || hayPendientes())) flushPush(); });
+  window.addEventListener('pagehide', () => { if (_pendingLocalWrite || hayPendientes()) flushPush(); });
 
   // BFCache: al restaurar página desde caché en iOS, refrescar datos
   window.addEventListener('pageshow', e => {
@@ -314,6 +339,7 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
         const initial = {};
         SYNC_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) initial[k] = v; });
         await setDoc(docRef, initial);
+        marcarSincronizado();
         syncBadge('ok');
       } else {
         syncBadge('none');
