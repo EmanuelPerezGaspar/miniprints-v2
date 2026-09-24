@@ -51,6 +51,10 @@
   --r-md:          14px;
   --r-sm:          10px;
   --radius:        var(--r-lg);
+  /* Espaciado: mismo espacio entre tarjetas que el margen lateral de la pantalla */
+  --sp:            16px;
+  --sp-section:    24px;
+  --pad-card:      16px;
   --radius-sm:     var(--r-md);
   --shadow:        none;
   --shadow-glow:   none;
@@ -94,7 +98,7 @@ body {
 @media (max-width: 899px) { .dash-main { padding: 12px 16px 24px; } }
 
 /* Título grande (Large Title) */
-.dash-header { align-items: flex-end; margin-bottom: 22px; gap: 12px; }
+.dash-header { align-items: flex-end; margin-bottom: var(--sp); gap: 12px; }
 .dash-title {
   font-size: 34px;
   line-height: 41px;
@@ -630,8 +634,8 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   --gw-ink-2: rgba(20, 40, 12, 0.62);
   --gw-arc:   #2fb34f;
   position: relative;
-  margin-bottom: 16px;
-  padding: 16px 18px 18px;
+  margin-bottom: var(--sp);
+  padding: var(--pad-card);
   border-radius: var(--r-lg);
   background: var(--gw-bg);
   color: var(--gw-ink);
@@ -819,17 +823,17 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 
 /* ── Pantalla de Inicio: widget de meta + indicadores ── */
-.home-stack { max-width: 640px; }
-.home-stack .goal-widget { margin-bottom: 12px; }
+.home-stack { max-width: 640px; display: flex; flex-direction: column; gap: var(--sp); }
+.home-stack .goal-widget, .home-stack .month-card { margin: 0; }
 
-.stat-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp); }
 .stat-tile {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 18px;
   min-height: 132px;
-  padding: 16px 16px 18px;
+  padding: var(--pad-card);
   border-radius: var(--r-lg);
   background: var(--ios-bg-2);
   color: var(--text);
@@ -877,8 +881,8 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .stat-tile .st-value { margin-top: auto; }
 
 /* ── Ventas por categoría (estilo "Health Monitor") ── */
-.cat-section { margin-top: 26px; }
-.cat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.cat-section { margin-top: calc(var(--sp-section) - var(--sp)); }
+.cat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .cat-title { font-size: 20px; line-height: 25px; font-weight: 700; letter-spacing: 0.38px; color: var(--text); }
 .cat-seg {
   display: inline-flex;
@@ -906,7 +910,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 .cat-seg button:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 1px; }
 
-.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp); }
 .cat-card {
   --cat-color: var(--ios-green);
   --cat-tint:  rgba(48, 209, 88, 0.18);
@@ -915,7 +919,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
   align-items: stretch;
   justify-content: space-between;
   gap: 10px;
-  padding: 14px 14px 14px 16px;
+  padding: var(--pad-card);
   border-radius: var(--r-lg);
   background: var(--ios-bg-2);
   font-family: var(--ios-font);
@@ -997,7 +1001,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 /* ── Ventas por mes (barras estilo app Salud) ──── */
 .month-card {
   margin-top: 26px;
-  padding: 16px 16px 12px;
+  padding: var(--pad-card);
   border-radius: var(--r-lg);
   background: var(--ios-bg-2);
   font-family: var(--ios-font);
@@ -1018,7 +1022,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 
 /* ── Formularios guiados (Cotizar y Ventas) ──── */
 .cq-header { max-width: 680px; }
-.cq-wrap { max-width: 680px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 96px; }
+.cq-wrap { max-width: 680px; display: flex; flex-direction: column; gap: var(--sp); padding-bottom: 96px; }
 .cq-step { display: flex; flex-direction: column; gap: 14px; }
 .cq-step-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .cq-step-title { display: flex; align-items: center; gap: 10px; font-size: 20px; line-height: 25px; font-weight: 700; letter-spacing: 0.38px; color: var(--text); }
@@ -1277,7 +1281,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .form-card .vs-wa-row input { flex: 1; min-width: 0; width: auto !important; font-size: 16px !important; }
 
 /* ── Inventario (Piezas y Material) ────────────── */
-.inv-wrap { max-width: 680px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.inv-wrap { max-width: 680px; display: flex; flex-direction: column; gap: var(--sp); padding-bottom: 24px; }
 .inv-header { display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: flex-start !important; justify-content: space-between; gap: 12px; max-width: 680px; }
 .inv-header > div:first-child { min-width: 0; }
 .inv-actions { display: flex; gap: 8px; flex-shrink: 0; padding-top: 4px; }
@@ -1292,11 +1296,11 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .inv-icon-btn:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
 
 /* Resumen en mosaicos */
-.inv-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.inv-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp); }
 .inv-sum.is-4 { grid-template-columns: repeat(4, 1fr); }
 .inv-tile {
   display: flex; flex-direction: column; gap: 2px; min-width: 0;
-  padding: 12px 14px; border: none; border-radius: var(--r-lg); background: var(--ios-bg-2);
+  padding: 14px var(--pad-card); border: none; border-radius: var(--r-lg); background: var(--ios-bg-2);
   color: var(--text); font-family: var(--ios-font); text-align: left;
 }
 button.inv-tile { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 120ms, box-shadow 160ms; }
@@ -1441,7 +1445,7 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .cq-row-note { margin-left: 4px; font-size: 15px; color: var(--ios-label-2); font-variant-numeric: tabular-nums; }
 
 /* ── Historiales (ventas y cotizaciones) ────────── */
-.hx-wrap { max-width: 680px; display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.hx-wrap { max-width: 680px; display: flex; flex-direction: column; gap: var(--sp); padding-bottom: 24px; }
 .hx-search {
   width: 100%; min-height: 40px; box-sizing: border-box; padding: 0 14px 0 38px;
   border: none; border-radius: var(--r-md); outline: none;
@@ -1502,7 +1506,7 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .inv-hero-num.is-small { font-size: 34px; line-height: 40px; }
 
 /* ── Finanzas ──────────────────────────────────── */
-.fn-card { padding: 16px; border-radius: var(--r-lg); background: var(--ios-bg-2); font-family: var(--ios-font); display: flex; flex-direction: column; gap: 12px; }
+.fn-card { padding: var(--pad-card); border-radius: var(--r-lg); background: var(--ios-bg-2); font-family: var(--ios-font); display: flex; flex-direction: column; gap: 12px; }
 .hx-wrap .month-card { margin-top: 0; }
 .fn-label { font-size: 15px; font-weight: 600; color: var(--ios-label-2); }
 .fn-big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
@@ -1581,3 +1585,7 @@ a.inv-tile:active { transform: scale(0.97); }
 .kpi-icon, .tp-icon { border-radius: var(--r-sm) !important; }
 /* Los interruptores siempre en cápsula */
 .toggle, .toggle-track { border-radius: var(--r-pill) !important; }
+
+/* Días y secciones con título: separación de sección */
+#hx-list { gap: var(--sp-section) !important; }
+.hx-wrap .fn-sec-title { margin-top: calc(var(--sp-section) - var(--sp)); }
