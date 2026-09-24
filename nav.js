@@ -244,6 +244,28 @@
     });
   }
 
+  /* ── Texto siempre en MAYÚSCULAS ───────────────────
+     Todo lo que se escribe en campos de texto se guarda en mayúsculas, para que
+     no haya registros mezclados. No aplica a correo, contraseña, enlaces ni a
+     campos marcados con data-sin-mayus (por ejemplo, el JSON de importación). */
+  const esTexto = el => el && !el.hasAttribute('data-sin-mayus') && !el.readOnly &&
+    (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && ['text', 'search', ''].includes((el.getAttribute('type') || '').toLowerCase())));
+  document.addEventListener('focusin', e => {
+    if (esTexto(e.target)) e.target.setAttribute('autocapitalize', 'characters');
+  });
+  document.addEventListener('input', e => {
+    const el = e.target;
+    if (!esTexto(el) || e.isComposing) return;
+    const v = el.value, up = v.toLocaleUpperCase('es-MX');
+    if (v === up) return;
+    const ini = el.selectionStart, fin = el.selectionEnd;
+    el.value = up;
+    try { el.setSelectionRange(ini, fin); } catch (_) {}
+  }, true);
+  document.addEventListener('compositionend', e => {
+    if (esTexto(e.target)) e.target.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
   function init() {
     tabbar = buildTabbar();
     buildSegmented();
