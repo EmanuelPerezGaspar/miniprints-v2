@@ -1597,3 +1597,6 @@ a.inv-tile:active { transform: scale(0.97); }
 .home-stack > .cat-section { margin-top: calc(var(--sp-section) - var(--sp)); }
 /* Fila de 3 mosaicos: sin el punto de color para que el título quepa completo */
 .inv-sum:not(.is-4) .inv-tile-lbl i { display: none; }
+/* Precio de venta en las hojas de Piezas */
+.inv-sheet .inv-precio input { padding-left: 34px; font-family: var(--ios-font-rounded); font-weight: 600; }
+.inv-sheet .inv-precio span { left: var(--pad-card); }

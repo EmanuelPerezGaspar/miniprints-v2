@@ -11,7 +11,7 @@ const firebaseConfig = {
 
 // Solo la cuenta autorizada puede leer y escribir (lo exigen las reglas de Firestore);
 // este archivo ya no guarda ningún PIN ni contraseña.
-const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo'];
+const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo','mp_precios'];
 
 // Se intercepta Storage.prototype.setItem: en Safari, asignar localStorage.setItem = …
 // no reemplaza la función (guarda un dato llamado "setItem"), y los cambios nunca se subían.
@@ -35,17 +35,19 @@ function datosLocales() {
   SYNC_KEYS.forEach(k => { d[k] = localStorage.getItem(k); });
   return d;
 }
+// Solo cuentan los datos que existen, así agregar un tipo de dato nuevo no cambia la huella
 function huella(d) {
-  const t = JSON.stringify(SYNC_KEYS.map(k => d[k] == null ? null : d[k]));
+  const t = JSON.stringify(SYNC_KEYS.filter(k => d[k] != null).map(k => [k, d[k]]));
   let h = 5381;
   for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0;
-  return t.length + ':' + (h >>> 0).toString(36);
+  return 'v2:' + t.length + ':' + (h >>> 0).toString(36);
 }
 const marcarSincronizado = d => _origSetItem(BASE, huella(d || datosLocales()));
 function hayPendientes() {
   if (localStorage.getItem(PENDIENTE)) return true;
   const base = localStorage.getItem(BASE);
-  return !!base && base !== huella(datosLocales());
+  // Una huella de otro formato (versión anterior) no cuenta: se confía en la nube
+  return !!base && base.startsWith('v2:') && base !== huella(datosLocales());
 }
 
 // Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
