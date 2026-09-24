@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260924t"></script>
-  <script src="whatsapp.js?v=20260924t"></script>
+  <script src="theme.js?v=20260924v"></script>
+  <script src="whatsapp.js?v=20260924v"></script>
+  <script src="categorias.js?v=20260924v"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924t" />
+  <link rel="stylesheet" href="styles.css?v=20260924v" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -542,8 +543,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924t" />
-  <link rel="stylesheet" href="nav.css?v=20260924t" />
+  <link rel="stylesheet" href="ios.css?v=20260924v" />
+  <link rel="stylesheet" href="nav.css?v=20260924v" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -554,7 +555,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924t"></script>
+  <script type="module" src="firebase-sync.js?v=20260924v"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -869,9 +870,23 @@
         <label>Nombre de la pieza</label>
         <input type="text" id="modal-nombre" placeholder="Ej: Mini Cebolla" />
       </div>
-      <div class="field">
+      <div class="field" style="margin-bottom:12px;">
         <label>Cantidad de piezas obtenidas</label>
         <input type="number" id="modal-cantidad" value="1" min="1" />
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="modal-precio">Precio de venta (por pieza)</label>
+        <div class="vs-price modal-precio"><span>$</span><input type="number" id="modal-precio" inputmode="decimal" min="0" step="0.5" placeholder="0.00" /></div>
+        <span class="modal-hint" id="modal-precio-hint"></span>
+      </div>
+      <div class="field">
+        <label>Categoría</label>
+        <div class="cq-chips modal-cats" data-for="modal-cat" role="radiogroup" aria-label="Categoría" id="modal-cats"></div>
+        <input type="hidden" id="modal-cat" value="" />
+        <div class="cat-nueva" id="modal-cat-form" hidden>
+          <input type="text" id="modal-cat-nombre" placeholder="Nombre de la categoría" maxlength="24" autocomplete="off" enterkeyhint="done" aria-label="Nombre de la nueva categoría" />
+          <button type="button" class="cat-nueva-ok" onclick="crearCategoriaModal()">Agregar</button>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
@@ -1472,15 +1487,66 @@
       const cv = document.getElementById('inp-cliente').value.trim();
       document.getElementById('modal-nombre').value   = cv || '';
       document.getElementById('modal-cantidad').value = state.lastCalc?.numPiezas || 1;
+      state.precioEditado = false;
+      modalPorNombre();
       document.getElementById('modal-imp').classList.add('open');
     }
+
+    // ── Precio y categoría al confirmar la impresión ──
+    const leerJSON = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+    const escModal = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    // Busca la pieza ya existente (sin importar mayúsculas) para sumar sobre ella
+    const piezaExistente = n => Object.keys(DB.piezas).find(p => p.toLowerCase() === n.toLowerCase()) || n;
+    function precioSugerido() {
+      const total = state.pendingCot?.total || state.lastCalc?.precioFinal || 0;
+      const cant = parseInt(document.getElementById('modal-cantidad').value) || 1;
+      return total > 0 ? Math.round(total / cant * 100) / 100 : 0;
+    }
+    function pintarPrecioModal() {
+      if (state.precioEditado) return;
+      const nombre = piezaExistente(document.getElementById('modal-nombre').value.trim());
+      const guardado = leerJSON('mp_precios', {})[nombre];
+      const sug = precioSugerido();
+      document.getElementById('modal-precio').value = sug || (guardado > 0 ? guardado : '');
+      document.getElementById('modal-precio-hint').textContent = guardado > 0 && guardado !== sug
+        ? `Precio actual de la pieza: ${fmt(guardado)}` : (sug ? 'Precio por pieza de esta cotización; cámbialo si vas a cobrar otro.' : '');
+    }
+    function chipsModal(valor) {
+      document.getElementById('modal-cat').value = valor || '';
+      document.getElementById('modal-cats').innerHTML = [...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
+        .map(c => `<button type="button" role="radio" data-v="${escModal(c.id)}" aria-checked="${c.id === valor}">${escModal(c.nombre)}</button>`).join('')
+        + '<button type="button" class="cat-chip-add" onclick="mostrarCategoriaModal()" aria-label="Agregar una categoría nueva">+ Nueva</button>';
+      document.getElementById('modal-cat-form').hidden = true;
+    }
+    function modalPorNombre() {
+      const nombre = piezaExistente(document.getElementById('modal-nombre').value.trim());
+      chipsModal(nombre ? (MP_CAT.de(nombre) || '') : '');
+      pintarPrecioModal();
+    }
+    function mostrarCategoriaModal() {
+      document.getElementById('modal-cat-form').hidden = false;
+      const i = document.getElementById('modal-cat-nombre'); i.value = ''; i.focus();
+    }
+    function crearCategoriaModal() {
+      const i = document.getElementById('modal-cat-nombre');
+      const cat = MP_CAT.agregar(i.value);
+      if (!cat) { showToast('Escribe un nombre válido para la categoría'); return i.focus(); }
+      chipsModal(cat.id);
+    }
+    document.getElementById('modal-nombre').addEventListener('input', modalPorNombre);
+    document.getElementById('modal-cantidad').addEventListener('input', pintarPrecioModal);
+    document.getElementById('modal-precio').addEventListener('input', () => { state.precioEditado = true; });
+    document.getElementById('modal-cat-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); crearCategoriaModal(); } });
 
     function closeModal() { document.getElementById('modal-imp').classList.remove('open'); }
 
     function procesarImpresion() {
-      const nombre   = document.getElementById('modal-nombre').value.trim();
+      const nombre   = piezaExistente(document.getElementById('modal-nombre').value.trim());
       const cantidad = parseInt(document.getElementById('modal-cantidad').value) || 1;
       if (!nombre) return showToast('Escribe el nombre de la pieza');
+      const precioTxt = document.getElementById('modal-precio').value.trim();
+      const precio = precioTxt === '' ? null : parseFloat(precioTxt);
+      if (precio != null && (isNaN(precio) || precio < 0)) return showToast('Escribe un precio válido');
 
       const isMulti  = document.getElementById('chk-multicolor').checked;
       const matsUsados = [];
@@ -1514,14 +1580,17 @@
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       saveKey('piezas');
 
-      // Si la pieza aún no tiene precio de venta, se toma el precio por pieza de esta cotización
-      if (state.pendingCot && state.pendingCot.total > 0) {
-        let precios = {};
-        try { precios = JSON.parse(localStorage.getItem('mp_precios')) || {}; } catch (e) {}
-        if (!(precios[nombre] > 0)) {
-          precios[nombre] = Math.round(state.pendingCot.total / (cantidad || 1) * 100) / 100;
-          localStorage.setItem('mp_precios', JSON.stringify(precios));
-        }
+      // Precio de venta y categoría elegidos al confirmar
+      if (precio != null) {
+        const precios = leerJSON('mp_precios', {});
+        precios[nombre] = Math.round(precio * 100) / 100;
+        localStorage.setItem('mp_precios', JSON.stringify(precios));
+      }
+      const cat = document.getElementById('modal-cat').value;
+      if (cat) {
+        const cats = leerJSON('mp_categorias', {});
+        if (cat !== MP_CAT.de(nombre, {})) cats[nombre] = cat; else delete cats[nombre];
+        localStorage.setItem('mp_categorias', JSON.stringify(cats));
       }
 
       // Save cotización as confirmed
@@ -1917,7 +1986,7 @@ tbody td:not(:first-child){text-align:right}
     }
 
     document.addEventListener('click', e => {
-      const b = e.target.closest('.cq-chips[data-for] button, .cq-seg[data-for] button');
+      const b = e.target.closest('.cq-chips[data-for] button[data-v], .cq-seg[data-for] button[data-v]');
       if (!b) return;
       const sel = document.getElementById(b.parentElement.dataset.for);
       if (!sel) return;
@@ -1972,6 +2041,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260924t"></script>
+  <script src="nav.js?v=20260924v"></script>
 </body>
 </html>
