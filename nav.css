@@ -298,13 +298,13 @@
 .sheet-close svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 
 .sheet-label {
-  padding: 0 18px 7px;
+  padding: 0 16px 10px;
   font-size: 13px;
   font-weight: 600;
   color: var(--nav-text-2);
 }
 .sheet-group {
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   border-radius: var(--r-sheet-in);
   background: var(--sheet-card);
   overflow: hidden;
