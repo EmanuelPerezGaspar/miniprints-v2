@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260924l"></script>
-  <script src="whatsapp.js?v=20260924l"></script>
+  <script src="theme.js?v=20260924m"></script>
+  <script src="whatsapp.js?v=20260924m"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924l" />
+  <link rel="stylesheet" href="styles.css?v=20260924m" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     /* ── Cotizador layout ─────────────────────── */
@@ -542,8 +542,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924l" />
-  <link rel="stylesheet" href="nav.css?v=20260924l" />
+  <link rel="stylesheet" href="ios.css?v=20260924m" />
+  <link rel="stylesheet" href="nav.css?v=20260924m" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -554,7 +554,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924l"></script>
+  <script type="module" src="firebase-sync.js?v=20260924m"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1514,6 +1514,16 @@
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       saveKey('piezas');
 
+      // Si la pieza aún no tiene precio de venta, se toma el precio por pieza de esta cotización
+      if (state.pendingCot && state.pendingCot.total > 0) {
+        let precios = {};
+        try { precios = JSON.parse(localStorage.getItem('mp_precios')) || {}; } catch (e) {}
+        if (!(precios[nombre] > 0)) {
+          precios[nombre] = Math.round(state.pendingCot.total / (cantidad || 1) * 100) / 100;
+          localStorage.setItem('mp_precios', JSON.stringify(precios));
+        }
+      }
+
       // Save cotización as confirmed
       if (state.pendingCot) {
         const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad };
@@ -1962,6 +1972,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260924l"></script>
+  <script src="nav.js?v=20260924m"></script>
 </body>
 </html>

@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260924l"></script>
-  <script src="categorias.js?v=20260924l"></script>
-  <script src="inventario.js?v=20260924l"></script>
+  <script src="theme.js?v=20260924m"></script>
+  <script src="categorias.js?v=20260924m"></script>
+  <script src="inventario.js?v=20260924m"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924l" />
+  <link rel="stylesheet" href="styles.css?v=20260924m" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924l" />
-  <link rel="stylesheet" href="nav.css?v=20260924l" />
+  <link rel="stylesheet" href="ios.css?v=20260924m" />
+  <link rel="stylesheet" href="nav.css?v=20260924m" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924l"></script>
+  <script type="module" src="firebase-sync.js?v=20260924m"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -77,6 +77,11 @@
       </div>
     </div>
     <div class="inv-f">
+      <label for="n-precio">Precio de venta (por pieza)</label>
+      <div class="vs-price inv-precio"><span>$</span><input type="number" id="n-precio" inputmode="decimal" min="0" step="0.5" placeholder="0.00" /></div>
+      <p class="inv-hint" id="n-precio-hint"></p>
+    </div>
+    <div class="inv-f">
       <span class="inv-f-lbl">Categoría</span>
       <div class="cq-chips" data-for="n-cat" role="radiogroup" aria-label="Categoría" id="n-cats"></div>
       <input type="hidden" id="n-cat" value="" />
@@ -113,6 +118,11 @@
       </div>
     </div>
     <div class="inv-f">
+      <label for="e-precio">Precio de venta (por pieza)</label>
+      <div class="vs-price inv-precio"><span>$</span><input type="number" id="e-precio" inputmode="decimal" min="0" step="0.5" placeholder="0.00" /></div>
+      <p class="inv-hint" id="e-precio-hint"></p>
+    </div>
+    <div class="inv-f">
       <span class="inv-f-lbl">Categoría</span>
       <div class="cq-chips" data-for="e-cat" role="radiogroup" aria-label="Categoría" id="e-cats"></div>
       <input type="hidden" id="e-cat" value="" />
@@ -129,7 +139,7 @@
 
   <script>
     const { esc } = MP_INV;
-    const DB = { materials: {}, piezas: {}, historial: {}, categorias: {} };
+    const DB = { materials: {}, piezas: {}, historial: {}, categorias: {}, precios: {}, ventas: [] };
     const BAJO = 2, POCO = 5;
 
     function loadDB() {
@@ -138,12 +148,38 @@
       DB.piezas     = get('mp_piezas', {});
       DB.historial  = get('mp_historial', {});
       DB.categorias = get('mp_categorias', {});
+      DB.precios    = get('mp_precios', {});
+      DB.ventas     = get('mp_ventas', []);
     }
     const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
     const saveMats       = () => save('mp_materials', DB.materials);
     const savePiezas     = () => save('mp_piezas', DB.piezas);
     const saveHistorial  = () => save('mp_historial', DB.historial);
     const saveCategorias = () => save('mp_categorias', DB.categorias);
+    const savePrecios    = () => save('mp_precios', DB.precios);
+    const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Último precio al que se vendió la pieza, como sugerencia cuando aún no tiene precio
+    function ultimaVenta(pieza) {
+      const vs = [...DB.ventas].sort((a, b) => (b.id || 0) - (a.id || 0));
+      for (const v of vs) {
+        const it = (v.items || [{ pieza: v.pieza, precio: v.precio }]).find(x => x.pieza === pieza && x.precio > 0);
+        if (it) return it.precio;
+      }
+      return 0;
+    }
+    function leerPrecio(id) {
+      const t = document.getElementById(id).value.trim();
+      if (t === '') return null;
+      const n = parseFloat(t);
+      return isNaN(n) || n < 0 ? NaN : Math.round(n * 100) / 100;
+    }
+    function pintarPrecio(id, hintId, pieza) {
+      const actual = pieza ? DB.precios[pieza] : 0;
+      const sugerido = pieza && !actual ? ultimaVenta(pieza) : 0;
+      document.getElementById(id).value = actual > 0 ? actual : '';
+      document.getElementById(id).placeholder = sugerido ? String(sugerido) : '0.00';
+      document.getElementById(hintId).textContent = sugerido ? `Última venta: ${fmt(sugerido)}. Escríbelo para guardarlo.` : '';
+    }
 
     const catDe = p => MP_CAT.de(p, DB.categorias);
     const catNombre = id => (MP_CAT.lista.find(c => c.id === id) || {}).nombre || 'Sin categoría';
@@ -224,7 +260,7 @@
             <span class="inv-mark">${ICON}</span>
             <span class="inv-row-text">
               <span class="inv-row-name">${esc(p)}</span>
-              <span class="inv-row-meta"><b>${st.txt}</b>${cat ? ' · ' + catNombre(cat) : ''}</span>
+              <span class="inv-row-meta"><b>${st.txt}</b>${DB.precios[p] > 0 ? ' · ' + fmt(DB.precios[p]) : ''}${cat ? ' · ' + catNombre(cat) : ''}</span>
             </span>
           </button>
           <div class="inv-step" role="group" aria-label="Unidades de ${esc(p)}">
@@ -271,6 +307,7 @@
     function abrirNueva() {
       document.getElementById('n-nombre').value = '';
       document.getElementById('n-cant').value = 1;
+      pintarPrecio('n-precio', 'n-precio-hint', null);
       document.getElementById('n-desc').checked = false;
       document.getElementById('n-grams').value = '';
       document.getElementById('n-nombres').innerHTML = Object.keys(DB.piezas).sort((a, b) => a.localeCompare(b, 'es'))
@@ -300,6 +337,7 @@
       const existe = Object.keys(DB.piezas).find(p => p.toLowerCase() === nombre.toLowerCase());
       hint.className = 'inv-hint' + (existe ? ' is-ok' : '');
       hint.textContent = existe ? `Ya tienes ${DB.piezas[existe]}; se sumarán a las existentes.` : '';
+      if (existe) pintarPrecio('n-precio', 'n-precio-hint', existe);
       const cat = nombre ? (catDe(existe || nombre) || '') : '';
       document.getElementById('n-cat').value = cat;
       MP_INV.syncChips(document.getElementById('sh-nueva'));
@@ -311,6 +349,8 @@
       const cantidad = Math.max(1, parseInt(document.getElementById('n-cant').value) || 1);
       if (!nombre) { MP_INV.toast('Escribe el nombre de la pieza'); return document.getElementById('n-nombre').focus(); }
       nombre = Object.keys(DB.piezas).find(p => p.toLowerCase() === nombre.toLowerCase()) || nombre;
+      const precio = leerPrecio('n-precio');
+      if (Number.isNaN(precio)) { MP_INV.toast('Escribe un precio válido'); return document.getElementById('n-precio').focus(); }
 
       if (document.getElementById('n-desc').checked) {
         const matId = document.getElementById('n-mat').value;
@@ -328,6 +368,7 @@
       const cat = document.getElementById('n-cat').value;
       if (cat && cat !== MP_CAT.de(nombre, {})) { DB.categorias[nombre] = cat; saveCategorias(); }
 
+      if (precio != null) { DB.precios[nombre] = precio; savePrecios(); }
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       savePiezas();
       MP_INV.cerrar();
@@ -343,6 +384,7 @@
       document.getElementById('sh-pieza-t').textContent = nombre;
       document.getElementById('e-sub').innerHTML = `<span class="${st.cls}" style="color:var(--st-color);font-weight:600">${st.txt}</span>`;
       document.getElementById('e-cant').value = n;
+      pintarPrecio('e-precio', 'e-precio-hint', nombre);
       const asignada = DB.categorias[nombre] || '';
       const cat = catDe(nombre) || '';
       document.getElementById('e-cat').value = cat;
@@ -364,6 +406,8 @@
     }
     function guardarPieza() {
       if (!editando) return;
+      const precio = leerPrecio('e-precio');
+      if (Number.isNaN(precio)) { MP_INV.toast('Escribe un precio válido'); return document.getElementById('e-precio').focus(); }
       const n = Math.max(0, parseInt(document.getElementById('e-cant').value) || 0);
       if (n === 0) {
         if (!confirm(`Con 0 unidades "${editando}" sale del inventario. ¿Continuar?`)) return;
@@ -376,6 +420,8 @@
       if (cat && cat !== MP_CAT.de(editando, {})) DB.categorias[editando] = cat;
       else delete DB.categorias[editando];
       saveCategorias();
+      if (precio != null) DB.precios[editando] = precio; else delete DB.precios[editando];
+      savePrecios();
       MP_INV.cerrar();
       render();
       MP_INV.toast('Cambios guardados');
@@ -389,6 +435,7 @@
       if (usados.length) { saveMats(); delete DB.historial[nombre]; saveHistorial(); }
       delete DB.piezas[nombre];
       savePiezas();
+      if (nombre in DB.precios) { delete DB.precios[nombre]; savePrecios(); }
       MP_INV.cerrar();
       render();
       MP_INV.toast(usados.length ? 'Pieza eliminada · filamento devuelto al stock' : 'Pieza eliminada');
@@ -399,6 +446,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260924l"></script>
+  <script src="nav.js?v=20260924m"></script>
 </body>
 </html>
