@@ -5,7 +5,7 @@
 :root {
   --ios-font:     -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
   --ios-tint:     #30d158;
-  --ios-label:    rgba(235, 235, 245, 0.62);
+  --ios-label:    rgba(235, 235, 245, 0.8);
   --ios-glass:    rgba(28, 28, 32, 0.66);
   --ios-stroke:   rgba(255, 255, 255, 0.16);
   --ios-bubble:   rgba(255, 255, 255, 0.13);
@@ -411,3 +411,92 @@
 @media print {
   .tabbar, .sheet, .sheet-backdrop, .ios-segmented { display: none !important; }
 }
+
+/* ─────────────────────────────────────────────────
+   Liquid Glass (iOS 26): vidrio claro con poco tinte, borde que
+   refleja la luz en las esquinas y brillo interior en los cantos.
+───────────────────────────────────────────────── */
+:root {
+  --lg-tint:        rgba(22, 22, 26, 0.38);
+  --lg-tint-sheet:  rgba(28, 28, 32, 0.58);
+  --lg-filter:      blur(12px) saturate(220%) brightness(0.9);
+  --lg-filter-sheet: blur(24px) saturate(200%) brightness(0.85);
+  --lg-rim-hi:      rgba(255, 255, 255, 0.62);
+  --lg-rim-lo:      rgba(255, 255, 255, 0.10);
+  --lg-edge:        inset 0 1px 1px rgba(255, 255, 255, 0.28), inset 0 -1px 1px rgba(255, 255, 255, 0.08), inset 0 0 16px rgba(255, 255, 255, 0.06);
+  --lg-drop:        0 12px 34px rgba(0, 0, 0, 0.42), 0 2px 6px rgba(0, 0, 0, 0.22);
+  --lg-bubble:      rgba(255, 255, 255, 0.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --lg-tint:        rgba(255, 255, 255, 0.40);
+    --lg-tint-sheet:  rgba(248, 248, 250, 0.66);
+    --lg-filter:      blur(12px) saturate(200%) brightness(1.06);
+    --lg-filter-sheet: blur(24px) saturate(190%) brightness(1.04);
+    --lg-rim-hi:      rgba(255, 255, 255, 1);
+    --lg-rim-lo:      rgba(255, 255, 255, 0.35);
+    --lg-edge:        inset 0 1px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.55), inset 0 0 16px rgba(255, 255, 255, 0.45);
+    --lg-drop:        0 12px 34px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+    --lg-bubble:      rgba(120, 120, 128, 0.16);
+  }
+}
+
+.tabbar-glass, .sheet-close, #toast, .cq-bar, .goals-add {
+  background: var(--lg-tint) !important;
+  backdrop-filter: var(--lg-filter) !important;
+  -webkit-backdrop-filter: var(--lg-filter) !important;
+  border: none !important;
+  box-shadow: var(--lg-edge), var(--lg-drop) !important;
+}
+.sheet-close, .goals-add, .cq-bar, #toast { position: relative; }
+#toast, .cq-bar { position: fixed; }
+.goals-add { box-shadow: var(--lg-edge), 0 2px 8px rgba(0, 0, 0, 0.12) !important; }
+
+/* Canto de luz: más brillante arriba a la izquierda y abajo a la derecha */
+.tabbar-glass::before, .sheet-close::before, #toast::before, .cq-bar::before, .goals-add::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: linear-gradient(135deg, var(--lg-rim-hi), var(--lg-rim-lo) 28%, transparent 50%, var(--lg-rim-lo) 72%, var(--lg-rim-hi));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.tabbar-glass::after { display: none; }
+
+/* La burbuja de la pestaña activa es una lente de vidrio */
+.tab-bubble {
+  background: var(--lg-bubble);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), inset 0 -1px 1px rgba(255, 255, 255, 0.12), 0 1px 6px rgba(0, 0, 0, 0.10);
+}
+.tabbar-glass:has(.tab:active) .tab-bubble { transform: scale(1.06); }
+.tab-bubble { transition: left 380ms var(--ios-spring), width 380ms var(--ios-spring), transform 260ms var(--ios-spring), opacity 200ms; }
+
+/* Hojas: vidrio más denso para leer bien, con canto de luz en el borde */
+.sheet {
+  background: var(--lg-tint-sheet) !important;
+  backdrop-filter: var(--lg-filter-sheet) !important;
+  -webkit-backdrop-filter: var(--lg-filter-sheet) !important;
+  border: none !important;
+  box-shadow: var(--lg-edge), inset 0 0 0 0.5px var(--lg-rim-lo), var(--lg-drop) !important;
+}
+.sheet-backdrop { background: rgba(0, 0, 0, 0.28); }
+
+/* Borde superior: el contenido se desvanece bajo la hora y la batería al desplazarse */
+body::after {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: calc(env(safe-area-inset-top, 0px) + 18px);
+  z-index: 950;
+  pointer-events: none;
+  background: linear-gradient(var(--ios-bg, #000) 30%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(#000 45%, transparent);
+  mask-image: linear-gradient(#000 45%, transparent);
+}
+@media print { body::after { display: none; } }
