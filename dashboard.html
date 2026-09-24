@@ -4,17 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20260924w"></script>
-  <script src="categorias.js?v=20260924w"></script>
-  <script src="inventario.js?v=20260924w"></script>
+  <script src="theme.js?v=20260924x"></script>
+  <script src="categorias.js?v=20260924x"></script>
+  <script src="inventario.js?v=20260924x"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924w" />
+  <link rel="stylesheet" href="styles.css?v=20260924x" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="ios-charts.js?v=20260924w"></script>
-  <link rel="stylesheet" href="ios.css?v=20260924w" />
-  <link rel="stylesheet" href="nav.css?v=20260924w" />
+  <script src="ios-charts.js?v=20260924x"></script>
+  <link rel="stylesheet" href="ios.css?v=20260924x" />
+  <link rel="stylesheet" href="nav.css?v=20260924x" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924w"></script>
+  <script type="module" src="firebase-sync.js?v=20260924x"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -38,10 +38,15 @@
       </div>
 
       <div class="home-stack">
-        <!-- Metas: del mes, anual y por evento (se deslizan como una pila de widgets) -->
-        <section class="goals" aria-label="Metas">
-          <div class="goals-track" id="goals-track"></div>
-          <div class="goals-dots" id="goals-dots" aria-hidden="true"></div>
+        <!-- Metas: del mes, anual y por evento, apiladas como tarjetas de Wallet -->
+        <section class="goals" aria-labelledby="goals-t">
+          <div class="cat-head">
+            <h2 class="cat-title" id="goals-t">Metas</h2>
+            <button type="button" class="goals-add" onclick="abrirMeta()" aria-label="Nueva meta de evento">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+          <div class="goals-stack" id="goals-stack"></div>
         </section>
 
         <!-- Indicadores rápidos -->
@@ -191,12 +196,15 @@
       const pct = o.meta > 0 ? Math.min(o.logrado / o.meta * 100, 100) : 0;
       const editar = o.tipo === 'evento'
         ? `onclick="abrirMeta('${o.id}')" aria-label="Editar o abonar a ${MP_INV.esc(o.titulo)}"`
-        : `onclick="toggleGoalInput('${o.tipo}')" aria-label="Editar ${o.chip.toLowerCase()}"`;
+        : o.auto
+          ? `onclick="editarAnual(event)" aria-label="Editar la meta anual"`
+          : `onclick="toggleGoalInput('${o.tipo}')" aria-label="Editar ${o.chip.toLowerCase()}"`;
       return `
-      <article class="goal-widget gw--${o.tipo}" data-meta="${o.id || o.tipo}" aria-label="${MP_INV.esc(o.chip)}">
+      <article class="goal-widget gw--${o.tipo} ${o.color || ''}" data-meta="${o.id || o.tipo}" data-nombre="${MP_INV.esc(o.chip)}">
         <div class="gw-top">
-          <span class="gw-chip"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONO[o.tipo]}</svg>${MP_INV.esc(o.chip)}</span>
+          <span class="gw-chip"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONO[o.tipo]}</svg><span>${MP_INV.esc(o.chip)}</span></span>
           <button class="gw-edit" type="button" ${editar}>${LAPIZ}</button>
+          <span class="gw-tab-pct" aria-hidden="true">${o.meta > 0 ? Math.floor(pct) + '%' : '—'}</span>
         </div>
         <div class="gw-body">
           <div class="gw-text">
@@ -212,7 +220,7 @@
             <div class="gw-center"><span class="gw-num">${o.meta > 0 ? Math.floor(pct) + '%' : '—'}</span><span class="gw-unit">${o.meta > 0 ? 'logrado' : 'sin meta'}</span></div>
           </div>
         </div>
-        ${o.tipo === 'evento' ? '' : `
+        ${o.tipo === 'evento' || o.auto ? '' : `
         <div class="goal-input-wrap" id="goal-input-wrap-${o.tipo}">
           <input class="goal-input" id="goal-input-${o.tipo}" type="number" inputmode="decimal" placeholder="${o.tipo === 'anual' ? 'Ej: 180000' : 'Ej: 15000'}" value="${o.meta || ''}" aria-label="${o.chip} en pesos">
           <button class="goal-save-btn" onclick="saveGoal('${o.tipo}')">Guardar</button>
@@ -220,58 +228,100 @@
       </article>`;
     }
 
+    // Con meta anual, la del mes se calcula sola: lo que falta del año repartido
+    // entre los meses que quedan (incluido este). Sin meta anual se usa la manual.
+    function metaMensual() {
+      const anual = parseFloat(localStorage.getItem('mp_meta_anual') || '0');
+      if (!(anual > 0)) return { meta: parseFloat(localStorage.getItem('mp_meta_mensual') || '0') };
+      const hoy = new Date(), anio = String(hoy.getFullYear()), mes = getMesActual();
+      const antes = ingresos(k => k.startsWith(anio) && k < mes);
+      const restantes = 12 - hoy.getMonth();
+      const falta = anual - antes;
+      return {
+        auto: true,
+        meta: falta > 0 ? falta / restantes : anual / 12,
+        extra: restantes > 1 ? `Meta anual en ${restantes} meses` : 'Último mes del año',
+      };
+    }
+    function editarAnual(e) {
+      if (e) e.stopPropagation();
+      activarMeta('anual');
+      setTimeout(() => toggleGoalInput('anual'), 540);
+    }
+    let metaActiva = null;
+    const TAB = 52;
     function renderGoal() {
-      const track = document.getElementById('goals-track');
+      const stack = document.getElementById('goals-stack');
       const anio = String(new Date().getFullYear());
       const tarjetas = [
         tarjetaMeta({ tipo: 'mes', chip: 'Meta del mes', titulo: 'Tu progreso del mes', cumplida: '¡Meta cumplida!', vacia: 'Define tu meta del mes',
-          meta: parseFloat(localStorage.getItem('mp_meta_mensual') || '0'), logrado: ingresos(k => k === getMesActual()) }),
+          logrado: ingresos(k => k === getMesActual()), ...metaMensual() }),
         tarjetaMeta({ tipo: 'anual', chip: 'Meta anual', titulo: `Tu progreso de ${anio}`, cumplida: '¡Meta del año cumplida!', vacia: 'Define tu meta del año',
           meta: parseFloat(localStorage.getItem('mp_meta_anual') || '0'), logrado: ingresos(k => k.startsWith(anio)) }),
-        ...metasEventos().map(m => {
-          const logrado = abonado(m);
-          return tarjetaMeta({ tipo: 'evento', id: m.id, chip: 'Meta de evento', titulo: m.nombre, cumplida: '¡Lograda!', vacia: m.nombre,
-            meta: Number(m.monto) || 0, logrado, extra: logrado >= m.monto ? 'Meta completada' : plazo(m.limite) });
+        ...metasEventos().map((m, i) => {
+          const logrado = abonado(m), monto = Number(m.monto) || 0;
+          return tarjetaMeta({ tipo: 'evento', id: m.id, color: 'gw-c' + (i % 4), chip: m.nombre, titulo: `Faltan ${fmtCorto(monto - logrado)}`, cumplida: '¡Lograda!', vacia: m.nombre,
+            meta: monto, logrado, extra: logrado >= monto ? '' : plazo(m.limite) });
         }),
-        `<button type="button" class="goal-widget gw--nueva" onclick="abrirMeta()">
-          <span class="gw-plus" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
-          <span class="gw-nueva-t">Nueva meta</span>
-          <span class="gw-nueva-s">Pago de impresora, del puesto, material…</span>
-        </button>`,
       ];
-      const previo = track.scrollLeft;
-      track.innerHTML = tarjetas.join('');
-      document.getElementById('goals-dots').innerHTML = tarjetas.map(() => '<i></i>').join('');
-      // Mantiene la tarjeta que se estaba viendo (también al volver a Inicio)
-      let destino = previo;
-      if (!track.dataset.listo) {
-        track.dataset.listo = '1';
-        try { destino = Number(sessionStorage.getItem('mp_meta_slide')) || 0; } catch (e) {}
-        track.addEventListener('scroll', () => { marcarDot(); clearTimeout(track._t); track._t = setTimeout(recordarSlide, 150); }, { passive: true });
+      stack.innerHTML = tarjetas.join('');
+      if (!stack.dataset.listo) {
+        stack.dataset.listo = '1';
+        try { metaActiva = sessionStorage.getItem('mp_meta_activa'); } catch (e) {}
+        stack.addEventListener('click', e => {
+          const c = e.target.closest('.goal-widget');
+          if (c && !c.classList.contains('activa')) activarMeta(c.dataset.meta);
+        });
+        stack.addEventListener('keydown', e => {
+          const c = e.target.closest('.goal-widget');
+          if (c && e.target === c && !c.classList.contains('activa') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); activarMeta(c.dataset.meta); }
+        });
+        // La altura de la pila sigue a la tarjeta del frente (p. ej. al abrir el campo de la meta)
+        stack._ro = new ResizeObserver(() => ajustarAltura());
       }
-      if (metaFoco) {
-        const el = track.querySelector(`[data-meta="${metaFoco}"]`);
-        if (el) destino = el.offsetLeft - track.firstElementChild.offsetLeft;
-        metaFoco = null;
-      }
-      track.scrollLeft = destino;
-      marcarDot();
+      if (metaFoco) { metaActiva = metaFoco; metaFoco = null; }
+      if (!stack.querySelector(`[data-meta="${metaActiva}"]`)) metaActiva = 'mes';
+      stack._ro.disconnect();
+      [...stack.children].forEach(c => stack._ro.observe(c));
+      acomodar(false);
       // Anima los anillos desde cero, como los widgets de iOS
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        track.querySelectorAll('.gw-arc').forEach(arc => { arc.style.strokeDashoffset = arc.dataset.offset; });
+        stack.querySelectorAll('.gw-arc').forEach(arc => { arc.style.strokeDashoffset = arc.dataset.offset; });
       }));
     }
-    function slideActual() {
-      const track = document.getElementById('goals-track');
-      const w = track.firstElementChild ? track.firstElementChild.offsetWidth + 12 : 1;
-      return Math.max(0, Math.min(track.children.length - 1, Math.round(track.scrollLeft / w)));
+    // Wallet: las demás metas se asoman arriba como pestañas y la activa va al frente
+    function acomodar(animar) {
+      const stack = document.getElementById('goals-stack');
+      const cards = [...stack.children];
+      const act = cards.find(c => c.dataset.meta === metaActiva) || cards[0];
+      const resto = cards.filter(c => c !== act);
+      if (!animar) stack.classList.add('sin-anim');
+      resto.forEach((c, i) => {
+        c.classList.remove('activa');
+        c.style.transform = `translateY(${i * TAB}px)`;
+        c.style.zIndex = i + 1;
+        c.tabIndex = 0;
+        c.setAttribute('role', 'button');
+        c.setAttribute('aria-label', 'Mostrar ' + c.dataset.nombre);
+        const w = c.querySelector('.goal-input-wrap'); if (w) w.classList.remove('open');
+      });
+      act.classList.add('activa');
+      try { sessionStorage.setItem('mp_meta_activa', act.dataset.meta); } catch (e) {}
+      act.style.transform = `translateY(${resto.length * TAB}px)`;
+      act.style.zIndex = resto.length + 1;
+      act.removeAttribute('tabindex'); act.removeAttribute('role'); act.removeAttribute('aria-label');
+      ajustarAltura();
+      if (!animar) requestAnimationFrame(() => requestAnimationFrame(() => stack.classList.remove('sin-anim')));
     }
-    function marcarDot() {
-      const i = slideActual();
-      document.querySelectorAll('#goals-dots i').forEach((d, j) => d.classList.toggle('on', j === i));
+    function ajustarAltura() {
+      const stack = document.getElementById('goals-stack');
+      const act = stack.querySelector('.goal-widget.activa');
+      if (act) stack.style.height = (stack.children.length - 1) * TAB + act.offsetHeight + 'px';
     }
-    function recordarSlide() {
-      try { sessionStorage.setItem('mp_meta_slide', String(document.getElementById('goals-track').scrollLeft)); } catch (e) {}
+    function activarMeta(id) {
+      metaActiva = id;
+      acomodar(true);
+      if (navigator.vibrate) navigator.vibrate(8);
     }
     function toggleGoalInput(tipo) {
       const w = document.getElementById('goal-input-wrap-' + tipo);
@@ -280,7 +330,7 @@
     }
     function saveGoal(tipo) {
       const v = parseFloat(document.getElementById('goal-input-' + tipo).value);
-      if (!isNaN(v) && v > 0) { localStorage.setItem(GOAL_KEYS[tipo], v); renderGoal(); }
+      if (!isNaN(v) && v > 0) { localStorage.setItem(GOAL_KEYS[tipo], v); metaFoco = tipo; renderGoal(); }
     }
 
     // ── Hoja de meta por evento ──
@@ -504,6 +554,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260924w"></script>
+  <script src="nav.js?v=20260924x"></script>
 </body>
 </html>
