@@ -11,7 +11,7 @@ const firebaseConfig = {
 
 // Solo la cuenta autorizada puede leer y escribir (lo exigen las reglas de Firestore);
 // este archivo ya no guarda ningún PIN ni contraseña.
-const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo','mp_precios','mp_categorias_lista'];
+const SYNC_KEYS = ['mp_config','mp_materials','mp_piezas','mp_ventas','mp_cotizaciones','mp_historial','mp_templates','mp_meta_mensual','mp_categorias','mp_wa_grupo','mp_wa_modo','mp_precios','mp_categorias_lista','mp_meta_anual','mp_metas_eventos'];
 
 // Se intercepta Storage.prototype.setItem: en Safari, asignar localStorage.setItem = …
 // no reemplaza la función (guarda un dato llamado "setItem"), y los cambios nunca se subían.
