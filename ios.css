@@ -521,6 +521,9 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .modal-cancel { color: var(--ios-blue) !important; font-size: 17px !important; font-weight: 600; padding: 12px !important; }
 
 /* ── Aviso flotante (HUD) ──────────────────────── */
+/* Oculto hasta que MP_INV.toast() lo muestra; nunca se ve vacío */
+#toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
+#toast:empty { display: none !important; }
 #toast {
   left: 50% !important;
   right: auto !important;
