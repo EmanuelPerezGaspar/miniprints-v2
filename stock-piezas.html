@@ -4,18 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260924p"></script>
-  <script src="categorias.js?v=20260924p"></script>
-  <script src="inventario.js?v=20260924p"></script>
+  <script src="theme.js?v=20260924r"></script>
+  <script src="categorias.js?v=20260924r"></script>
+  <script src="inventario.js?v=20260924r"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924p" />
+  <link rel="stylesheet" href="styles.css?v=20260924r" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924p" />
-  <link rel="stylesheet" href="nav.css?v=20260924p" />
+  <link rel="stylesheet" href="ios.css?v=20260924r" />
+  <link rel="stylesheet" href="nav.css?v=20260924r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924p"></script>
+  <script type="module" src="firebase-sync.js?v=20260924r"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -48,7 +48,13 @@
         <section class="form-card inv-card" aria-label="Inventario de piezas">
           <input type="search" id="inv-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
           <div class="vs-cats" id="inv-cats" role="radiogroup" aria-label="Filtrar"></div>
-          <div class="vs-list-head"><span id="inv-count"></span><span>Toca una pieza para editarla</span></div>
+          <div class="vs-list-head mat-head"><span id="inv-count"></span>
+            <div class="cq-seg mat-vista" data-for="pz-vista" role="radiogroup" aria-label="Vista">
+              <button type="button" data-v="grid" aria-label="Cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+              <button type="button" data-v="lista" aria-label="Lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+            </div>
+            <input type="hidden" id="pz-vista" value="grid" />
+          </div>
           <div class="inv-list" id="inv-list" role="list"></div>
         </section>
       </div>
@@ -260,7 +266,10 @@
         .filter(p => !q || p.toLowerCase().includes(q))
         .sort((a, b) => a.localeCompare(b, 'es'));
       document.getElementById('inv-count').textContent = `${vis.length} de ${nombres.length} piezas`;
+      const grid = document.getElementById('pz-vista').value === 'grid';
+      list.classList.toggle('is-grid', grid);
       if (!vis.length) { list.innerHTML = `<div class="inv-empty">Sin resultados${q ? ` para "${esc(q)}"` : ''}</div>`; return; }
+      if (grid) { list.innerHTML = cuadricula(vis); return; }
       list.innerHTML = vis.map(p => {
         const n = DB.piezas[p], st = estado(n), cat = catDe(p);
         return `<div class="inv-row ${st.cls}" role="listitem" data-p="${esc(p)}">
@@ -279,6 +288,34 @@
         </div>`;
       }).join('');
     }
+
+    // Cuadrícula agrupada por categoría (mismo estilo que Material)
+    function cuadricula(vis) {
+      const grupos = {};
+      vis.forEach(p => { const c = catDe(p) || 'otras'; (grupos[c] = grupos[c] || []).push(p); });
+      const orden = [...MP_CAT.lista.map(c => c.id), 'otras'];
+      return orden.filter(id => grupos[id]).map(id => {
+        const ps = grupos[id];
+        const uds = ps.reduce((s, p) => s + DB.piezas[p], 0);
+        return `<section class="mat-grupo">
+          <div class="mat-grupo-head"><span>${esc(id === 'otras' ? 'Sin categoría' : catNombre(id))}</span><span>${ps.length} · ${uds} uds</span></div>
+          <div class="mat-grid">${ps.map(p => {
+            const n = DB.piezas[p], st = estado(n);
+            return `<button type="button" class="mat-tile pz-tile ${st.cls}" data-p="${esc(p)}" data-act="abrir" aria-label="${esc(p)}, ${n} unidades, ${st.txt}">
+              <span class="mat-tile-top"><span class="pz-ico"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_CAT.icono(id === 'otras' ? '' : id)}</svg></span><span class="mat-tile-marca">${DB.precios[p] > 0 ? MP_INV.money0(DB.precios[p]) : ''}</span></span>
+              <span class="mat-tile-color">${esc(p)}</span>
+              <span class="mat-tile-g">${n}<small>uds</small></span>
+              <span class="pz-estado">${st.txt}</span>
+            </button>`;
+          }).join('')}</div>
+        </section>`;
+      }).join('');
+    }
+    try { const v = localStorage.getItem('mp_vista_piezas'); if (v === 'lista' || v === 'grid') document.getElementById('pz-vista').value = v; } catch (e) {}
+    document.getElementById('pz-vista').addEventListener('change', e => {
+      try { localStorage.setItem('mp_vista_piezas', e.target.value); } catch (err) {}
+      renderLista();
+    });
 
     document.getElementById('inv-cats').addEventListener('click', e => {
       const b = e.target.closest('[data-f]');
@@ -474,10 +511,10 @@
     }
 
     function render() { renderResumen(); renderLista(); }
-    function mpInit() { loadDB(); render(); }
+    function mpInit() { loadDB(); MP_INV.syncChips(); render(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260924p"></script>
+  <script src="nav.js?v=20260924r"></script>
 </body>
 </html>
