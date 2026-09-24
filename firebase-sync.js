@@ -85,69 +85,91 @@ const ERRORES = {
 };
 const errorDe = e => ERRORES[e && e.code] || 'No se pudo iniciar sesión. Intenta de nuevo.';
 
-function mostrarLogin(api) {
-  return new Promise(resolve => {
-    let el = document.getElementById('mp-login');
-    if (!el) {
-      el = document.createElement('div');
-      el.id = 'mp-login';
-      el.setAttribute('role', 'dialog');
-      el.setAttribute('aria-modal', 'true');
-      el.setAttribute('aria-labelledby', 'mp-login-t');
-      el.innerHTML = `
-        <form class="auth-card" novalidate>
-          <img class="auth-icon" src="icon-180.png" alt="" width="72" height="72" />
-          <h1 id="mp-login-t">MiniPrints</h1>
-          <p class="auth-sub">Inicia sesión para ver tu negocio.</p>
-          <div class="auth-fields">
-            <input id="mp-login-email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Correo" aria-label="Correo" required />
-            <input id="mp-login-pass" type="password" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña" required />
-          </div>
-          <p class="auth-msg" id="mp-login-msg" role="alert"></p>
-          <button class="auth-btn" type="submit" id="mp-login-btn">Iniciar sesión</button>
-          <button class="auth-link" type="button" id="mp-login-olvide">¿Olvidaste tu contraseña?</button>
-        </form>`;
-      document.body.appendChild(el);
-    }
-    document.documentElement.style.overflow = 'hidden';
-    const form = el.querySelector('form');
-    const email = el.querySelector('#mp-login-email');
-    const pass = el.querySelector('#mp-login-pass');
-    const msg = el.querySelector('#mp-login-msg');
-    const btn = el.querySelector('#mp-login-btn');
-    const aviso = (t, ok) => { msg.textContent = t || ''; msg.classList.toggle('is-ok', !!ok); };
-
-    if (!api) {
-      aviso('Sin conexión. Conéctate a internet para iniciar sesión.');
-      btn.disabled = true;
-      return;
-    }
-
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      if (!email.value.trim() || !pass.value) return aviso('Escribe tu correo y contraseña.');
-      btn.disabled = true; btn.textContent = 'Entrando…'; aviso('');
-      try {
-        const cred = await api.signInWithEmailAndPassword(api.auth, email.value.trim(), pass.value);
-        el.remove();
-        document.documentElement.style.overflow = '';
-        resolve(cred.user);
-      } catch (err) {
-        aviso(errorDe(err));
-        btn.disabled = false; btn.textContent = 'Iniciar sesión';
-        pass.select();
-      }
-    });
-    el.querySelector('#mp-login-olvide').addEventListener('click', async () => {
-      if (!email.value.trim()) { aviso('Escribe tu correo y vuelve a tocar aquí.'); email.focus(); return; }
-      try {
-        await api.sendPasswordResetEmail(api.auth, email.value.trim());
-        aviso('Si el correo está registrado, te llegará un enlace para cambiar la contraseña.', true);
-      } catch (err) { aviso(errorDe(err)); }
-    });
-    setTimeout(() => email.focus(), 200);
-  });
+// Una sola pantalla con tres estados: conectando, error (con reintentar) y formulario
+function pantallaAcceso() {
+  let el = document.getElementById('mp-login');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'mp-login';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'mp-login-t');
+    el.innerHTML = `
+      <form class="auth-card" novalidate>
+        <img class="auth-icon" src="icon-180.png" alt="" width="72" height="72" />
+        <h1 id="mp-login-t">MiniPrints</h1>
+        <p class="auth-sub" id="mp-login-sub">Conectando…</p>
+        <div class="auth-fields" hidden>
+          <input id="mp-login-email" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Correo" aria-label="Correo" required />
+          <input id="mp-login-pass" type="password" autocomplete="current-password" placeholder="Contraseña" aria-label="Contraseña" required />
+        </div>
+        <p class="auth-msg" id="mp-login-msg" role="alert"></p>
+        <button class="auth-btn" type="submit" id="mp-login-btn" hidden>Iniciar sesión</button>
+        <button class="auth-link" type="button" id="mp-login-olvide" hidden>¿Olvidaste tu contraseña?</button>
+      </form>`;
+    (document.body || document.documentElement).appendChild(el);
+  }
+  document.documentElement.style.overflow = 'hidden';
+  const $ = id => el.querySelector('#' + id);
+  const aviso = (t, ok) => { $('mp-login-msg').textContent = t || ''; $('mp-login-msg').classList.toggle('is-ok', !!ok); };
+  const verFormulario = v => {
+    el.querySelector('.auth-fields').hidden = !v;
+    $('mp-login-olvide').hidden = !v;
+    $('mp-login-btn').hidden = false;
+  };
+  return {
+    cargando() {
+      $('mp-login-sub').textContent = 'Conectando…';
+      el.querySelector('.auth-fields').hidden = true;
+      $('mp-login-btn').hidden = true; $('mp-login-olvide').hidden = true; aviso('');
+    },
+    error(texto) {
+      $('mp-login-sub').textContent = 'No se pudo conectar.';
+      el.querySelector('.auth-fields').hidden = true; $('mp-login-olvide').hidden = true;
+      aviso(texto);
+      const btn = $('mp-login-btn');
+      btn.hidden = false; btn.disabled = false; btn.textContent = 'Reintentar';
+      btn.onclick = e => { e.preventDefault(); location.reload(); };
+    },
+    pedir(api) {
+      return new Promise(resolve => {
+        $('mp-login-sub').textContent = 'Inicia sesión para ver tu negocio.';
+        verFormulario(true); aviso('');
+        const btn = $('mp-login-btn'), email = $('mp-login-email'), pass = $('mp-login-pass');
+        btn.textContent = 'Iniciar sesión'; btn.disabled = false; btn.onclick = null;
+        el.querySelector('form').onsubmit = async e => {
+          e.preventDefault();
+          if (!email.value.trim() || !pass.value) return aviso('Escribe tu correo y contraseña.');
+          btn.disabled = true; btn.textContent = 'Entrando…'; aviso('');
+          try {
+            const cred = await api.signInWithEmailAndPassword(api.auth, email.value.trim(), pass.value);
+            el.remove();
+            document.documentElement.style.overflow = '';
+            resolve(cred.user);
+          } catch (err) {
+            aviso(errorDe(err));
+            btn.disabled = false; btn.textContent = 'Iniciar sesión';
+            pass.select();
+          }
+        };
+        $('mp-login-olvide').onclick = async () => {
+          if (!email.value.trim()) { aviso('Escribe tu correo y vuelve a tocar aquí.'); email.focus(); return; }
+          try {
+            await api.sendPasswordResetEmail(api.auth, email.value.trim());
+            aviso('Si el correo está registrado, te llegará un enlace para cambiar la contraseña.', true);
+          } catch (err) { aviso(errorDe(err)); }
+        };
+        setTimeout(() => email.focus(), 200);
+      });
+    },
+  };
 }
+
+// Evita que un paso de red o de almacenamiento se quede esperando para siempre
+const conTiempo = (promesa, ms, codigo) => Promise.race([
+  promesa,
+  new Promise((_, rej) => setTimeout(() => { const e = new Error(codigo); e.code = codigo; rej(e); }, ms)),
+]);
 
 // Cerrar sesión: se borra la copia local (sin sincronizar el borrado) y se vuelve a pedir acceso
 let _salir = null;
@@ -172,48 +194,53 @@ async function iniciar() {
   // Si ya iniciaste sesión en este dispositivo, la app se muestra al momento con los datos
   // guardados; la sesión se confirma en segundo plano.
   const recordado = localStorage.getItem(AUTH_FLAG) === '1';
-  if (recordado) listo();
+  const pantalla = recordado ? null : pantallaAcceso();
+  if (recordado) listo(); else pantalla.cargando();
   syncBadge('connecting');
 
-  let mods;
   try {
-    mods = await Promise.all([import(FB + 'firebase-app.js'), import(FB + 'firebase-auth.js'), import(FB + 'firebase-firestore.js')]);
+    const [{ initializeApp }, A, { getFirestore, doc, getDoc, setDoc, onSnapshot }] = await conTiempo(
+      Promise.all([import(FB + 'firebase-app.js'), import(FB + 'firebase-auth.js'), import(FB + 'firebase-firestore.js')]),
+      20000, 'sin-conexion');
+    const app = initializeApp(firebaseConfig);
+    // La sesión se guarda en localStorage: en Safari de iPhone IndexedDB puede quedarse colgado
+    const auth = A.initializeAuth(app, { persistence: [A.browserLocalPersistence, A.inMemoryPersistence] });
+    let user = await conTiempo(new Promise(resolve => {
+      let parar = null;
+      parar = A.onAuthStateChanged(auth, u => { if (parar) parar(); resolve(u); });
+    }), 15000, 'auth-lento');
+
+    _salir = async () => {
+      try { await A.signOut(auth); } catch (_) {}
+      localStorage.removeItem(AUTH_FLAG);
+      SYNC_KEYS.forEach(k => localStorage.removeItem(k));
+      location.replace('dashboard.html');
+    };
+
+    if (user && user.isAnonymous) { try { await A.signOut(auth); } catch (_) {} user = null; }
+    if (!user) {
+      localStorage.removeItem(AUTH_FLAG);
+      syncBadge('none');
+      user = await (pantalla || pantallaAcceso()).pedir({ auth, signInWithEmailAndPassword: A.signInWithEmailAndPassword, sendPasswordResetEmail: A.sendPasswordResetEmail });
+    }
+    _origSetItem(AUTH_FLAG, '1');
+    window.MP_AUTH.usuario = { email: user.email, uid: user.uid };
+    window.dispatchEvent(new CustomEvent('mp-auth', { detail: window.MP_AUTH.usuario }));
+    listo();
+    syncBadge('connecting');
+    iniciarSync({ doc: doc(getFirestore(app), 'negocio', 'data'), getDoc, setDoc, onSnapshot });
+
+    // Si la sesión se cierra en otro lado (o se revoca), se vuelve a pedir acceso
+    A.onAuthStateChanged(auth, u => { if (!u) window.MP_AUTH.salir(); });
   } catch (e) {
-    console.warn('Firebase no disponible:', e);
+    console.error('MiniPrints: no se pudo iniciar', e);
     if (recordado) { syncBadge('local'); return; }
-    mostrarLogin(null);
-    return;
+    const sinRed = e && (e.code === 'sin-conexion' || e.code === 'auth/network-request-failed' || /fetch|import|network/i.test(e.message || ''));
+    const motivo = sinRed ? 'Revisa tu conexión a internet.'
+      : e && e.code === 'auth-lento' ? 'El servicio tardó demasiado en responder.'
+      : 'Detalle: ' + ((e && (e.code || e.message)) || 'desconocido');
+    pantalla.error(motivo);
   }
-  const [{ initializeApp }, A, { getFirestore, doc, getDoc, setDoc, onSnapshot }] = mods;
-  const app  = initializeApp(firebaseConfig);
-  const auth = A.getAuth(app);
-  try { await A.setPersistence(auth, A.indexedDBLocalPersistence); }
-  catch (_) { try { await A.setPersistence(auth, A.browserLocalPersistence); } catch (__) {} }
-  await auth.authStateReady();
-
-  _salir = async () => {
-    try { await A.signOut(auth); } catch (_) {}
-    localStorage.removeItem(AUTH_FLAG);
-    SYNC_KEYS.forEach(k => localStorage.removeItem(k));
-    location.replace('dashboard.html');
-  };
-
-  let user = auth.currentUser;
-  if (user && user.isAnonymous) { try { await A.signOut(auth); } catch (_) {} user = null; }
-  if (!user) {
-    localStorage.removeItem(AUTH_FLAG);
-    syncBadge('none');
-    user = await mostrarLogin({ auth, signInWithEmailAndPassword: A.signInWithEmailAndPassword, sendPasswordResetEmail: A.sendPasswordResetEmail });
-  }
-  _origSetItem(AUTH_FLAG, '1');
-  window.MP_AUTH.usuario = { email: user.email, uid: user.uid };
-  window.dispatchEvent(new CustomEvent('mp-auth', { detail: window.MP_AUTH.usuario }));
-  listo();
-  syncBadge('connecting');
-  iniciarSync({ doc: doc(getFirestore(app), 'negocio', 'data'), getDoc, setDoc, onSnapshot });
-
-  // Si la sesión se cierra en otro lado (o se revoca), se vuelve a pedir acceso
-  A.onAuthStateChanged(auth, u => { if (!u) window.MP_AUTH.salir(); });
 }
 
 function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
