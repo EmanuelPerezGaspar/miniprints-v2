@@ -1652,45 +1652,45 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .pz-tile .mat-tile-marca { font-size: 11px; color: var(--ios-label-2); font-variant-numeric: tabular-nums; }
 .pz-estado { font-size: 11px; line-height: 13px; font-weight: 600; color: var(--st-color); }
 
-/* ── Ventas: piezas como tarjetas tipo punto de venta ── */
+/* ── Ventas: piezas en tarjetas compactas ───────── */
 .vs-tiles {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px;
-  max-height: 440px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-  padding: 2px; margin: -2px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px;
+  max-height: 420px; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  padding: 8px; margin: -8px;   /* espacio para el contador que sobresale */
 }
-@media (min-width: 900px) { .vs-tiles { max-height: 520px; } }
+@media (min-width: 900px) { .vs-tiles { max-height: 500px; } }
 .vs-tile { position: relative; min-width: 0; }
 .vs-tile-main {
-  width: 100%; height: 100%; display: flex; flex-direction: column; align-items: stretch; gap: 3px;
-  padding: 10px; border: none; border-radius: var(--r-md); background: var(--ios-fill-2);
+  width: 100%; height: 100%; min-height: 62px; display: flex; flex-direction: column; justify-content: space-between; gap: 4px;
+  padding: 8px 10px; border: none; border-radius: var(--r-md); background: var(--ios-fill-2);
   color: var(--text); font-family: var(--ios-font); text-align: left; cursor: pointer;
   -webkit-tap-highlight-color: transparent; transition: transform 120ms, background 160ms, box-shadow 160ms;
 }
 .vs-tile-main:active { transform: scale(0.95); }
 .vs-tile-main:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
 .vs-tile-main:disabled { opacity: 0.45; cursor: default; transform: none; }
-.vs-tile.is-added .vs-tile-main:disabled { opacity: 1; }
 .vs-tile.is-added .vs-tile-main { background: rgba(48, 209, 88, 0.14); box-shadow: inset 0 0 0 2px var(--ios-green); }
-.vs-tile-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-.vs-tile-ico { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: var(--ios-fill); color: var(--ios-label-2); }
-.vs-tile.is-added .vs-tile-ico { background: rgba(48, 209, 88, 0.2); color: var(--ios-green); }
-.vs-tile-ico svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.vs-tile-plus, .vs-tile-badge {
-  min-width: 26px; height: 26px; padding: 0 6px; box-sizing: border-box; display: grid; place-items: center; border-radius: var(--r-pill);
-  font-family: var(--ios-font-rounded); font-size: 15px; font-weight: 700;
+.vs-tile.is-added .vs-tile-main:disabled { opacity: 1; }
+.vs-tile-name { font-size: 12px; font-weight: 600; line-height: 15px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
+.vs-tile.is-added .vs-tile-name { padding-right: 18px; }
+.vs-tile-pie { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; min-width: 0; }
+.vs-tile-precio { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.vs-tile-precio.is-vacio { color: var(--ios-orange); }
+.vs-tile-disp { font-size: 10px; font-weight: 500; color: var(--ios-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vs-tile.is-added .vs-tile-disp { visibility: hidden; }
+/* Contador (arriba) y botón para quitar una (abajo), solo cuando la pieza ya está en el pedido */
+.vs-tile-badge {
+  position: absolute; top: -6px; right: -6px; min-width: 22px; height: 22px; padding: 0 6px; box-sizing: border-box;
+  display: grid; place-items: center; border-radius: var(--r-pill);
+  background: var(--ios-green); color: var(--ios-on-accent);
+  font-family: var(--ios-font-rounded); font-size: 13px; font-weight: 700; pointer-events: none;
+  box-shadow: 0 0 0 2px var(--ios-bg-2);
 }
-.vs-tile-plus { color: var(--ios-green); background: var(--ios-fill); font-size: 18px; font-weight: 600; }
-.vs-tile-badge { color: var(--ios-on-accent); background: var(--ios-green); }
-.vs-tile-name { font-size: 13px; font-weight: 600; line-height: 16px; min-height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; -webkit-hyphens: auto; hyphens: auto; overflow-wrap: anywhere; }
-.vs-tile-precio { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 700; }
-.vs-tile-precio.is-vacio { font-family: var(--ios-font); font-size: 13px; font-weight: 600; color: var(--ios-orange); }
-.vs-tile-disp { font-size: 11px; font-weight: 500; color: var(--ios-label-2); padding-right: 30px; }
-/* Botón para quitar una, en la esquina inferior derecha de la tarjeta */
 .vs-tile-menos {
-  position: absolute; right: 8px; bottom: 8px; width: 28px; height: 28px; display: grid; place-items: center;
+  position: absolute; right: 6px; bottom: 6px; width: 24px; height: 24px; display: grid; place-items: center;
   border: none; border-radius: 50%; background: var(--ios-bg-2); color: var(--ios-red);
-  font-size: 20px; font-weight: 600; line-height: 1; cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); -webkit-tap-highlight-color: transparent;
+  font-size: 18px; font-weight: 600; line-height: 1; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); -webkit-tap-highlight-color: transparent;
 }
 .vs-tile-menos:active { transform: scale(0.9); }
 .vs-tile-menos:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }

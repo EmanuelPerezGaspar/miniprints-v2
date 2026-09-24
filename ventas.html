@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260924r"></script>
-  <script src="categorias.js?v=20260924r"></script>
-  <script src="whatsapp.js?v=20260924r"></script>
+  <script src="theme.js?v=20260924t"></script>
+  <script src="categorias.js?v=20260924t"></script>
+  <script src="whatsapp.js?v=20260924t"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260924r" />
+  <link rel="stylesheet" href="styles.css?v=20260924t" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -88,8 +88,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260924r" />
-  <link rel="stylesheet" href="nav.css?v=20260924r" />
+  <link rel="stylesheet" href="ios.css?v=20260924t" />
+  <link rel="stylesheet" href="nav.css?v=20260924t" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,7 +100,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260924r"></script>
+  <script type="module" src="firebase-sync.js?v=20260924t"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -232,6 +232,8 @@
     function saveVentas() { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch(e) {} }
 
     const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Precio corto para las tarjetas: sin centavos si es entero
+    const precioCorto = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: Number.isInteger(+n) ? 0 : 2, maximumFractionDigits: 2 });
     // Fecha local (toISOString usa UTC y en la noche daba el día siguiente)
     function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
     function showToast(msg) {
@@ -297,20 +299,18 @@
         const item = enCarrito(p);
         const libres = disponible(p) - (item ? item.cantidad : 0);
         const precio = ultimoPrecio(p);
-        const cat = MP_CAT.de(p) || '';
         // Tarjeta tipo punto de venta: tocar suma una; el "−" quita una sin bajar al pedido
         return `<div class="vs-tile${item ? ' is-added' : ''}${libres <= 0 ? ' is-agotada' : ''}" role="listitem" data-pieza="${attr(p)}">
           <button type="button" class="vs-tile-main" ${libres <= 0 ? 'disabled' : ''}
-                  aria-label="Agregar ${attr(p)}, ${libres} disponibles${item ? ', ' + item.cantidad + ' en el pedido' : ''}">
-            <span class="vs-tile-top">
-              <span class="vs-tile-ico"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_CAT.icono(cat)}</svg></span>
-              ${item ? `<span class="vs-tile-badge">${item.cantidad}</span>` : '<span class="vs-tile-plus" aria-hidden="true">+</span>'}
-            </span>
+                  aria-label="Agregar ${attr(p)}${precio ? '' : ', sin precio'}, ${libres} disponibles${item ? ', ' + item.cantidad + ' en el pedido' : ''}">
             <span class="vs-tile-name">${escapeHtml(p)}</span>
-            <span class="vs-tile-precio${precio ? '' : ' is-vacio'}">${precio ? fmt(precio) : 'Sin precio'}</span>
-            <span class="vs-tile-disp">${libres > 0 ? libres + ' disp.' : item ? 'Todas en el pedido' : 'Agotada'}</span>
+            <span class="vs-tile-pie">
+              <span class="vs-tile-precio${precio ? '' : ' is-vacio'}">${precio ? precioCorto(precio) : '$ —'}</span>
+              <span class="vs-tile-disp">${libres > 0 ? libres + ' disp.' : item ? 'Todas' : 'Agotada'}</span>
+            </span>
           </button>
-          ${item ? `<button type="button" class="vs-tile-menos" aria-label="Quitar una de ${attr(p)}">−</button>` : ''}
+          ${item ? `<span class="vs-tile-badge" aria-hidden="true">${item.cantidad}</span>
+          <button type="button" class="vs-tile-menos" aria-label="Quitar una de ${attr(p)}">−</button>` : ''}
         </div>`;
       }).join('');
     }
@@ -517,6 +517,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20260924r"></script>
+  <script src="nav.js?v=20260924t"></script>
 </body>
 </html>
