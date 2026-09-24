@@ -26,6 +26,7 @@
     material:  '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
     bloquear:  '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     reset:     '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+    salir:     '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5M15 12H4"/>',
   };
 
   const SECTIONS = [
@@ -39,7 +40,7 @@
       { href: 'stock-material.html', icon: 'material',  color: '#bf5af2', title: 'Filamentos y material', sub: 'Rollos y gramos disponibles' },
     ]},
     { label: 'Cuenta', rows: [
-      { action: 'lock',              icon: 'bloquear',  color: '#8e8e93', title: 'Bloquear app', sub: 'Pedir el PIN otra vez' },
+      { action: 'lock',              icon: 'salir',      color: '#8e8e93', title: 'Cerrar sesión', sub: 'Salir de tu cuenta en este dispositivo' },
       { href: 'reset.html',          icon: 'reset',     color: '#ff453a', title: 'Restablecer datos', sub: 'Borrar la información guardada', danger: true },
     ]},
   ];
@@ -154,8 +155,11 @@
     }));
     backdrop.addEventListener('click', closeSheet);
     sheet.querySelector('.sheet-close').addEventListener('click', closeSheet);
+    const cuenta = window.MP_AUTH && MP_AUTH.usuario;
+    if (cuenta && cuenta.email) sheet.querySelector('[data-action="lock"] .sheet-row-sub').textContent = cuenta.email;
     sheet.querySelector('[data-action="lock"]').addEventListener('click', () => {
-      try { localStorage.removeItem('mp_pin_ok'); } catch (_) {}
+      if (!confirm('¿Cerrar sesión en este dispositivo? Tus datos siguen guardados en tu cuenta.')) return;
+      if (window.MP_AUTH) return MP_AUTH.salir();
       location.reload();
     });
     document.addEventListener('keydown', e => {

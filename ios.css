@@ -1529,3 +1529,36 @@ a.inv-tile:active { transform: scale(0.97); }
 .rs-btns .inv-btn.is-plain, .rs-btns .inv-btn.is-danger { background: var(--ios-bg-2); }
 .inv-btn.is-destroy { background: var(--ios-red); color: #fff; }
 .inv-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+/* ── Inicio de sesión ──────────────────────────── */
+#mp-login {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  background: var(--ios-bg);
+  font-family: var(--ios-font);
+  overflow-y: auto;
+}
+.auth-card { width: 100%; max-width: 360px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-icon { width: 72px; height: 72px; border-radius: 18px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18); margin-bottom: 16px; }
+.auth-card h1 { font-size: 28px; line-height: 34px; font-weight: 700; letter-spacing: 0.36px; color: var(--text); }
+.auth-sub { margin-top: 4px; font-size: 15px; color: var(--ios-label-2); }
+.auth-fields { width: 100%; margin-top: 24px; border-radius: 14px; background: var(--ios-bg-2); overflow: hidden; }
+.auth-fields input {
+  display: block; width: 100%; min-height: 50px; box-sizing: border-box; padding: 0 16px;
+  border: none; background: transparent; color: var(--text);
+  font-family: var(--ios-font); font-size: 17px; outline: none;
+}
+.auth-fields input + input { border-top: 0.5px solid var(--ios-separator); }
+.auth-fields input::placeholder { color: var(--ios-label-3); }
+.auth-fields input:focus { background: rgba(var(--ink), 0.03); }
+.auth-msg { min-height: 20px; margin: 10px 4px 6px; font-size: 14px; color: var(--ios-red); }
+.auth-msg.is-ok { color: var(--ios-green); }
+.auth-btn {
+  width: 100%; min-height: 50px; border: none; border-radius: 14px;
+  background: var(--ios-green); color: var(--ios-on-accent);
+  font-family: var(--ios-font); font-size: 17px; font-weight: 600; cursor: pointer;
+}
+.auth-btn:disabled { opacity: 0.5; cursor: default; }
+.auth-btn:active:not(:disabled) { transform: scale(0.98); }
+.auth-link { margin-top: 14px; border: none; background: none; color: var(--ios-green); font-family: var(--ios-font); font-size: 15px; cursor: pointer; padding: 6px; }
