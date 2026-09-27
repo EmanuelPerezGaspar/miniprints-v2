@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260927a"></script>
-  <script src="categorias.js?v=20260927a"></script>
-  <script src="whatsapp.js?v=20260927a"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927a" />
+  <script src="theme.js?v=20260927b"></script>
+  <script src="categorias.js?v=20260927b"></script>
+  <script src="whatsapp.js?v=20260927b"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927b" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -85,8 +85,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260927a" />
-  <link rel="stylesheet" href="nav.css?v=20260927a" />
+  <link rel="stylesheet" href="ios.css?v=20260927b" />
+  <link rel="stylesheet" href="nav.css?v=20260927b" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -97,7 +97,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927a"></script>
+  <script type="module" src="firebase-sync.js?v=20260927b"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -123,19 +123,9 @@
           <!-- 1. Qué se vendió -->
           <section class="form-card cq-step" aria-labelledby="vs-s1">
             <h2 class="cq-step-title" id="vs-s1"><span class="cq-num">1</span>¿Qué vendiste?</h2>
-            <!-- Buscador y categorías: se quedan fijos arriba al bajar por la lista -->
-            <div class="vs-finder">
-              <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar pieza o categoría" autocomplete="off" enterkeyhint="search" aria-label="Buscar pieza" />
-              <div class="vs-cats" id="vs-cats" role="radiogroup" aria-label="Filtrar por categoría"></div>
-            </div>
-            <div class="vs-list-head mat-head"><span id="vs-count"></span>
-              <div class="cq-seg mat-vista" data-for="vs-vista" role="radiogroup" aria-label="Vista">
-                <button type="button" data-v="grid" aria-label="Cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
-                <button type="button" data-v="lista" aria-label="Lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
-              </div>
-              <input type="hidden" id="vs-vista" value="grid" />
-            </div>
-            <div class="vs-secciones" id="vs-grid"></div>
+            <!-- Menú de categorías: cada una abre una hoja con sus piezas -->
+            <button type="button" class="vs-search vs-search-btn" onclick="abrirPiezas('todas', true)">Buscar pieza</button>
+            <div class="vs-catmenu" id="vs-catmenu" role="list"></div>
           </section>
 
           <!-- 2. Pedido -->
@@ -218,6 +208,27 @@
     </div>
   </div>
 
+  <!-- Hoja: piezas de una categoría (con su propio scroll) -->
+  <div class="sheet-backdrop" id="vs-backdrop" hidden></div>
+  <div class="sheet inv-sheet vs-sheet" id="vs-sheet" role="dialog" aria-modal="true" aria-labelledby="vs-sheet-t" hidden>
+    <div class="sheet-head">
+      <button class="sheet-close" type="button" onclick="cerrarPiezas()" aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+      <h2 id="vs-sheet-t">Piezas</h2>
+    </div>
+    <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar en esta categoría" autocomplete="off" enterkeyhint="search" aria-label="Buscar pieza" />
+    <div class="vs-list-head mat-head"><span id="vs-count"></span>
+      <div class="cq-seg mat-vista" data-for="vs-vista" role="radiogroup" aria-label="Vista">
+        <button type="button" data-v="grid" aria-label="Cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+        <button type="button" data-v="lista" aria-label="Lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+      </div>
+      <input type="hidden" id="vs-vista" value="grid" />
+    </div>
+    <div class="vs-sheet-scroll" id="vs-scroll"><div class="vs-secciones" id="vs-grid"></div></div>
+    <div class="vs-sheet-foot">
+      <button type="button" class="inv-btn" id="vs-listo" onclick="cerrarPiezas(true)">Listo</button>
+    </div>
+  </div>
+
   <div id="toast"></div>
 
   <script>
@@ -275,14 +286,34 @@
     }
 
     let catFiltro = 'todas';
-    function renderCats(piezas) {
-      const cuenta = { todas: piezas.length, otras: 0 };
-      piezas.forEach(p => { const c = MP_CAT.de(p) || 'otras'; cuenta[c] = (cuenta[c] || 0) + 1; });
-      const opciones = [{ id: 'todas', nombre: 'Todas' }, ...MP_CAT.lista, { id: 'otras', nombre: 'Sin categoría' }]
-        .filter(o => o.id === 'todas' || cuenta[o.id]);
-      if (!opciones.some(o => o.id === catFiltro)) catFiltro = 'todas';
-      document.getElementById('vs-cats').innerHTML = opciones.map(o =>
-        `<button type="button" role="radio" data-cat="${attr(o.id)}" aria-checked="${o.id === catFiltro}">${escapeHtml(o.nombre)} <span>${cuenta[o.id] || 0}</span></button>`).join('');
+    const ICONO_TODAS = '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>';
+    function masVendidas(piezas) {
+      return piezas.filter(p => _popularidad[p] > 0).sort((a, b) => _popularidad[b] - _popularidad[a] || a.localeCompare(b, 'es')).slice(0, 12);
+    }
+    function nombreCat(id) { return id === 'todas' ? 'Todas' : id === 'top' ? 'Más vendidas' : id === 'otras' ? 'Sin categoría' : MP_CAT.nombre(id); }
+    // Tarjetas del menú: ícono, piezas disponibles y cuántas van en el pedido
+    function renderCatMenu(piezas) {
+      const catDe = p => MP_CAT.de(p) || 'otras';
+      const grupos = {};
+      piezas.forEach(p => (grupos[catDe(p)] = grupos[catDe(p)] || []).push(p));
+      const top = masVendidas(piezas);
+      const opciones = [
+        ...(top.length ? [{ id: 'top', icono: ICONO_TOP, ps: top }] : []),
+        ...[...MP_CAT.lista.map(c => c.id), 'otras'].filter(id => grupos[id]).map(id => ({ id, icono: MP_CAT.icono(id === 'otras' ? '' : id), ps: grupos[id] })),
+        { id: 'todas', icono: ICONO_TODAS, ps: piezas },
+      ];
+      const menu = document.getElementById('vs-catmenu');
+      if (!piezas.length) { menu.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`; return; }
+      menu.innerHTML = opciones.map(o => {
+        const enPedido = carrito.filter(it => o.ps.includes(it.pieza)).reduce((s, it) => s + it.cantidad, 0);
+        return `<button type="button" class="vs-cat-tile${o.id === 'top' ? ' is-top' : ''}${enPedido ? ' has-badge' : ''}" role="listitem" data-cat="${attr(o.id)}"
+                  aria-label="${attr(nombreCat(o.id))}, ${o.ps.length} piezas${enPedido ? ', ' + enPedido + ' en el pedido' : ''}">
+            <span class="vs-cat-ico" aria-hidden="true"><svg viewBox="0 0 24 24">${o.icono}</svg></span>
+            <span class="vs-cat-name">${escapeHtml(nombreCat(o.id))}</span>
+            <span class="vs-cat-n">${o.ps.length} ${o.ps.length === 1 ? 'pieza' : 'piezas'}</span>
+            ${enPedido ? `<span class="vs-cat-badge" aria-hidden="true">${enPedido}</span>` : ''}
+          </button>`;
+      }).join('');
     }
 
     // Búsqueda sin acentos ni mayúsculas, con palabras en cualquier orden (también por categoría)
@@ -319,14 +350,13 @@
       const q = normal(document.getElementById('vs-buscar')?.value).trim();
       const grid = document.getElementById('vs-grid');
       const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0);
-      renderCats(piezas);
-      if (!piezas.length) {
-        document.getElementById('vs-count').textContent = '';
-        grid.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`;
-        return;
-      }
+      renderCatMenu(piezas);
+      actualizarListo();
+      if (document.getElementById('vs-sheet').hidden) return;
       const catDe = p => MP_CAT.de(p) || 'otras';
-      const enCat = piezas.filter(p => catFiltro === 'todas' || catDe(p) === catFiltro);
+      const top = masVendidas(piezas);
+      const enCat = catFiltro === 'top' ? top : piezas.filter(p => catFiltro === 'todas' || catDe(p) === catFiltro);
+      if (!enCat.length) { document.getElementById('vs-count').textContent = ''; grid.innerHTML = '<div class="vs-empty">Ya no hay piezas disponibles aquí.</div>'; return; }
       let html = '', total = 0;
       if (q) {
         // Resultados: primero los que empiezan con lo escrito, luego los que lo tienen al inicio de una palabra
@@ -340,22 +370,22 @@
         total = res.length;
         html = res.length ? seccion('', '', res)
           : `<div class="vs-empty">Sin resultados para "${escapeHtml(document.getElementById('vs-buscar').value.trim())}"</div>`;
+      } else if (catFiltro === 'top') {
+        total = enCat.length;
+        html = seccion('', '', enCat);
       } else if (catFiltro !== 'todas') {
         total = enCat.length;
         html = seccion('', '', enCat.sort(porNombre));
       } else {
         total = piezas.length;
-        // Las más vendidas arriba para tenerlas a la mano; después todo por categoría y en orden alfabético
-        const top = piezas.filter(p => _popularidad[p] > 0)
-          .sort((a, b) => _popularidad[b] - _popularidad[a] || porNombre(a, b)).slice(0, 6);
-        if (top.length && piezas.length > 8) html += seccion('Más vendidas', ICONO_TOP, top);
+        // Todas: agrupadas por categoría y en orden alfabético
         const grupos = {};
         piezas.forEach(p => (grupos[catDe(p)] = grupos[catDe(p)] || []).push(p));
         [...MP_CAT.lista.map(c => c.id), 'otras'].filter(id => grupos[id]).forEach(id => {
           html += seccion(id === 'otras' ? 'Sin categoría' : MP_CAT.nombre(id), MP_CAT.icono(id === 'otras' ? '' : id), grupos[id].sort(porNombre));
         });
       }
-      document.getElementById('vs-count').textContent = q || catFiltro !== 'todas' ? `${total} de ${piezas.length} piezas` : `${piezas.length} piezas`;
+      document.getElementById('vs-count').textContent = q ? `${total} de ${enCat.length} piezas` : `${total} ${total === 1 ? 'pieza' : 'piezas'}`;
       grid.innerHTML = html;
     }
 
@@ -365,13 +395,48 @@
       refreshPiezaSelect();
     });
 
-    document.getElementById('vs-cats').addEventListener('click', e => {
+    document.getElementById('vs-catmenu').addEventListener('click', e => {
       const b = e.target.closest('[data-cat]');
-      if (!b) return;
-      catFiltro = b.dataset.cat;
-      refreshPiezaSelect();
-      alInicioDeLista();
+      if (b) abrirPiezas(b.dataset.cat);
     });
+
+    // ── Hoja de piezas ──
+    let _abridor = null;
+    function abrirPiezas(cat, buscar) {
+      catFiltro = cat;
+      const sh = document.getElementById('vs-sheet'), bd = document.getElementById('vs-backdrop');
+      document.getElementById('vs-sheet-t').textContent = nombreCat(cat);
+      const q = document.getElementById('vs-buscar');
+      q.value = '';
+      q.placeholder = cat === 'todas' ? 'Buscar pieza o categoría' : 'Buscar en ' + nombreCat(cat).toLowerCase();
+      _abridor = document.activeElement;
+      sh.hidden = bd.hidden = false;
+      refreshPiezaSelect();
+      document.getElementById('vs-scroll').scrollTop = 0;
+      document.documentElement.style.overflow = 'hidden';
+      requestAnimationFrame(() => requestAnimationFrame(() => { sh.classList.add('open'); bd.classList.add('open'); }));
+      if (buscar) q.focus({ preventScroll: true });
+    }
+    function cerrarPiezas(listo) {
+      const sh = document.getElementById('vs-sheet'), bd = document.getElementById('vs-backdrop');
+      if (sh.hidden) return;
+      sh.classList.remove('open'); bd.classList.remove('open');
+      document.documentElement.style.overflow = '';
+      document.activeElement && document.activeElement.blur && document.activeElement.blur();
+      setTimeout(() => { if (!sh.classList.contains('open')) { sh.hidden = bd.hidden = true; } }, 420);
+      refreshPiezaSelect();
+      // Con "Listo" se baja al pedido para revisar cantidades y precios
+      if (listo && carrito.length) setTimeout(() => document.getElementById('vs-pedido').scrollIntoView({ behavior: 'smooth', block: 'start' }), 300);
+      else if (_abridor && _abridor.focus) _abridor.focus({ preventScroll: true });
+    }
+    function actualizarListo() {
+      const uds = carrito.reduce((s, it) => s + it.cantidad, 0);
+      const total = carrito.reduce((s, it) => s + it.precio * it.cantidad, 0);
+      document.getElementById('vs-listo').innerHTML = uds
+        ? `Listo <span class="vs-listo-sub">· ${uds} pieza${uds > 1 ? 's' : ''} · ${fmt(total)}</span>` : 'Listo';
+    }
+    document.getElementById('vs-backdrop').addEventListener('click', () => cerrarPiezas());
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarPiezas(); });
 
     function agregarAlCarrito(pieza) {
       const item = enCarrito(pieza);
@@ -454,15 +519,7 @@
       const b = e.target.closest('.vs-tile-main');
       if (b && !b.disabled) agregarAlCarrito(tile.dataset.pieza);
     });
-    document.getElementById('vs-buscar').addEventListener('input', () => { refreshPiezaSelect(); alInicioDeLista(); });
-    // Si ya bajaste por la lista, al filtrar o buscar vuelve al principio de los resultados
-    function alInicioDeLista() {
-      const f = document.querySelector('.vs-finder');
-      const lista = document.querySelector('.vs-list-head');
-      if (f.getBoundingClientRect().top <= parseFloat(getComputedStyle(f).top) + 1 && lista.getBoundingClientRect().top < f.getBoundingClientRect().bottom) {
-        window.scrollBy({ top: lista.getBoundingClientRect().top - f.getBoundingClientRect().bottom - 8 });
-      }
-    }
+    document.getElementById('vs-buscar').addEventListener('input', () => { refreshPiezaSelect(); document.getElementById('vs-scroll').scrollTop = 0; });
 
     // Controles segmentados de pago
     function syncSeg() {
@@ -576,6 +633,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20260927a"></script>
+  <script src="nav.js?v=20260927b"></script>
 </body>
 </html>
