@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Finanzas</title>
-  <script src="theme.js?v=20260927b"></script>
-  <script src="inventario.js?v=20260927b"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927b" />
+  <script src="theme.js?v=20260927c"></script>
+  <script src="inventario.js?v=20260927c"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927c" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20260927b"></script>
-  <link rel="stylesheet" href="ios.css?v=20260927b" />
-  <link rel="stylesheet" href="nav.css?v=20260927b" />
+  <script src="ios-charts.js?v=20260927c"></script>
+  <link rel="stylesheet" href="ios.css?v=20260927c" />
+  <link rel="stylesheet" href="nav.css?v=20260927c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -21,7 +21,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927b"></script>
+  <script type="module" src="firebase-sync.js?v=20260927c"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -60,6 +60,9 @@
         <h2 class="fn-sec-title">Por pieza</h2>
         <div id="fn-piezas"></div>
 
+        <h2 class="fn-sec-title">Precio vs. cotización</h2>
+        <div id="fn-cotiz"></div>
+
         <h2 class="fn-sec-title">Formas de pago</h2>
         <div id="fn-pagos"></div>
       </div>
@@ -81,6 +84,8 @@
       DB.materials = get('mp_materials', {});
       DB.ventas = get('mp_ventas', []);
       DB.cotizaciones = get('mp_cotizaciones', []);
+      DB.costos = get('mp_costos_piezas', {});
+      DB.precios = get('mp_precios', {});
     }
 
     function desde() {
@@ -157,6 +162,7 @@
 
       renderMeses();
       renderPiezas(pagadas);
+      renderCotiz(ventas);
       renderPagos(pagadas, ingresos);
     }
 
@@ -223,6 +229,59 @@
       }).join('')}</div>`;
     }
 
+    // Cuánto más (o menos) se cobra respecto al precio que dio la cotización
+    function renderCotiz(ventas) {
+      const cont = document.getElementById('fn-cotiz');
+      const cot = p => (DB.costos[p] || {}).cotizado || 0;
+      const corto = n => (Math.round(n * 100) % 100 ? money(n) : money0(n));
+      const acc = {};
+      ventas.forEach(v => ventaItems(v).forEach(it => {
+        const c = cot(it.pieza), uds = Number(it.cantidad) || 0;
+        if (!(c > 0) || !uds) return;
+        const a = acc[it.pieza] = acc[it.pieza] || { uds: 0, cobrado: 0, cotizado: 0 };
+        a.uds += uds; a.cobrado += (Number(it.precio) || 0) * uds; a.cotizado += c * uds;
+      }));
+      const filas = Object.entries(acc).map(([p, a]) => ({ p, ...a, extra: a.cobrado - a.cotizado })).sort((a, b) => b.extra - a.extra);
+      const fila = (titulo, meta, extra, base) => {
+        const pct = base > 0 ? Math.round(extra / base * 100) : 0;
+        const st = extra > 0.004 ? 'st-ok' : extra < -0.004 ? 'st-low' : 'st-mute';
+        return `<div class="hx-row ${st}" style="cursor:default">
+          <span class="hx-text"><span class="hx-title">${esc(titulo)}</span><span class="hx-meta">${meta}</span></span>
+          <span class="hx-right"><span class="hx-amt" style="color:var(--st-color)">${extra >= 0 ? '+' : '−'}${money0(Math.abs(extra))}</span><span class="hx-meta">${extra >= 0 ? '+' : '−'}${Math.abs(pct)} %</span></span>
+        </div>`;
+      };
+      if (filas.length) {
+        const cobrado = filas.reduce((s, f) => s + f.cobrado, 0), cotizado = filas.reduce((s, f) => s + f.cotizado, 0);
+        const extra = cobrado - cotizado, pct = cotizado > 0 ? Math.round(extra / cotizado * 100) : 0;
+        const uds = filas.reduce((s, f) => s + f.uds, 0);
+        const st = extra >= 0 ? 'st-ok' : 'st-low';
+        cont.innerHTML = `
+          <section class="fn-card ${st}" aria-label="Precio contra cotización">
+            <span class="fn-label">${extra >= 0 ? 'Le sacaste de más' : 'Cobraste de menos'}</span>
+            <div class="fn-big"><span class="fn-big-num">${extra >= 0 ? '+' : '−'}${money0(Math.abs(extra))}</span><span class="fn-pill">${extra >= 0 ? '+' : '−'}${Math.abs(pct)} % sobre lo cotizado</span></div>
+            <div class="fn-legend">
+              <div class="fn-legend-row"><i style="background:var(--ios-blue)"></i><span>Vendido a</span><span>${money(cobrado)}</span></div>
+              <div class="fn-legend-row"><i style="background:var(--ios-purple)"></i><span>Según cotización</span><span>${money(cotizado)}</span></div>
+            </div>
+            <p class="fn-note">${uds} pieza${uds !== 1 ? 's' : ''} vendida${uds !== 1 ? 's' : ''} en este periodo con precio cotizado registrado.</p>
+          </section>
+          <div class="hx-list is-plain" style="margin-top:var(--sp-title)">${filas.slice(0, 12).map(f =>
+            fila(f.p, `${f.uds} vendida${f.uds !== 1 ? 's' : ''} · ${corto(f.cotizado / f.uds)} → ${corto(f.cobrado / f.uds)} c/u`, f.extra, f.cotizado)).join('')}</div>`;
+        return;
+      }
+      // Sin ventas comparables: se muestra el precio actual de cada pieza contra su cotización
+      const piezas = Object.entries(DB.costos).filter(([p, c]) => c && c.cotizado > 0)
+        .map(([p, c]) => { const tuyo = DB.precios[p] || c.precio || 0; return { p, c, tuyo, extra: tuyo ? tuyo - c.cotizado : 0 }; })
+        .filter(x => x.tuyo > 0).sort((a, b) => b.extra - a.extra);
+      if (!piezas.length) {
+        cont.innerHTML = '<div class="hx-empty">Cuando confirmes una impresión en Cotizar, aquí verás cuánto más cobras que lo cotizado.</div>';
+        return;
+      }
+      cont.innerHTML = `<p class="fn-note" style="margin-bottom:var(--sp-title)">Aún no hay ventas de estas piezas en el periodo. Tu precio actual contra lo cotizado, por pieza:</p>
+        <div class="hx-list is-plain">${piezas.slice(0, 12).map(x =>
+          fila(x.p, `cotizado ${corto(x.c.cotizado)} → tu precio ${corto(x.tuyo)}`, x.extra, x.c.cotizado)).join('')}</div>`;
+    }
+
     function renderPagos(pagadas, ingresos) {
       const METODOS = [['Efectivo', 'st-ok'], ['Transferencia', 'st-info'], ['Tarjeta', 'st-low']];
       const cont = document.getElementById('fn-pagos');
@@ -244,6 +303,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260927b"></script>
+  <script src="nav.js?v=20260927c"></script>
 </body>
 </html>
