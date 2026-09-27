@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Restablecer datos</title>
-  <script src="theme.js?v=20260927b"></script>
-  <script src="inventario.js?v=20260927b"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927b" />
+  <script src="theme.js?v=20260927c"></script>
+  <script src="inventario.js?v=20260927c"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927c" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260927b" />
-  <link rel="stylesheet" href="nav.css?v=20260927b" />
+  <link rel="stylesheet" href="ios.css?v=20260927c" />
+  <link rel="stylesheet" href="nav.css?v=20260927c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -22,7 +22,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927b"></script>
+  <script type="module" src="firebase-sync.js?v=20260927c"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -79,7 +79,7 @@
 
   <script>
     const { esc } = MP_INV;
-    const SYNC_KEYS = ['mp_config', 'mp_materials', 'mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial', 'mp_templates', 'mp_meta_mensual', 'mp_categorias', 'mp_wa_grupo', 'mp_wa_modo', 'mp_precios', 'mp_categorias_lista', 'mp_meta_anual', 'mp_metas_eventos'];
+    const SYNC_KEYS = ['mp_config', 'mp_materials', 'mp_piezas', 'mp_ventas', 'mp_cotizaciones', 'mp_historial', 'mp_templates', 'mp_meta_mensual', 'mp_categorias', 'mp_wa_grupo', 'mp_wa_modo', 'mp_precios', 'mp_categorias_lista', 'mp_meta_anual', 'mp_metas_eventos', 'mp_costos_piezas'];
     const get = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
     // Se escribe vacío (en lugar de quitar la clave) para que el borrado también se sincronice
     const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -93,7 +93,7 @@
         borrar: () => set('mp_cotizaciones', []) },
       { id: 'piezas', titulo: 'Stock de piezas', color: 'var(--ios-orange)', icon: '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
         detalle: () => { const p = Object.values(get('mp_piezas', {})); return `${p.length} modelos · ${p.reduce((s, n) => s + n, 0)} unidades`; },
-        borrar: () => { set('mp_piezas', {}); set('mp_historial', {}); set('mp_precios', {}); } },
+        borrar: () => { set('mp_piezas', {}); set('mp_historial', {}); set('mp_precios', {}); set('mp_costos_piezas', {}); } },
       { id: 'materiales', titulo: 'Filamentos', color: 'var(--ios-purple)', icon: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
         detalle: () => { const n = Object.keys(get('mp_materials', {})).length; return `${n} registrado${n !== 1 ? 's' : ''} · se borra la lista`; },
         borrar: () => set('mp_materials', {}) },
@@ -167,6 +167,7 @@
       };
       set('mp_piezas', renombrar(get('mp_piezas', {}), (a, b) => (Number(a) || 0) + (Number(b) || 0)));
       set('mp_precios', renombrar(get('mp_precios', {}), (a, b) => a || b));
+      set('mp_costos_piezas', renombrar(get('mp_costos_piezas', {}), (a, b) => a || b));
       set('mp_categorias', renombrar(get('mp_categorias', {}), (a, b) => a || b));
       set('mp_historial', renombrar(get('mp_historial', {}), (a, b) => [...(a || []), ...(b || [])]));
       set('mp_ventas', get('mp_ventas', []).map(v => {
@@ -222,6 +223,6 @@
     window.addEventListener('mp-sync-ready', render, { once: true });
     window.addEventListener('mp-sync-update', render);
   </script>
-  <script src="nav.js?v=20260927b"></script>
+  <script src="nav.js?v=20260927c"></script>
 </body>
 </html>

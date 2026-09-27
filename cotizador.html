@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260927b"></script>
-  <script src="whatsapp.js?v=20260927b"></script>
-  <script src="categorias.js?v=20260927b"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927b" />
+  <script src="theme.js?v=20260927c"></script>
+  <script src="whatsapp.js?v=20260927c"></script>
+  <script src="categorias.js?v=20260927c"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927c" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -539,8 +539,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260927b" />
-  <link rel="stylesheet" href="nav.css?v=20260927b" />
+  <link rel="stylesheet" href="ios.css?v=20260927c" />
+  <link rel="stylesheet" href="nav.css?v=20260927c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -551,7 +551,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927b"></script>
+  <script type="module" src="firebase-sync.js?v=20260927c"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1499,13 +1499,29 @@
       return total > 0 ? Math.round(total / cant * 100) / 100 : 0;
     }
     function pintarPrecioModal() {
-      if (state.precioEditado) return;
+      if (state.precioEditado) return pintarDiferencia();
       const nombre = piezaExistente(document.getElementById('modal-nombre').value.trim());
       const guardado = leerJSON('mp_precios', {})[nombre];
       const sug = precioSugerido();
       document.getElementById('modal-precio').value = sug || (guardado > 0 ? guardado : '');
-      document.getElementById('modal-precio-hint').textContent = guardado > 0 && guardado !== sug
-        ? `Precio actual de la pieza: ${fmt(guardado)}` : (sug ? 'Precio por pieza de esta cotización; cámbialo si vas a cobrar otro.' : '');
+      pintarDiferencia();
+    }
+    // Compara tu precio con el de la cotización (por pieza) mientras lo escribes
+    function pintarDiferencia() {
+      const hint = document.getElementById('modal-precio-hint');
+      const sug = precioSugerido();
+      const p = parseFloat(document.getElementById('modal-precio').value);
+      const guardado = leerJSON('mp_precios', {})[piezaExistente(document.getElementById('modal-nombre').value.trim())];
+      const antes = guardado > 0 && guardado !== p ? ` · Antes: ${fmt(guardado)}` : '';
+      hint.className = 'modal-hint';
+      if (!(sug > 0)) { hint.textContent = guardado > 0 ? `Precio actual de la pieza: ${fmt(guardado)}` : ''; return; }
+      if (!(p >= 0) || document.getElementById('modal-precio').value.trim() === '') { hint.textContent = `Cotizado: ${fmt(sug)} por pieza${antes}`; return; }
+      const d = Math.round((p - sug) * 100) / 100, pct = Math.round(d / sug * 100);
+      if (d === 0) hint.textContent = `Igual a lo cotizado (${fmt(sug)} por pieza)${antes}`;
+      else {
+        hint.textContent = `${d > 0 ? '+' : '−'}${fmt(Math.abs(d))} (${d > 0 ? '+' : '−'}${Math.abs(pct)} %) ${d > 0 ? 'sobre' : 'debajo de'} lo cotizado (${fmt(sug)})${antes}`;
+        hint.classList.add(d > 0 ? 'is-ok' : 'is-warn');
+      }
     }
     function chipsModal(valor) {
       document.getElementById('modal-cat').value = valor || '';
@@ -1531,7 +1547,7 @@
     }
     document.getElementById('modal-nombre').addEventListener('input', modalPorNombre);
     document.getElementById('modal-cantidad').addEventListener('input', pintarPrecioModal);
-    document.getElementById('modal-precio').addEventListener('input', () => { state.precioEditado = true; });
+    document.getElementById('modal-precio').addEventListener('input', () => { state.precioEditado = true; pintarDiferencia(); });
     document.getElementById('modal-cat-nombre').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); crearCategoriaModal(); } });
 
     function closeModal() { document.getElementById('modal-imp').classList.remove('open'); }
@@ -1589,9 +1605,19 @@
         localStorage.setItem('mp_categorias', JSON.stringify(cats));
       }
 
+      // Precio cotizado, costo y tu precio por pieza: para saber cuánto más le sacas
+      const cotizadoU = precioSugerido();
+      const costoU = state.pendingCot?.costo_base > 0 ? Math.round(state.pendingCot.costo_base / cantidad * 100) / 100 : null;
+      if (cotizadoU > 0) {
+        const cp = leerJSON('mp_costos_piezas', {});
+        cp[nombre] = { cotizado: cotizadoU, costo: costoU, precio: precio != null ? Math.round(precio * 100) / 100 : (leerJSON('mp_precios', {})[nombre] || null), fecha: new Date().toISOString().slice(0, 10) };
+        localStorage.setItem('mp_costos_piezas', JSON.stringify(cp));
+      }
+
       // Save cotización as confirmed
       if (state.pendingCot) {
-        const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad };
+        const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad,
+          precio_cotizado_u: cotizadoU || null, precio_venta_u: precio != null ? Math.round(precio * 100) / 100 : null, costo_u: costoU };
         DB.cotizaciones.unshift(cot);
         saveKey('cotizaciones');
         state.pendingCot = null;
@@ -2037,6 +2063,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260927b"></script>
+  <script src="nav.js?v=20260927c"></script>
 </body>
 </html>

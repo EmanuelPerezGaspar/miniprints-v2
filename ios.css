@@ -1820,6 +1820,13 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .modal-box .vs-price input { padding-left: 32px !important; font-family: var(--ios-font-rounded) !important; font-weight: 600; width: 100%; box-sizing: border-box; }
 .modal-hint { display: block; font-size: 12px; line-height: 16px; color: var(--ios-label-2); }
 .modal-hint:empty { display: none; }
+.modal-hint.is-ok { color: var(--ios-green); font-weight: 600; }
+.pz-dif { margin-left: 4px; font-weight: 600; color: var(--ios-label-2); white-space: nowrap; }
+#e-cotiz .inv-group-row > span:first-child { white-space: nowrap; }
+#e-cotiz .inv-group-row > span:last-child { white-space: nowrap; }
+.pz-dif.is-up { color: var(--ios-green); }
+.pz-dif.is-down { color: var(--ios-orange); }
+.modal-hint.is-warn { color: var(--ios-orange); font-weight: 600; }
 .modal-box .cat-nueva input { flex: 1; min-width: 0; }
 .modal-box .cq-chips button { min-height: 34px; padding: 7px 13px; font-size: 14px; }
 /* Los modales quedan por encima de la barra de pestañas y del aviso de sincronización */

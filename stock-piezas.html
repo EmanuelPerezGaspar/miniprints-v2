@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260927b"></script>
-  <script src="categorias.js?v=20260927b"></script>
-  <script src="inventario.js?v=20260927b"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927b" />
+  <script src="theme.js?v=20260927c"></script>
+  <script src="categorias.js?v=20260927c"></script>
+  <script src="inventario.js?v=20260927c"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927c" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260927b" />
-  <link rel="stylesheet" href="nav.css?v=20260927b" />
+  <link rel="stylesheet" href="ios.css?v=20260927c" />
+  <link rel="stylesheet" href="nav.css?v=20260927c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927b"></script>
+  <script type="module" src="firebase-sync.js?v=20260927c"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -139,6 +139,7 @@
       </div>
       <p class="inv-hint" id="e-cat-hint"></p>
     </div>
+    <div class="inv-group" id="e-cotiz" hidden aria-label="Precio contra cotización"></div>
     <div class="inv-group" id="e-mats"></div>
     <div class="inv-btns">
       <button type="button" class="inv-btn" onclick="guardarPieza()">Guardar</button>
@@ -160,6 +161,7 @@
       DB.historial  = get('mp_historial', {});
       DB.categorias = get('mp_categorias', {});
       DB.precios    = get('mp_precios', {});
+      DB.costos     = get('mp_costos_piezas', {});
       DB.ventas     = get('mp_ventas', []);
     }
     const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -457,6 +459,8 @@
       chipsCategoria('e-cats', cat);
       document.getElementById('e-cat-hint').textContent = !asignada && cat ? 'Sugerida por el nombre; toca otra si no es correcta.' : '';
 
+      pintarCotizacion();
+
       const usados = DB.historial[nombre] || [];
       const box = document.getElementById('e-mats');
       box.hidden = !usados.length;
@@ -466,6 +470,22 @@
       }).join('');
       MP_INV.abrir('sh-pieza');
     }
+    // Costo, precio cotizado y tu precio (se guardan al confirmar una impresión en Cotizar)
+    function pintarCotizacion() {
+      const box = document.getElementById('e-cotiz');
+      const c = (DB.costos || {})[editando];
+      if (!c || !(c.cotizado > 0)) { box.hidden = true; box.innerHTML = ''; return; }
+      const txt = document.getElementById('e-precio').value.trim();
+      const tuyo = txt !== '' && parseFloat(txt) >= 0 ? parseFloat(txt) : (DB.precios[editando] || c.precio || 0);
+      const d = Math.round((tuyo - c.cotizado) * 100) / 100, pct = Math.round(d / c.cotizado * 100);
+      const dif = !tuyo ? '' : d === 0 ? 'igual' : `${d > 0 ? '+' : '−'}${MP_INV.money(Math.abs(d))} (${d > 0 ? '+' : '−'}${Math.abs(pct)}%)`;
+      box.hidden = false;
+      box.innerHTML = `
+        ${c.costo > 0 ? `<div class="inv-group-row"><span>Costo de producción</span><span>${MP_INV.money(c.costo)}</span></div>` : ''}
+        <div class="inv-group-row"><span>Precio cotizado</span><span>${MP_INV.money(c.cotizado)}</span></div>
+        <div class="inv-group-row"><span>Tu precio</span><span>${tuyo ? MP_INV.money(tuyo) : '—'}${dif ? ` <b class="pz-dif ${d > 0 ? 'is-up' : d < 0 ? 'is-down' : ''}">${dif}</b>` : ''}</span></div>`;
+    }
+    document.getElementById('e-precio').addEventListener('input', () => { if (editando) pintarCotizacion(); });
     function pasoEdit(d) {
       const i = document.getElementById('e-cant');
       i.value = Math.max(0, (parseInt(i.value) || 0) + d);
@@ -502,6 +522,7 @@
       delete DB.piezas[nombre];
       savePiezas();
       if (nombre in DB.precios) { delete DB.precios[nombre]; savePrecios(); }
+      if (DB.costos && nombre in DB.costos) { delete DB.costos[nombre]; save('mp_costos_piezas', DB.costos); }
       MP_INV.cerrar();
       render();
       MP_INV.toast(usados.length ? 'Pieza eliminada · filamento devuelto al stock' : 'Pieza eliminada');
@@ -512,6 +533,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260927b"></script>
+  <script src="nav.js?v=20260927c"></script>
 </body>
 </html>
