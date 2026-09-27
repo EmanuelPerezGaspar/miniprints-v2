@@ -1230,7 +1230,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 
 /* ── Registrar venta ───────────────────────────── */
 .vs-wrap { margin-bottom: 24px; }
-.form-card .vs-search {
+.form-card .vs-search, .vs-sheet .vs-search {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: 12px center !important;
@@ -1717,16 +1717,50 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .vs-sec-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .vs-sec-n { font-size: 13px; font-weight: 600; color: var(--ios-label-2); font-variant-numeric: tabular-nums; }
 
-/* Buscador fijo arriba mientras se recorre la lista */
-.vs-finder {
-  position: sticky; top: calc(env(safe-area-inset-top, 0px) + 6px); z-index: 20;
-  display: flex; flex-direction: column; gap: 10px;
-  margin: -6px -10px 0; padding: 6px 10px 8px;
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--ios-bg-2) 82%, transparent);
-  -webkit-backdrop-filter: blur(16px) saturate(180%); backdrop-filter: blur(16px) saturate(180%);
+/* Ventas: menú de categorías; cada tarjeta abre una hoja con sus piezas */
+.vs-search-btn {
+  width: 100%; min-height: 46px; border: none; border-radius: var(--r-md); background-color: var(--ios-fill);
+  color: var(--ios-label-3, var(--ios-label-2)); font-family: var(--ios-font); font-size: 17px; text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.vs-finder .vs-cats { margin: -2px -10px 0; padding: 2px 10px; }
+.vs-catmenu { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.vs-cat-tile {
+  position: relative; display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 10px; row-gap: 1px; align-items: center; min-width: 0;
+  padding: 12px; border: none; border-radius: var(--r-md); background: var(--ios-fill-2);
+  color: var(--text); font-family: var(--ios-font); text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: transform 140ms var(--ios-spring, ease);
+}
+.vs-cat-tile:active { transform: scale(0.96); }
+.vs-cat-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
+.vs-cat-ico { grid-row: span 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(48, 209, 88, 0.16); color: var(--ios-green); }
+.vs-cat-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.vs-cat-tile.is-top .vs-cat-ico { background: rgba(255, 159, 10, 0.18); color: var(--ios-orange); }
+.vs-cat-name { align-self: end; max-width: 100%; font-size: 15px; line-height: 19px; font-weight: 600; letter-spacing: -0.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.vs-cat-tile.has-badge { padding-right: 40px; }
+.vs-cat-n { align-self: start; white-space: nowrap; font-size: 13px; color: var(--ios-label-2); font-variant-numeric: tabular-nums; }
+.vs-cat-badge {
+  position: absolute; top: 50%; right: 8px; transform: translateY(-50%); min-width: 24px; height: 24px; padding: 0 7px; box-sizing: border-box;
+  display: grid; place-items: center; border-radius: var(--r-pill); background: var(--ios-green); color: var(--ios-on-accent);
+  font-family: var(--ios-font-rounded); font-size: 13px; font-weight: 700;
+}
+@media (prefers-color-scheme: light) { .vs-cat-tile { background: var(--ios-bg-3); } }
+
+/* Hoja de piezas: altura fija, la lista tiene su propio scroll y "Listo" siempre visible */
+.sheet.vs-sheet {
+  height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px);
+  overflow: hidden; gap: 12px;
+}
+.vs-sheet .sheet-head { padding-bottom: 0; }
+.vs-sheet-scroll {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  margin: 0 -14px; padding: 0 14px 12px; scrollbar-width: none;
+}
+.vs-sheet-scroll::-webkit-scrollbar { display: none; }
+.vs-sheet .vs-tile-main { background: var(--sheet-card); }
+.vs-sheet .vs-tile-badge { box-shadow: none; }
+.vs-sheet .vs-list-head { margin-bottom: -4px; }
+.vs-sheet-foot { flex-shrink: 0; }
+.vs-listo-sub { font-weight: 500; opacity: 0.85; }
 
 /* Vista de lista: nombre completo, precio y disponibles a la derecha */
 .vs-rows { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
@@ -1790,5 +1824,6 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .modal-box .cq-chips button { min-height: 34px; padding: 7px 13px; font-size: 14px; }
 /* Los modales quedan por encima de la barra de pestañas y del aviso de sincronización */
 .modal-overlay { z-index: 1150 !important; }
-/* El buscador de Ventas se queda fijo: su contenedor no debe crear un scroll propio */
-.dash-main:has(.vs-finder) { overflow: visible; }
+
+/* Las secciones ocultas (p. ej. "Pedido" sin piezas) no se muestran */
+.cq-step[hidden] { display: none !important; }
