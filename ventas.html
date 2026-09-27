@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20260925a"></script>
-  <script src="categorias.js?v=20260925a"></script>
-  <script src="whatsapp.js?v=20260925a"></script>
-  <link rel="stylesheet" href="styles.css?v=20260925a" />
+  <script src="theme.js?v=20260927a"></script>
+  <script src="categorias.js?v=20260927a"></script>
+  <script src="whatsapp.js?v=20260927a"></script>
+  <link rel="stylesheet" href="styles.css?v=20260927a" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -85,8 +85,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260925a" />
-  <link rel="stylesheet" href="nav.css?v=20260925a" />
+  <link rel="stylesheet" href="ios.css?v=20260927a" />
+  <link rel="stylesheet" href="nav.css?v=20260927a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -97,7 +97,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260925a"></script>
+  <script type="module" src="firebase-sync.js?v=20260927a"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -123,10 +123,19 @@
           <!-- 1. Qué se vendió -->
           <section class="form-card cq-step" aria-labelledby="vs-s1">
             <h2 class="cq-step-title" id="vs-s1"><span class="cq-num">1</span>¿Qué vendiste?</h2>
-            <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
-            <div class="vs-cats" id="vs-cats" role="radiogroup" aria-label="Filtrar por categoría"></div>
-            <div class="vs-list-head"><span id="vs-count"></span><span>Toca para agregar</span></div>
-            <div class="vs-tiles" id="vs-grid" role="list"></div>
+            <!-- Buscador y categorías: se quedan fijos arriba al bajar por la lista -->
+            <div class="vs-finder">
+              <input type="search" id="vs-buscar" class="vs-search" placeholder="Buscar pieza o categoría" autocomplete="off" enterkeyhint="search" aria-label="Buscar pieza" />
+              <div class="vs-cats" id="vs-cats" role="radiogroup" aria-label="Filtrar por categoría"></div>
+            </div>
+            <div class="vs-list-head mat-head"><span id="vs-count"></span>
+              <div class="cq-seg mat-vista" data-for="vs-vista" role="radiogroup" aria-label="Vista">
+                <button type="button" data-v="grid" aria-label="Cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+                <button type="button" data-v="lista" aria-label="Lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
+              </div>
+              <input type="hidden" id="vs-vista" value="grid" />
+            </div>
+            <div class="vs-secciones" id="vs-grid"></div>
           </section>
 
           <!-- 2. Pedido -->
@@ -276,28 +285,15 @@
         `<button type="button" role="radio" data-cat="${attr(o.id)}" aria-checked="${o.id === catFiltro}">${escapeHtml(o.nombre)} <span>${cuenta[o.id] || 0}</span></button>`).join('');
     }
 
-    function refreshPiezaSelect() {
-      const q = (document.getElementById('vs-buscar')?.value || '').trim().toLowerCase();
-      const grid = document.getElementById('vs-grid');
-      const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0);
-      renderCats(piezas);
-      if (!piezas.length) {
-        document.getElementById('vs-count').textContent = '';
-        grid.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`;
-        return;
-      }
-      const visibles = piezas
-        .filter(p => catFiltro === 'todas' || (MP_CAT.de(p) || 'otras') === catFiltro)
-        .filter(p => !q || p.toLowerCase().includes(q))
-        .sort((a, b) => (_popularidad[b] || 0) - (_popularidad[a] || 0) || a.localeCompare(b, 'es'));
-      document.getElementById('vs-count').textContent = `${visibles.length} de ${piezas.length} piezas`;
-      if (!visibles.length) { grid.innerHTML = `<div class="vs-empty">Sin resultados${q ? ` para "${escapeHtml(q)}"` : ''}</div>`; return; }
-      grid.innerHTML = visibles.map(p => {
-        const item = enCarrito(p);
-        const libres = disponible(p) - (item ? item.cantidad : 0);
-        const precio = ultimoPrecio(p);
-        // Tarjeta tipo punto de venta: tocar suma una; el "−" quita una sin bajar al pedido
-        return `<div class="vs-tile${item ? ' is-added' : ''}${libres <= 0 ? ' is-agotada' : ''}" role="listitem" data-pieza="${attr(p)}">
+    // Búsqueda sin acentos ni mayúsculas, con palabras en cualquier orden (también por categoría)
+    const normal = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const ICONO_TOP = '<path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>';
+    function tarjetaPieza(p) {
+      const item = enCarrito(p);
+      const libres = disponible(p) - (item ? item.cantidad : 0);
+      const precio = ultimoPrecio(p);
+      // Tocar suma una; el "−" quita una sin bajar al pedido
+      return `<div class="vs-tile${item ? ' is-added' : ''}${libres <= 0 ? ' is-agotada' : ''}" role="listitem" data-pieza="${attr(p)}">
           <button type="button" class="vs-tile-main" ${libres <= 0 ? 'disabled' : ''}
                   aria-label="Agregar ${attr(p)}${precio ? '' : ', sin precio'}, ${libres} disponibles${item ? ', ' + item.cantidad + ' en el pedido' : ''}">
             <span class="vs-tile-name">${escapeHtml(p)}</span>
@@ -309,14 +305,72 @@
           ${item ? `<span class="vs-tile-badge" aria-hidden="true">${item.cantidad}</span>
           <button type="button" class="vs-tile-menos" aria-label="Quitar una de ${attr(p)}">−</button>` : ''}
         </div>`;
-      }).join('');
     }
+    function seccion(titulo, icono, ps) {
+      const cont = document.getElementById('vs-vista').value === 'lista' ? 'vs-rows' : 'vs-tiles';
+      return `<section class="vs-sec">
+          ${titulo ? `<h3 class="vs-sec-head"><span class="vs-sec-ico" aria-hidden="true"><svg viewBox="0 0 24 24">${icono}</svg></span><span class="vs-sec-t">${escapeHtml(titulo)}</span><span class="vs-sec-n">${ps.length}</span></h3>` : ''}
+          <div class="${cont}" role="list">${ps.map(tarjetaPieza).join('')}</div>
+        </section>`;
+    }
+    const porNombre = (a, b) => a.localeCompare(b, 'es');
+
+    function refreshPiezaSelect() {
+      const q = normal(document.getElementById('vs-buscar')?.value).trim();
+      const grid = document.getElementById('vs-grid');
+      const piezas = Object.keys(DB.piezas).filter(p => disponible(p) > 0);
+      renderCats(piezas);
+      if (!piezas.length) {
+        document.getElementById('vs-count').textContent = '';
+        grid.innerHTML = `<div class="vs-empty">No hay piezas en inventario.<br><a href="stock-piezas.html">Agregar piezas</a></div>`;
+        return;
+      }
+      const catDe = p => MP_CAT.de(p) || 'otras';
+      const enCat = piezas.filter(p => catFiltro === 'todas' || catDe(p) === catFiltro);
+      let html = '', total = 0;
+      if (q) {
+        // Resultados: primero los que empiezan con lo escrito, luego los que lo tienen al inicio de una palabra
+        const palabras = q.split(/\s+/);
+        const res = enCat.map(p => {
+          const n = normal(p), texto = n + ' ' + normal(MP_CAT.nombre(catDe(p)));
+          if (!palabras.every(w => texto.includes(w))) return null;
+          const rango = n.startsWith(palabras[0]) ? 0 : (' ' + n).includes(' ' + palabras[0]) ? 1 : 2;
+          return { p, rango };
+        }).filter(Boolean).sort((a, b) => a.rango - b.rango || porNombre(a.p, b.p)).map(x => x.p);
+        total = res.length;
+        html = res.length ? seccion('', '', res)
+          : `<div class="vs-empty">Sin resultados para "${escapeHtml(document.getElementById('vs-buscar').value.trim())}"</div>`;
+      } else if (catFiltro !== 'todas') {
+        total = enCat.length;
+        html = seccion('', '', enCat.sort(porNombre));
+      } else {
+        total = piezas.length;
+        // Las más vendidas arriba para tenerlas a la mano; después todo por categoría y en orden alfabético
+        const top = piezas.filter(p => _popularidad[p] > 0)
+          .sort((a, b) => _popularidad[b] - _popularidad[a] || porNombre(a, b)).slice(0, 6);
+        if (top.length && piezas.length > 8) html += seccion('Más vendidas', ICONO_TOP, top);
+        const grupos = {};
+        piezas.forEach(p => (grupos[catDe(p)] = grupos[catDe(p)] || []).push(p));
+        [...MP_CAT.lista.map(c => c.id), 'otras'].filter(id => grupos[id]).forEach(id => {
+          html += seccion(id === 'otras' ? 'Sin categoría' : MP_CAT.nombre(id), MP_CAT.icono(id === 'otras' ? '' : id), grupos[id].sort(porNombre));
+        });
+      }
+      document.getElementById('vs-count').textContent = q || catFiltro !== 'todas' ? `${total} de ${piezas.length} piezas` : `${piezas.length} piezas`;
+      grid.innerHTML = html;
+    }
+
+    try { const v = localStorage.getItem('mp_vista_ventas'); if (v === 'lista' || v === 'grid') document.getElementById('vs-vista').value = v; } catch (e) {}
+    document.getElementById('vs-vista').addEventListener('change', e => {
+      try { localStorage.setItem('mp_vista_ventas', e.target.value); } catch (err) {}
+      refreshPiezaSelect();
+    });
 
     document.getElementById('vs-cats').addEventListener('click', e => {
       const b = e.target.closest('[data-cat]');
       if (!b) return;
       catFiltro = b.dataset.cat;
       refreshPiezaSelect();
+      alInicioDeLista();
     });
 
     function agregarAlCarrito(pieza) {
@@ -400,7 +454,15 @@
       const b = e.target.closest('.vs-tile-main');
       if (b && !b.disabled) agregarAlCarrito(tile.dataset.pieza);
     });
-    document.getElementById('vs-buscar').addEventListener('input', refreshPiezaSelect);
+    document.getElementById('vs-buscar').addEventListener('input', () => { refreshPiezaSelect(); alInicioDeLista(); });
+    // Si ya bajaste por la lista, al filtrar o buscar vuelve al principio de los resultados
+    function alInicioDeLista() {
+      const f = document.querySelector('.vs-finder');
+      const lista = document.querySelector('.vs-list-head');
+      if (f.getBoundingClientRect().top <= parseFloat(getComputedStyle(f).top) + 1 && lista.getBoundingClientRect().top < f.getBoundingClientRect().bottom) {
+        window.scrollBy({ top: lista.getBoundingClientRect().top - f.getBoundingClientRect().bottom - 8 });
+      }
+    }
 
     // Controles segmentados de pago
     function syncSeg() {
@@ -514,6 +576,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20260925a"></script>
+  <script src="nav.js?v=20260927a"></script>
 </body>
 </html>
