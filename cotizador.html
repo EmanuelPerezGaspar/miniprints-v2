@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260928c"></script>
-  <script src="whatsapp.js?v=20260928c"></script>
-  <script src="categorias.js?v=20260928c"></script>
-  <link rel="stylesheet" href="styles.css?v=20260928c" />
+  <script src="theme.js?v=20260928d"></script>
+  <script src="whatsapp.js?v=20260928d"></script>
+  <script src="categorias.js?v=20260928d"></script>
+  <link rel="stylesheet" href="styles.css?v=20260928d" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -539,8 +539,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260928c" />
-  <link rel="stylesheet" href="nav.css?v=20260928c" />
+  <link rel="stylesheet" href="ios.css?v=20260928d" />
+  <link rel="stylesheet" href="nav.css?v=20260928d" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -551,7 +551,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260928c"></script>
+  <script type="module" src="firebase-sync.js?v=20260928d"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -860,14 +860,20 @@
   <!-- Modal confirmar impresión -->
   <div class="modal-overlay" id="modal-imp">
     <div class="modal-box">
-      <div class="modal-title">Confirmar impresión</div>
-      <div class="modal-sub">Se descontarán los materiales y las piezas se agregarán al inventario.</div>
+      <div class="modal-title" id="modal-titulo">Confirmar impresión</div>
+      <div class="cq-seg modal-modo" role="radiogroup" aria-label="¿Qué quieres hacer?">
+        <button type="button" role="radio" data-modo="nueva" aria-checked="true" onclick="setModoModal('nueva')">Nueva impresión</button>
+        <button type="button" role="radio" data-modo="existente" aria-checked="false" onclick="setModoModal('existente')">Pieza existente</button>
+      </div>
+      <div class="modal-sub" id="modal-sub">Se descontarán los materiales y las piezas se agregarán al inventario.</div>
       <div class="field" style="margin-bottom:12px;">
-        <label>Nombre de la pieza</label>
-        <input type="text" id="modal-nombre" placeholder="Ej: Mini Cebolla" />
+        <label for="modal-nombre" id="modal-nombre-lbl">Nombre de la pieza</label>
+        <input type="text" id="modal-nombre" list="modal-piezas" placeholder="Ej: Mini Cebolla" autocomplete="off" />
+        <datalist id="modal-piezas"></datalist>
+        <span class="modal-hint" id="modal-nombre-hint"></span>
       </div>
       <div class="field" style="margin-bottom:12px;">
-        <label>Cantidad de piezas obtenidas</label>
+        <label id="modal-cant-lbl">Cantidad de piezas obtenidas</label>
         <input type="number" id="modal-cantidad" value="1" min="1" />
       </div>
       <div class="field" style="margin-bottom:12px;">
@@ -886,7 +892,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="procesarImpresion()">Confirmar</button>
+        <button class="btn btn-primary" id="modal-ok" onclick="procesarImpresion()">Confirmar</button>
       </div>
     </div>
   </div>
@@ -1484,8 +1490,43 @@
       document.getElementById('modal-nombre').value   = cv || '';
       document.getElementById('modal-cantidad').value = state.lastCalc?.numPiezas || 1;
       state.precioEditado = false;
+      document.getElementById('modal-piezas').innerHTML = Object.keys(DB.piezas).sort((a, b) => a.localeCompare(b, 'es'))
+        .map(p => `<option value="${escModal(p)}"></option>`).join('');
+      // Siempre inicia en "Nueva impresión" para no dejar de descontar filamento sin querer
+      setModoModal('nueva');
       modalPorNombre();
       document.getElementById('modal-imp').classList.add('open');
+    }
+
+    // Nueva impresión (descuenta filamento y suma stock) o pieza existente (solo guarda costo y precio)
+    let modoModal = 'nueva';
+    function setModoModal(m) {
+      modoModal = m;
+      const ex = m === 'existente';
+      document.querySelectorAll('.modal-modo [data-modo]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.modo === m)));
+      document.getElementById('modal-titulo').textContent = ex ? 'Asociar a pieza existente' : 'Confirmar impresión';
+      document.getElementById('modal-sub').textContent = ex
+        ? 'Solo se guardan el costo y el precio cotizado de la pieza. No se descuenta filamento ni cambia el stock.'
+        : 'Se descontarán los materiales y las piezas se agregarán al inventario.';
+      document.getElementById('modal-nombre-lbl').textContent = ex ? 'Pieza de tu inventario' : 'Nombre de la pieza';
+      document.getElementById('modal-nombre').placeholder = ex ? 'Busca la pieza' : 'Ej: Mini Cebolla';
+      document.getElementById('modal-cant-lbl').textContent = ex ? 'Piezas que salen de esta cotización' : 'Cantidad de piezas obtenidas';
+      document.getElementById('modal-ok').textContent = ex ? 'Asociar' : 'Confirmar';
+      pintarNombreHint();
+      pintarPrecioModal();
+    }
+    function pintarNombreHint() {
+      const hint = document.getElementById('modal-nombre-hint');
+      const n = document.getElementById('modal-nombre').value.trim();
+      const p = Object.keys(DB.piezas).find(x => x.toLowerCase() === n.toLowerCase());
+      hint.className = 'modal-hint';
+      if (modoModal === 'existente') {
+        if (!n) hint.textContent = 'Escribe o elige una pieza de la lista.';
+        else if (p) { hint.textContent = `${DB.piezas[p]} en stock · no se modifican`; hint.classList.add('is-ok'); }
+        else { hint.textContent = 'No está en tu inventario. Elige una de la lista o usa "Nueva impresión".'; hint.classList.add('is-warn'); }
+      } else {
+        hint.textContent = p ? `Ya tienes ${DB.piezas[p]} en stock; se sumarán. Si solo quieres guardar su costo, elige "Pieza existente".` : '';
+      }
     }
 
     // ── Precio y categoría al confirmar la impresión ──
@@ -1503,7 +1544,8 @@
       const nombre = piezaExistente(document.getElementById('modal-nombre').value.trim());
       const guardado = leerJSON('mp_precios', {})[nombre];
       const sug = precioSugerido();
-      document.getElementById('modal-precio').value = sug || (guardado > 0 ? guardado : '');
+      // En una pieza existente se conserva su precio; en una nueva se propone el cotizado
+      document.getElementById('modal-precio').value = modoModal === 'existente' && guardado > 0 ? guardado : (sug || (guardado > 0 ? guardado : ''));
       pintarDiferencia();
     }
     // Compara tu precio con el de la cotización (por pieza) mientras lo escribes
@@ -1534,6 +1576,7 @@
       const nombre = piezaExistente(document.getElementById('modal-nombre').value.trim());
       chipsModal(nombre ? (MP_CAT.de(nombre) || '') : '');
       pintarPrecioModal();
+      pintarNombreHint();
     }
     function mostrarCategoriaModal() {
       document.getElementById('modal-cat-form').hidden = false;
@@ -1556,12 +1599,16 @@
       const nombre   = piezaExistente(document.getElementById('modal-nombre').value.trim());
       const cantidad = parseInt(document.getElementById('modal-cantidad').value) || 1;
       if (!nombre) return showToast('Escribe el nombre de la pieza');
+      const asociar = modoModal === 'existente';
+      if (asociar && !(nombre in DB.piezas)) return showToast('Elige una pieza que ya esté en tu inventario');
       const precioTxt = document.getElementById('modal-precio').value.trim();
       const precio = precioTxt === '' ? null : parseFloat(precioTxt);
       if (precio != null && (isNaN(precio) || precio < 0)) return showToast('Escribe un precio válido');
 
       const isMulti  = document.getElementById('chk-multicolor').checked;
       const matsUsados = [];
+      // Pieza existente: su filamento ya se descontó cuando se hizo; no se toca material ni stock
+      if (!asociar) {
 
       if (!isMulti) {
         const sel  = document.getElementById('single-mat');
@@ -1591,6 +1638,7 @@
 
       DB.piezas[nombre] = (DB.piezas[nombre] || 0) + cantidad;
       saveKey('piezas');
+      }
 
       // Precio de venta y categoría elegidos al confirmar
       if (precio != null) {
@@ -1616,7 +1664,7 @@
 
       // Save cotización as confirmed
       if (state.pendingCot) {
-        const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad,
+        const cot = { ...state.pendingCot, fue_aceptada: true, pieza: nombre, cantidad, ...(asociar ? { asociada: true } : {}),
           precio_cotizado_u: cotizadoU || null, precio_venta_u: precio != null ? Math.round(precio * 100) / 100 : null, costo_u: costoU };
         DB.cotizaciones.unshift(cot);
         saveKey('cotizaciones');
@@ -1624,8 +1672,15 @@
       }
 
       closeModal();
+      if (asociar) {
+        document.getElementById('confirm-msg').innerHTML =
+          `<span style="color:var(--primary);">Costo y precio cotizado guardados en "${escModal(nombre)}". Sin descontar filamento.</span>`;
+        showToast(`Cotización asociada a "${nombre}"`);
+        checkStock();
+        return;
+      }
       document.getElementById('confirm-msg').innerHTML =
-        `<span style="color:var(--primary);">${cantidad}× "${nombre}" en inventario. Materiales descontados.</span>`;
+        `<span style="color:var(--primary);">${cantidad}× "${escModal(nombre)}" en inventario. Materiales descontados.</span>`;
       showToast(`${cantidad}× "${nombre}" agregadas al stock`);
       checkStock();
     }
@@ -2063,6 +2118,6 @@ tbody td:not(:first-child){text-align:right}
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260928c"></script>
+  <script src="nav.js?v=20260928d"></script>
 </body>
 </html>

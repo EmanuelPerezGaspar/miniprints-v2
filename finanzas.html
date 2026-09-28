@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Finanzas</title>
-  <script src="theme.js?v=20260928c"></script>
-  <script src="inventario.js?v=20260928c"></script>
-  <link rel="stylesheet" href="styles.css?v=20260928c" />
+  <script src="theme.js?v=20260928d"></script>
+  <script src="inventario.js?v=20260928d"></script>
+  <link rel="stylesheet" href="styles.css?v=20260928d" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20260928c"></script>
-  <link rel="stylesheet" href="ios.css?v=20260928c" />
-  <link rel="stylesheet" href="nav.css?v=20260928c" />
+  <script src="ios-charts.js?v=20260928d"></script>
+  <link rel="stylesheet" href="ios.css?v=20260928d" />
+  <link rel="stylesheet" href="nav.css?v=20260928d" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -21,7 +21,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260928c"></script>
+  <script type="module" src="firebase-sync.js?v=20260928d"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -111,7 +111,7 @@
       const d0 = desde();
       const ventas = DB.ventas.filter(v => !d0 || F.iso(v.fecha) >= d0);
       const pagadas = ventas.filter(ventaPagada);
-      const aceptadas = DB.cotizaciones.filter(c => c.fue_aceptada === true && (!d0 || fechaCot(c) >= d0));
+      const aceptadas = DB.cotizaciones.filter(c => c.fue_aceptada === true && !c.asociada && (!d0 || fechaCot(c) >= d0));
       const ingresos = pagadas.reduce((s, v) => s + totalDe(v), 0);
       const costos = aceptadas.reduce((s, c) => s + (c.costo_base || 0), 0);
       const ganancia = ingresos - costos;
@@ -172,7 +172,7 @@
       const meses = [];
       for (let i = n - 1; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); meses.push(F.isoDe(d).slice(0, 7)); }
       const ing = meses.map(m => DB.ventas.filter(v => ventaPagada(v) && F.mesKey(F.iso(v.fecha)) === m).reduce((s, v) => s + totalDe(v), 0));
-      const cos = meses.map(m => DB.cotizaciones.filter(c => c.fue_aceptada === true && F.mesKey(fechaCot(c)) === m).reduce((s, c) => s + (c.costo_base || 0), 0));
+      const cos = meses.map(m => DB.cotizaciones.filter(c => c.fue_aceptada === true && !c.asociada && F.mesKey(fechaCot(c)) === m).reduce((s, c) => s + (c.costo_base || 0), 0));
       document.getElementById('fn-mes-cap').textContent = `Últimos ${n} ${n === 1 ? 'mes' : 'meses'} · ingresos cobrados vs costo de producción`;
       if (!window.Chart) return;
       if (chart) chart.destroy();
@@ -303,6 +303,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260928c"></script>
+  <script src="nav.js?v=20260928d"></script>
 </body>
 </html>
