@@ -500,3 +500,13 @@ body::after {
   mask-image: linear-gradient(#000 45%, transparent);
 }
 @media print { body::after { display: none; } }
+
+/* iPad vertical: las hojas no ocupan todo el ancho */
+@media (min-width: 600px) and (max-width: 899px) {
+  .sheet {
+    left: 50%; right: auto;
+    width: min(560px, calc(100% - 32px));
+    transform: translate(-50%, calc(100% + 40px)) scale(0.96);
+  }
+  .sheet.open { transform: translate(-50%, 0) scale(1); }
+}

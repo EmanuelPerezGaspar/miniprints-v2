@@ -1736,7 +1736,7 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .vs-cat-ico { grid-row: span 2; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; background: rgba(48, 209, 88, 0.16); color: var(--ios-green); }
 .vs-cat-ico svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .vs-cat-tile.is-top .vs-cat-ico { background: rgba(255, 159, 10, 0.18); color: var(--ios-orange); }
-.vs-cat-name { align-self: end; max-width: 100%; font-size: 15px; line-height: 19px; font-weight: 600; letter-spacing: -0.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.vs-cat-name { align-self: end; max-width: 100%; font-size: 15px; line-height: 19px; font-weight: 600; letter-spacing: -0.2px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
 .vs-cat-tile.has-badge { padding-right: 40px; }
 .vs-cat-n { align-self: start; white-space: nowrap; font-size: 13px; color: var(--ios-label-2); font-variant-numeric: tabular-nums; }
 .vs-cat-badge {
@@ -1835,3 +1835,40 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 
 /* Las secciones ocultas (p. ej. "Pedido" sin piezas) no se muestran */
 .cq-step[hidden] { display: none !important; }
+
+/* ─────────────────────────────────────────────────
+   iPad (taller): contenido centrado y dos columnas donde ayuda.
+   En iPhone (menos de 768 px) no cambia nada.
+───────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .dash-main { --page-w: 720px; }
+  .dash-main:has(.inv-wrap) { --page-w: 960px; }
+  .dash-main:has(.home-stack), .dash-main:has(.vs-wrap) { --page-w: 1040px; }
+  .dash-main > .dash-header, .dash-main > .home-stack,
+  .dash-main > .cq-wrap, .dash-main > .inv-wrap, .dash-main > .hx-wrap {
+    width: 100%; max-width: var(--page-w) !important; margin-left: auto; margin-right: auto; box-sizing: border-box;
+  }
+  .dash-main > .ios-segmented { margin-left: max(0px, calc((100% - var(--page-w)) / 2)); }
+
+  /* Inicio: metas e indicadores a la izquierda, gráficas a la derecha */
+  .home-stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: var(--sp); }
+  .home-stack > .goals { grid-column: 1; grid-row: 1; }
+  .home-stack > .stat-tiles { grid-column: 1; grid-row: 2; }
+  .home-stack > .month-card { grid-column: 2; grid-row: 1 / span 2; }
+  .home-stack > .cat-section { grid-column: 1 / -1; margin-top: 0; }
+
+  /* Ventas: qué vendiste a la izquierda; pedido y pago a la derecha */
+  .vs-wrap { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); align-items: start; gap: var(--sp); }
+  .vs-wrap > :first-child { grid-column: 1; grid-row: 1 / span 6; }
+  .vs-wrap > :not(:first-child) { grid-column: 2; }
+
+  /* Tarjetas de piezas y filamentos un poco más grandes */
+  .mat-grid { grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); }
+  .vs-tiles { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+
+  /* Barras flotantes centradas con el contenido */
+  .cq-bar { left: 50% !important; transform: translateX(-50%); width: min(680px, calc(100% - 64px)) !important; }
+}
+@media (min-width: 900px) {
+  .sheet.vs-sheet { width: 560px; }
+}
