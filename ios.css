@@ -1823,8 +1823,26 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .modal-hint:empty { display: none; }
 .modal-hint.is-ok { color: var(--ios-green); font-weight: 600; }
 .pz-dif { margin-left: 4px; font-weight: 600; color: var(--ios-label-2); white-space: nowrap; }
-#e-cotiz .inv-group-row > span:first-child { white-space: nowrap; }
-#e-cotiz .inv-group-row > span:last-child { white-space: nowrap; }
+/* Ningún bloque de una hoja se aplasta cuando la hoja llega a su alto máximo (entonces hace scroll) */
+.inv-sheet > * { flex-shrink: 0; }
+/* Hoja de pieza: unidades y precio en una fila; detalles en filas que se despliegan */
+.pz-edit-top { align-items: end; }
+.pz-edit-top .cq-stepper button { min-width: 44px; }
+.pz-edit-hint { margin-top: -8px; }
+.pz-edit-hint.is-ok { color: var(--ios-green); font-weight: 600; }
+.pz-edit-hint.is-warn { color: var(--ios-orange); font-weight: 600; }
+.pz-det #e-cotiz .inv-group-row, .pz-det-row { border-top: 0.5px solid var(--ios-sep); }
+.pz-det > :first-child { border-top: none; }
+.pz-det-row { width: 100%; border-left: none; border-right: none; border-bottom: none; background: none; color: inherit; font: inherit; font-size: 17px; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pz-det-row:active { background: var(--nav-press); }
+.pz-det-val { display: inline-flex; align-items: center; gap: 6px; }
+.pz-chev { width: 16px; height: 16px; fill: none; stroke: var(--nav-text-3); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms; }
+.pz-det-row[aria-expanded="true"] .pz-chev { transform: rotate(90deg); }
+.pz-det-body { padding: 4px 14px 14px; }
+.pz-det-body[hidden] { display: none; }
+.pz-det-body .cq-chips button:not([aria-checked="true"]):not(.cat-chip-add) { background: var(--ios-fill); }
+#e-mats.pz-det-body { padding: 0; }
+#e-mats .inv-group-row { font-size: 15px; min-height: 42px; border-top: 0.5px solid var(--ios-sep); }
 .pz-dif.is-up { color: var(--ios-green); }
 .pz-dif.is-down { color: var(--ios-orange); }
 .modal-hint.is-warn { color: var(--ios-orange); font-weight: 600; }

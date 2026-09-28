@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260928b"></script>
-  <script src="categorias.js?v=20260928b"></script>
-  <script src="inventario.js?v=20260928b"></script>
-  <link rel="stylesheet" href="styles.css?v=20260928b" />
+  <script src="theme.js?v=20260928c"></script>
+  <script src="categorias.js?v=20260928c"></script>
+  <script src="inventario.js?v=20260928c"></script>
+  <link rel="stylesheet" href="styles.css?v=20260928c" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260928b" />
-  <link rel="stylesheet" href="nav.css?v=20260928b" />
+  <link rel="stylesheet" href="ios.css?v=20260928c" />
+  <link rel="stylesheet" href="nav.css?v=20260928c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260928b"></script>
+  <script type="module" src="firebase-sync.js?v=20260928c"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -116,31 +116,42 @@
       <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
     </div>
     <p class="inv-sheet-sub" id="e-sub"></p>
-    <div class="inv-f">
-      <span class="inv-f-lbl">Unidades en stock</span>
-      <div class="cq-stepper">
-        <button type="button" aria-label="Menos" onclick="pasoEdit(-1)">−</button>
-        <input type="number" id="e-cant" min="0" inputmode="numeric" aria-label="Unidades en stock" />
-        <button type="button" aria-label="Más" onclick="pasoEdit(1)">+</button>
+    <div class="inv-row2 pz-edit-top">
+      <div class="inv-f">
+        <span class="inv-f-lbl">Unidades</span>
+        <div class="cq-stepper">
+          <button type="button" aria-label="Menos" onclick="pasoEdit(-1)">−</button>
+          <input type="number" id="e-cant" min="0" inputmode="numeric" aria-label="Unidades en stock" />
+          <button type="button" aria-label="Más" onclick="pasoEdit(1)">+</button>
+        </div>
+      </div>
+      <div class="inv-f">
+        <label for="e-precio">Precio c/u</label>
+        <div class="vs-price inv-precio"><span>$</span><input type="number" id="e-precio" inputmode="decimal" min="0" step="0.5" placeholder="0.00" /></div>
       </div>
     </div>
-    <div class="inv-f">
-      <label for="e-precio">Precio de venta (por pieza)</label>
-      <div class="vs-price inv-precio"><span>$</span><input type="number" id="e-precio" inputmode="decimal" min="0" step="0.5" placeholder="0.00" /></div>
-      <p class="inv-hint" id="e-precio-hint"></p>
-    </div>
-    <div class="inv-f">
-      <span class="inv-f-lbl">Categoría</span>
-      <div class="cq-chips" data-for="e-cat" role="radiogroup" aria-label="Categoría" id="e-cats"></div>
-      <input type="hidden" id="e-cat" value="" />
-      <div class="cat-nueva" id="e-cat-form" hidden>
-        <input type="text" id="e-cat-nombre" placeholder="Nombre de la categoría" maxlength="24" autocomplete="off" enterkeyhint="done" aria-label="Nombre de la nueva categoría" />
-        <button type="button" class="cat-nueva-ok" onclick="crearCategoria('e')">Agregar</button>
+    <p class="inv-hint pz-edit-hint" id="e-precio-hint"></p>
+
+    <!-- Detalles: categoría, cotización y filamento, cada uno en una fila -->
+    <div class="inv-group pz-det">
+      <button type="button" class="inv-group-row pz-det-row" id="e-cat-row" aria-expanded="false" aria-controls="e-cat-body" onclick="toggleDet('e-cat')">
+        <span>Categoría</span><span class="pz-det-val"><span id="e-cat-val">—</span><svg class="pz-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
+      </button>
+      <div class="inv-group-body pz-det-body" id="e-cat-body" hidden>
+        <div class="cq-chips" data-for="e-cat" role="radiogroup" aria-label="Categoría" id="e-cats"></div>
+        <input type="hidden" id="e-cat" value="" />
+        <div class="cat-nueva" id="e-cat-form" hidden>
+          <input type="text" id="e-cat-nombre" placeholder="Nombre de la categoría" maxlength="24" autocomplete="off" enterkeyhint="done" aria-label="Nombre de la nueva categoría" />
+          <button type="button" class="cat-nueva-ok" onclick="crearCategoria('e')">Agregar</button>
+        </div>
+        <p class="inv-hint" id="e-cat-hint"></p>
       </div>
-      <p class="inv-hint" id="e-cat-hint"></p>
+      <div id="e-cotiz"></div>
+      <button type="button" class="inv-group-row pz-det-row" id="e-mats-row" aria-expanded="false" aria-controls="e-mats" onclick="toggleDet('e-mats')" hidden>
+        <span>Filamento usado</span><span class="pz-det-val"><span id="e-mats-val"></span><svg class="pz-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></span>
+      </button>
+      <div class="pz-det-body" id="e-mats" hidden></div>
     </div>
-    <div class="inv-group" id="e-cotiz" hidden aria-label="Precio contra cotización"></div>
-    <div class="inv-group" id="e-mats"></div>
     <div class="inv-btns">
       <button type="button" class="inv-btn" onclick="guardarPieza()">Guardar</button>
       <button type="button" class="inv-btn is-danger" onclick="eliminarPieza()">Eliminar del inventario</button>
@@ -372,6 +383,7 @@
       if (!cat) { MP_INV.toast('Ese nombre no se puede usar'); return inp.focus(); }
       document.getElementById(pre + '-cat').value = cat.id;
       chipsCategoria(pre + '-cats', cat.id);
+      if (pre === 'e') pintarCatVal();
       renderCats(Object.keys(DB.piezas));
       MP_INV.toast(`Categoría "${cat.nombre}" lista`);
     }
@@ -466,12 +478,16 @@
       document.getElementById('e-cat').value = cat;
       chipsCategoria('e-cats', cat);
       document.getElementById('e-cat-hint').textContent = !asignada && cat ? 'Sugerida por el nombre; toca otra si no es correcta.' : '';
+      pintarCatVal();
+      cerrarDet('e-cat'); cerrarDet('e-mats');
 
       pintarCotizacion();
 
       const usados = DB.historial[nombre] || [];
       const box = document.getElementById('e-mats');
-      box.hidden = !usados.length;
+      const gramosTot = usados.reduce((s, u) => s + (parseFloat(u.grams) || 0), 0);
+      document.getElementById('e-mats-row').hidden = !usados.length;
+      document.getElementById('e-mats-val').textContent = `${Math.round(gramosTot * 10) / 10} g`;
       box.innerHTML = usados.map(u => {
         const m = DB.materials[u.matId];
         return `<div class="inv-group-row"><span>${esc(m ? matLabel(m) : 'Filamento eliminado')}</span><span>${parseFloat(u.grams)} g</span></div>`;
@@ -481,18 +497,36 @@
     // Costo, precio cotizado y tu precio (se guardan al confirmar una impresión en Cotizar)
     function pintarCotizacion() {
       const box = document.getElementById('e-cotiz');
+      const hint = document.getElementById('e-precio-hint');
       const c = (DB.costos || {})[editando];
-      if (!c || !(c.cotizado > 0)) { box.hidden = true; box.innerHTML = ''; return; }
+      if (!c || !(c.cotizado > 0)) { box.innerHTML = ''; hint.className = 'inv-hint pz-edit-hint'; return; }
       const txt = document.getElementById('e-precio').value.trim();
       const tuyo = txt !== '' && parseFloat(txt) >= 0 ? parseFloat(txt) : (DB.precios[editando] || c.precio || 0);
       const d = Math.round((tuyo - c.cotizado) * 100) / 100, pct = Math.round(d / c.cotizado * 100);
-      const dif = !tuyo ? '' : d === 0 ? 'igual' : `${d > 0 ? '+' : '−'}${MP_INV.money(Math.abs(d))} (${d > 0 ? '+' : '−'}${Math.abs(pct)}%)`;
-      box.hidden = false;
       box.innerHTML = `
-        ${c.costo > 0 ? `<div class="inv-group-row"><span>Costo de producción</span><span>${MP_INV.money(c.costo)}</span></div>` : ''}
         <div class="inv-group-row"><span>Precio cotizado</span><span>${MP_INV.money(c.cotizado)}</span></div>
-        <div class="inv-group-row"><span>Tu precio</span><span>${tuyo ? MP_INV.money(tuyo) : '—'}${dif ? ` <b class="pz-dif ${d > 0 ? 'is-up' : d < 0 ? 'is-down' : ''}">${dif}</b>` : ''}</span></div>`;
+        ${c.costo > 0 ? `<div class="inv-group-row"><span>Costo de producción</span><span>${MP_INV.money(c.costo)}</span></div>` : ''}`;
+      hint.className = 'inv-hint pz-edit-hint' + (tuyo && d > 0 ? ' is-ok' : tuyo && d < 0 ? ' is-warn' : '');
+      hint.textContent = !tuyo ? `Cotizado: ${MP_INV.money(c.cotizado)} c/u`
+        : d === 0 ? 'Igual a lo cotizado'
+        : `${d > 0 ? '+' : '−'}${MP_INV.money(Math.abs(d))} (${d > 0 ? '+' : '−'}${Math.abs(pct)} %) ${d > 0 ? 'sobre' : 'debajo de'} lo cotizado`;
     }
+    // Filas que se despliegan (categoría y filamento usado)
+    function toggleDet(id) {
+      const body = document.getElementById(id === 'e-cat' ? 'e-cat-body' : id);
+      const row = document.getElementById(id + '-row');
+      body.hidden = !body.hidden;
+      row.setAttribute('aria-expanded', String(!body.hidden));
+    }
+    function cerrarDet(id) {
+      document.getElementById(id === 'e-cat' ? 'e-cat-body' : id).hidden = true;
+      document.getElementById(id + '-row').setAttribute('aria-expanded', 'false');
+    }
+    function pintarCatVal() {
+      const v = document.getElementById('e-cat').value;
+      document.getElementById('e-cat-val').textContent = v && v !== 'otras' ? catNombre(v) : 'Sin categoría';
+    }
+    document.getElementById('e-cat').addEventListener('change', pintarCatVal);
     document.getElementById('e-precio').addEventListener('input', () => { if (editando) pintarCotizacion(); });
     function pasoEdit(d) {
       const i = document.getElementById('e-cant');
@@ -541,6 +575,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260928b"></script>
+  <script src="nav.js?v=20260928c"></script>
 </body>
 </html>
