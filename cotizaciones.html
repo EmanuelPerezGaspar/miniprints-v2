@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizaciones</title>
-  <script src="theme.js?v=20260928c"></script>
-  <script src="inventario.js?v=20260928c"></script>
-  <link rel="stylesheet" href="styles.css?v=20260928c" />
+  <script src="theme.js?v=20260928d"></script>
+  <script src="inventario.js?v=20260928d"></script>
+  <link rel="stylesheet" href="styles.css?v=20260928d" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260928c" />
-  <link rel="stylesheet" href="nav.css?v=20260928c" />
+  <link rel="stylesheet" href="ios.css?v=20260928d" />
+  <link rel="stylesheet" href="nav.css?v=20260928d" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -22,7 +22,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260928c"></script>
+  <script type="module" src="firebase-sync.js?v=20260928d"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -196,7 +196,7 @@
     };
     function fila(c) {
       const e = estadoDe(c), st = ESTADO[e];
-      const detalle = [c.pieza ? `${c.pieza}${c.cantidad ? ' × ' + c.cantidad : ''}` : '', st.txt].filter(Boolean).join(' · ');
+      const detalle = [c.pieza ? `${c.pieza}${c.cantidad && !c.asociada ? ' × ' + c.cantidad : ''}` : '', c.asociada ? 'Asociada a pieza existente' : st.txt].filter(Boolean).join(' · ');
       return `<button type="button" class="hx-row ${st.cls}" data-id="${c.id}">
         <span class="hx-ico">${ICO[e]}</span>
         <span class="hx-text">
@@ -278,6 +278,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260928c"></script>
+  <script src="nav.js?v=20260928d"></script>
 </body>
 </html>

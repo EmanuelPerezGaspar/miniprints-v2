@@ -1821,6 +1821,8 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .modal-box .vs-price input { padding-left: 32px !important; font-family: var(--ios-font-rounded) !important; font-weight: 600; width: 100%; box-sizing: border-box; }
 .modal-hint { display: block; font-size: 12px; line-height: 16px; color: var(--ios-label-2); }
 .modal-hint:empty { display: none; }
+.modal-modo { margin: 12px 0 10px; }
+.modal-modo button { min-height: 40px; }
 .modal-hint.is-ok { color: var(--ios-green); font-weight: 600; }
 .pz-dif { margin-left: 4px; font-weight: 600; color: var(--ios-label-2); white-space: nowrap; }
 /* Ningún bloque de una hoja se aplasta cuando la hoja llega a su alto máximo (entonces hace scroll) */
