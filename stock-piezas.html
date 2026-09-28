@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20260927c"></script>
-  <script src="categorias.js?v=20260927c"></script>
-  <script src="inventario.js?v=20260927c"></script>
-  <link rel="stylesheet" href="styles.css?v=20260927c" />
+  <script src="theme.js?v=20260928a"></script>
+  <script src="categorias.js?v=20260928a"></script>
+  <script src="inventario.js?v=20260928a"></script>
+  <link rel="stylesheet" href="styles.css?v=20260928a" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260927c" />
-  <link rel="stylesheet" href="nav.css?v=20260927c" />
+  <link rel="stylesheet" href="ios.css?v=20260928a" />
+  <link rel="stylesheet" href="nav.css?v=20260928a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260927c"></script>
+  <script type="module" src="firebase-sync.js?v=20260928a"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -40,7 +40,7 @@
       </div>
 
       <div class="inv-wrap">
-        <div class="inv-sum" id="inv-sum"></div>
+        <div class="inv-sum is-4" id="inv-sum"></div>
 
         <section class="form-card inv-card" aria-label="Inventario de piezas">
           <input type="search" id="inv-buscar" class="vs-search" placeholder="Buscar pieza" autocomplete="off" aria-label="Buscar pieza" />
@@ -211,6 +211,9 @@
       const piezas = Object.entries(DB.piezas);
       const uds = piezas.reduce((s, [, n]) => s + n, 0);
       const bajas = piezas.filter(([, n]) => n <= BAJO).length;
+      // Valor del stock a precio de venta; las piezas sin precio no suman
+      const valor = piezas.reduce((s, [p, n]) => s + (DB.precios[p] > 0 ? DB.precios[p] * n : 0), 0);
+      const sinPrecio = piezas.filter(([p, n]) => n > 0 && !(DB.precios[p] > 0)).length;
       document.getElementById('inv-sub').textContent = piezas.length
         ? `${piezas.length} modelo${piezas.length !== 1 ? 's' : ''} · ${uds} unidad${uds !== 1 ? 'es' : ''} listas para vender`
         : 'Piezas impresas listas para vender.';
@@ -224,6 +227,11 @@
           <span class="inv-tile-lbl"><i></i>Unidades</span>
           <span class="inv-tile-num">${uds.toLocaleString('es-MX')}</span>
           <span class="inv-tile-sub">en stock</span>
+        </div>
+        <div class="inv-tile" style="--tile-color:var(--ios-teal)">
+          <span class="inv-tile-lbl"><i></i>Valor</span>
+          <span class="inv-tile-num">${MP_INV.money0(valor)}</span>
+          <span class="inv-tile-sub${sinPrecio ? ' is-warn' : ''}">${sinPrecio ? `${sinPrecio} sin precio` : 'a precio de venta'}</span>
         </div>
         <button type="button" class="inv-tile${bajas ? ' is-alert' : ''}${filtro === 'bajas' ? ' is-on' : ''}" style="--tile-color:${bajas ? 'var(--ios-orange)' : 'var(--ios-green)'}"
                 onclick="setFiltro(filtro === 'bajas' ? 'todas' : 'bajas')" aria-pressed="${filtro === 'bajas'}">
@@ -533,6 +541,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20260927c"></script>
+  <script src="nav.js?v=20260928a"></script>
 </body>
 </html>
