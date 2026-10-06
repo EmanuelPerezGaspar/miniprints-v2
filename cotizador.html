@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261006b"></script>
-  <script src="whatsapp.js?v=20261006b"></script>
-  <script src="categorias.js?v=20261006b"></script>
-  <link rel="stylesheet" href="styles.css?v=20261006b" />
+  <script src="theme.js?v=20261006c"></script>
+  <script src="whatsapp.js?v=20261006c"></script>
+  <script src="categorias.js?v=20261006c"></script>
+  <link rel="stylesheet" href="styles.css?v=20261006c" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -550,8 +550,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261006b" />
-  <link rel="stylesheet" href="nav.css?v=20261006b" />
+  <link rel="stylesheet" href="ios.css?v=20261006c" />
+  <link rel="stylesheet" href="nav.css?v=20261006c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -562,7 +562,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261006b"></script>
+  <script type="module" src="firebase-sync.js?v=20261006c"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1790,28 +1790,64 @@
       }
       y += (c.numPiezas > 1 ? 38 : 32) + 12;
 
-      // Qué incluye
-      const incluye = [
-        ...c.detMat.filter(d => d.grams > 0).map(d => { const m = DB.materials[d.matId]; return `Material: ${m ? `${m.tipo} ${m.color}` : d.nombre}`; }),
-        `Impresión 3D (${horasTexto(c.tiempo)} de impresión)`,
-        ...(c.empaqueMonto > 0 ? ['Empaque y envío'] : []),
-        ...(c.ivaMonto > 0 ? ['IVA 16 % incluido'] : []),
-        ...(c.urgencia && c.urgencia !== 'normal' ? [`Entrega ${ENTREGA[c.urgencia].toLowerCase()}`] : []),
-      ];
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...VERDE); doc.text('INCLUYE', M, y);
-      y += 6;
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(...TINTA);
-      incluye.forEach(t => {
-        doc.splitTextToSize(t, W - 2 * M - 8).forEach((linea, i) => {
-          if (i === 0) { doc.setFillColor(...VERDE); doc.circle(M + 1.5, y - 1.3, 0.9, 'F'); }
-          doc.text(linea, M + 6, y); y += 6;
+      // Tablas con salto de página automático
+      const pie = () => {
+        doc.setDrawColor(229, 231, 235); doc.setLineWidth(0.3); doc.line(M, 280, W - M, 280);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+        doc.text(`MiniPrints · Cotización del ${fecha} · Documento interno · Precios en MXN`, W / 2, 286, { align: 'center' });
+      };
+      const espacio = alto => { if (y + alto > 272) { pie(); doc.addPage(); y = 22; return true; } return false; };
+      const titulo = t => { espacio(16); doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...VERDE); doc.text(t, M, y); y += 4; };
+      // cols: [{ t: encabezado, w: ancho en mm, a: 'left'|'right' }]
+      function tabla(cols, filas) {
+        const enc = () => {
+          doc.setFillColor(...VERDE_OSC); doc.rect(M, y, W - 2 * M, 7.5, 'F');
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+          let x = M; cols.forEach(c => { doc.text(c.t, c.a === 'right' ? x + c.w - 3 : x + 3, y + 5, { align: c.a === 'right' ? 'right' : 'left' }); x += c.w; });
+          y += 7.5;
+        };
+        enc();
+        filas.forEach(f => {
+          if (f.sep) { y += 1.5; return; }
+          const lineas = doc.splitTextToSize(String(f.v[0]), cols[0].w - 6);
+          const alto = Math.max(7, lineas.length * 4.6 + 2.6);
+          if (espacio(alto)) enc();
+          if (f.total) { doc.setFillColor(240, 253, 244); doc.rect(M, y, W - 2 * M, alto, 'F'); }
+          doc.setFont('helvetica', f.total ? 'bold' : 'normal'); doc.setFontSize(f.total ? 10 : 9.5);
+          doc.setTextColor(...(f.total ? VERDE_OSC : f.tenue ? GRIS : TINTA));
+          let x = M;
+          cols.forEach((c, i) => {
+            const txt = i === 0 ? lineas : String(f.v[i] ?? '');
+            doc.text(txt, c.a === 'right' ? x + c.w - 3 : x + 3, y + 4.8, { align: c.a === 'right' ? 'right' : 'left' });
+            x += c.w;
+          });
+          y += alto;
+          doc.setDrawColor(229, 231, 235); doc.setLineWidth(0.2); doc.line(M, y, W - M, y);
         });
-      });
+        y += 8;
+      }
+      const ancho = W - 2 * M;
 
-      // Pie
-      doc.setDrawColor(229, 231, 235); doc.setLineWidth(0.3); doc.line(M, 280, W - M, 280);
-      doc.setFontSize(8.5); doc.setTextColor(...GRIS);
-      doc.text(`MiniPrints · Cotización del ${fecha} · Precios en MXN`, W / 2, 286, { align: 'center' });
+      // Materiales: gramos, precio por kilo y costo de cada filamento
+      const mats = c.detMat.filter(d => d.grams > 0);
+      if (mats.length) {
+        titulo('MATERIALES');
+        const gTot = mats.reduce((t, d) => t + (parseFloat(d.grams) || 0), 0);
+        const cTot = mats.reduce((t, d) => t + (d.costo || 0), 0);
+        tabla([{ t: 'Material', w: ancho - 96 }, { t: 'Gramos', w: 30, a: 'right' }, { t: 'Precio/kg', w: 32, a: 'right' }, { t: 'Costo', w: 34, a: 'right' }], [
+          ...mats.map(d => ({ v: [d.nombre, `${(parseFloat(d.grams) || 0).toLocaleString('es-MX', { maximumFractionDigits: 1 })} g`, money(d.precioKg), money(d.costo)] })),
+          ...(mats.length > 1 ? [{ total: true, v: ['Total material', `${gTot.toLocaleString('es-MX', { maximumFractionDigits: 1 })} g`, '', money(cTot)] }] : []),
+        ]);
+      }
+
+      // Desglose de costos (el mismo que se ve en la app)
+      titulo(`DESGLOSE DE COSTOS · ${horasTexto(c.tiempo)} de impresión`);
+      tabla([{ t: 'Concepto', w: ancho - 40 }, { t: 'Monto', w: 40, a: 'right' }],
+        (c.filas || []).map(([lbl, val]) => lbl.startsWith('─') ? { sep: true }
+          : lbl.startsWith('=') ? { total: true, v: [lbl.replace(/^=\s*/, ''), val] }
+          : { tenue: lbl.startsWith('+'), v: [lbl.replace(/^\+\s*/, '+ ').replace(/(\d+(?:\.\d+)?)h\b/g, (_, n) => horasTexto(n)), val] }));
+
+      pie();
 
       const slug = cliente.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'cliente';
       const nombre = `Cotizacion-MiniPrints-${slug}-${hoy.toISOString().slice(0, 10)}.pdf`;
@@ -2165,6 +2201,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261006b"></script>
+  <script src="nav.js?v=20261006c"></script>
 </body>
 </html>
