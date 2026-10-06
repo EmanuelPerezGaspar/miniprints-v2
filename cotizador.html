@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261006c"></script>
-  <script src="whatsapp.js?v=20261006c"></script>
-  <script src="categorias.js?v=20261006c"></script>
-  <link rel="stylesheet" href="styles.css?v=20261006c" />
+  <script src="theme.js?v=20261006d"></script>
+  <script src="whatsapp.js?v=20261006d"></script>
+  <script src="categorias.js?v=20261006d"></script>
+  <link rel="stylesheet" href="styles.css?v=20261006d" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -168,6 +168,37 @@
     }
     .mat-select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(48,209,88,0.12); }
     .mat-select option { background: var(--ios-bg-3); color: var(--text); }
+    /* Botón de filamento (abre la hoja con buscador) */
+    .mat-pick {
+      width: 100%; min-width: 0; min-height: 46px; display: flex; align-items: center; gap: 10px;
+      padding: 6px 12px; border: none; border-radius: var(--r-md, 14px); background: var(--ios-fill);
+      color: var(--text); font-family: var(--ios-font); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .mat-pick:active { transform: scale(0.99); }
+    .mat-pick:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
+    .mp-sw { width: 22px; height: 22px; flex-shrink: 0; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(128,128,128,0.5); }
+    .mp-sw.is-clear { background: repeating-conic-gradient(rgba(128,128,128,.35) 0 25%, rgba(255,255,255,.6) 0 50%) 50% / 8px 8px; }
+    .mp-sw.is-none { background: transparent; box-shadow: inset 0 0 0 1.5px var(--ios-label-3, rgba(128,128,128,.5)); }
+    .mp-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
+    .mp-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mp-meta { font-size: 12px; color: var(--ios-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .mp-meta.is-low, .mp-g.is-low { color: var(--ios-orange); font-weight: 600; }
+    .mp-chev { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: var(--ios-label-2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    /* Hoja de filamentos */
+    .mp-grupo { margin-bottom: 18px; }
+    .mp-grupo-t { display: flex; justify-content: space-between; margin: 0 0 6px; padding: 0 4px; font-size: 13px; font-weight: 700; color: var(--ios-label-2); text-transform: uppercase; letter-spacing: 0.4px; }
+    .mp-grupo-l { border-radius: var(--r-sheet-in, 24px); background: var(--sheet-card); overflow: hidden; }
+    .mp-row {
+      width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+      border: none; border-top: 0.5px solid var(--ios-sep); background: none; color: var(--nav-text, var(--text));
+      font-family: var(--ios-font); text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .mp-row:first-child { border-top: none; }
+    .mp-row:active { background: var(--nav-press); }
+    .mp-g { font-size: 13px; color: var(--ios-label-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .mp-check { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: var(--ios-green); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+    .mp-row.is-on .mp-check { visibility: visible; }
+    .mp-row.is-on .mp-name { color: var(--ios-green); }
     .mat-row {
       display: grid;
       grid-template-columns: 2fr 1fr 36px;
@@ -550,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261006c" />
-  <link rel="stylesheet" href="nav.css?v=20261006c" />
+  <link rel="stylesheet" href="ios.css?v=20261006d" />
+  <link rel="stylesheet" href="nav.css?v=20261006d" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -562,7 +593,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261006c"></script>
+  <script type="module" src="firebase-sync.js?v=20261006d"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -908,6 +939,17 @@
     </div>
   </div>
 
+  <!-- Hoja: elegir filamento (buscador, agrupado por tipo, gramos disponibles) -->
+  <div class="sheet-backdrop" id="mp-backdrop" hidden></div>
+  <div class="sheet inv-sheet vs-sheet mp-sheet" id="mp-sheet" role="dialog" aria-modal="true" aria-labelledby="mp-sheet-t" hidden>
+    <div class="sheet-head">
+      <button class="sheet-close" type="button" onclick="cerrarMatPicker()" aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+      <h2 id="mp-sheet-t">Elegir filamento</h2>
+    </div>
+    <input type="search" id="mp-buscar" class="vs-search" placeholder="Buscar por tipo, color o marca" autocomplete="off" enterkeyhint="search" aria-label="Buscar filamento" />
+    <div class="vs-sheet-scroll" id="mp-scroll"><div id="mp-lista" role="listbox" aria-labelledby="mp-sheet-t"></div></div>
+  </div>
+
   <div id="toast"></div>
 
   <script>
@@ -982,6 +1024,118 @@
       return Object.values(DB.materials).sort((a, b) => (a.marca + a.tipo + a.color).localeCompare(b.marca + b.tipo + b.color));
     }
     function matLabel(m) { return `${m.marca} · ${m.tipo} · ${m.color}`; }
+    // Muestra de color aproximada a partir del nombre del color
+    const COLORES = [
+      [/transp|natural|cristal|clear/, 'transparente'], [/negr|black/, '#1c1c1e'], [/blanc|white|hueso/, '#f5f5f2'],
+      [/gris|gray|grey|plata|silver/, '#a1a1a6'], [/roj|red|vino/, '#e5372e'], [/rosa|pink|magenta|fucsia/, '#ff6fa5'],
+      [/morad|violet|lila|purple/, '#9a5cf0'], [/azul|blue|marino|cyan|cian|turques|celeste/, '#2f7bf6'],
+      [/verde|green|lima|menta|oliva/, '#34c759'], [/amarill|yellow/, '#ffd60a'], [/naranj|orange/, '#ff9500'],
+      [/dorad|oro|gold/, '#d4a72c'], [/caf|marr|brown|chocolate|madera|wood/, '#8b5a2b'], [/beige|arena|crema|piel/, '#e8d5b0'],
+    ];
+    function colorDe(m) {
+      const t = (m && m.color || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const c = COLORES.find(([re]) => re.test(t));
+      return c ? c[1] : '';
+    }
+    function swatch(m) {
+      const c = colorDe(m);
+      return `<span class="mp-sw${c === 'transparente' ? ' is-clear' : ''}${!c ? ' is-none' : ''}" style="${c && c !== 'transparente' ? `background:${c}` : ''}" aria-hidden="true"></span>`;
+    }
+    const gramosTxt = g => `${Math.round(g || 0).toLocaleString('es-MX')} g`;
+
+    function pintarPicks() {
+      document.querySelectorAll('#mats-container select').forEach(sel => {
+        let btn = sel.nextElementSibling;
+        if (!btn || !btn.classList.contains('mat-pick')) {
+          sel.hidden = true;
+          btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'mat-pick';
+          btn.addEventListener('click', () => abrirMatPicker(sel));
+          sel.after(btn);
+        }
+        const m = DB.materials[sel.value];
+        const poco = m && (m.pesoTotal || 0) < 100;
+        btn.setAttribute('aria-label', m ? `Filamento: ${m.tipo} ${m.color}, ${m.marca}. Cambiar` : 'Elegir filamento');
+        btn.innerHTML = m
+          ? `${swatch(m)}<span class="mp-txt"><span class="mp-name">${escMat(m.tipo)} ${escMat(m.color)}</span><span class="mp-meta${poco ? ' is-low' : ''}">${escMat(m.marca)} · ${gramosTxt(m.pesoTotal)}</span></span><svg class="mp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>`
+          : `<span class="mp-txt"><span class="mp-name">${Object.keys(DB.materials).length ? 'Elegir filamento' : 'Sin filamentos registrados'}</span></span><svg class="mp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>`;
+      });
+    }
+    const escMat = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+    // Últimos filamentos elegidos en este dispositivo, para tenerlos arriba
+    const RECIENTES = 'mp_mat_recientes';
+    function recientes() { try { return (JSON.parse(localStorage.getItem(RECIENTES)) || []).filter(id => DB.materials[id]); } catch (e) { return []; } }
+    function recordarReciente(id) {
+      try { localStorage.setItem(RECIENTES, JSON.stringify([id, ...recientes().filter(x => x !== id)].slice(0, 5))); } catch (e) {}
+    }
+
+    let _pickSel = null, _pickAbridor = null;
+    function abrirMatPicker(sel) {
+      if (!Object.keys(DB.materials).length) { showToast('Primero registra tus filamentos en Inventario › Material'); return; }
+      _pickSel = sel; _pickAbridor = document.activeElement;
+      const q = document.getElementById('mp-buscar'); q.value = '';
+      pintarMatLista();
+      const sh = document.getElementById('mp-sheet'), bd = document.getElementById('mp-backdrop');
+      sh.hidden = bd.hidden = false;
+      document.getElementById('mp-scroll').scrollTop = 0;
+      document.documentElement.style.overflow = 'hidden';
+      requestAnimationFrame(() => requestAnimationFrame(() => { sh.classList.add('open'); bd.classList.add('open'); }));
+    }
+    function cerrarMatPicker() {
+      const sh = document.getElementById('mp-sheet'), bd = document.getElementById('mp-backdrop');
+      if (sh.hidden) return;
+      sh.classList.remove('open'); bd.classList.remove('open');
+      document.documentElement.style.overflow = '';
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      setTimeout(() => { if (!sh.classList.contains('open')) sh.hidden = bd.hidden = true; }, 420);
+      if (_pickAbridor && _pickAbridor.focus) _pickAbridor.focus({ preventScroll: true });
+    }
+    function elegirMat(id) {
+      if (!_pickSel) return;
+      _pickSel.value = id;
+      _pickSel.dispatchEvent(new Event('change', { bubbles: true }));
+      recordarReciente(id);
+      pintarPicks();
+      cerrarMatPicker();
+    }
+    function pintarMatLista() {
+      const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      const q = norm(document.getElementById('mp-buscar').value).trim();
+      const actual = _pickSel ? _pickSel.value : '';
+      const mats = Object.values(DB.materials);
+      const fila = m => {
+        const poco = (m.pesoTotal || 0) < 100;
+        return `<button type="button" class="mp-row${m.id === actual ? ' is-on' : ''}" role="option" aria-selected="${m.id === actual}" data-id="${escMat(m.id)}">
+          ${swatch(m)}
+          <span class="mp-txt"><span class="mp-name">${escMat(m.tipo)} ${escMat(m.color)}</span><span class="mp-meta">${escMat(m.marca)}</span></span>
+          <span class="mp-g${poco ? ' is-low' : ''}">${gramosTxt(m.pesoTotal)}</span>
+          <svg class="mp-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+        </button>`;
+      };
+      const grupo = (t, ms) => `<section class="mp-grupo"><h3 class="mp-grupo-t">${escMat(t)}<span>${ms.length}</span></h3><div class="mp-grupo-l">${ms.map(fila).join('')}</div></section>`;
+      const porColor = (a, b) => (a.color + a.marca).localeCompare(b.color + b.marca, 'es');
+      let html = '';
+      if (q) {
+        const palabras = q.split(/\s+/);
+        const res = mats.filter(m => { const t = norm(`${m.tipo} ${m.color} ${m.marca}`); return palabras.every(w => t.includes(w)); })
+          .sort((a, b) => (a.tipo + a.color).localeCompare(b.tipo + b.color, 'es'));
+        html = res.length ? grupo('Resultados', res) : `<div class="vs-empty">Sin filamentos para "${escMat(document.getElementById('mp-buscar').value.trim())}"</div>`;
+      } else {
+        const rec = recientes().map(id => DB.materials[id]);
+        if (rec.length && mats.length > 6) html += grupo('Recientes', rec);
+        const tipos = {};
+        mats.forEach(m => (tipos[m.tipo || 'Otro'] = tipos[m.tipo || 'Otro'] || []).push(m));
+        Object.keys(tipos).sort((a, b) => a.localeCompare(b, 'es')).forEach(t => { html += grupo(t, tipos[t].sort(porColor)); });
+      }
+      document.getElementById('mp-lista').innerHTML = html;
+    }
+    document.getElementById('mp-buscar').addEventListener('input', () => { pintarMatLista(); document.getElementById('mp-scroll').scrollTop = 0; });
+    document.getElementById('mp-lista').addEventListener('click', e => { const b = e.target.closest('.mp-row'); if (b) elegirMat(b.dataset.id); });
+    document.getElementById('mp-backdrop').addEventListener('click', cerrarMatPicker);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarMatPicker(); });
+
     function matOptions(selected) {
       const mats = matsSorted();
       if (!mats.length) return '<option value="">— Sin materiales —</option>';
@@ -1007,6 +1161,7 @@
 
     /* ── Stock check ──────────────────────────── */
     function checkStock() {
+      pintarPicks();
       const warn = document.getElementById('stock-warn');
       if (!warn) return;
       const isMulti = document.getElementById('chk-multicolor')?.checked;
@@ -2201,6 +2356,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261006c"></script>
+  <script src="nav.js?v=20261006d"></script>
 </body>
 </html>
