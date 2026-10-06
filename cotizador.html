@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261006a"></script>
-  <script src="whatsapp.js?v=20261006a"></script>
-  <script src="categorias.js?v=20261006a"></script>
-  <link rel="stylesheet" href="styles.css?v=20261006a" />
+  <script src="theme.js?v=20261006b"></script>
+  <script src="whatsapp.js?v=20261006b"></script>
+  <script src="categorias.js?v=20261006b"></script>
+  <link rel="stylesheet" href="styles.css?v=20261006b" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -550,8 +550,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261006a" />
-  <link rel="stylesheet" href="nav.css?v=20261006a" />
+  <link rel="stylesheet" href="ios.css?v=20261006b" />
+  <link rel="stylesheet" href="nav.css?v=20261006b" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -562,7 +562,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261006a"></script>
+  <script type="module" src="firebase-sync.js?v=20261006b"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1734,6 +1734,12 @@
       return _jspdf;
     }
 
+    // 43.2 → "43 h 12 min"; 0.75 → "45 min"; 3 → "3 h"
+    function horasTexto(t) {
+      const total = Math.round((Number(t) || 0) * 60), h = Math.floor(total / 60), m = total % 60;
+      return h && m ? `${h} h ${m} min` : h ? `${h} h` : `${m} min`;
+    }
+
     // PDF para el cliente: datos, precio y qué incluye (sin costos internos ni ganancia)
     function crearPDF(jsPDF) {
       const c = state.lastCalc;
@@ -1787,7 +1793,7 @@
       // Qué incluye
       const incluye = [
         ...c.detMat.filter(d => d.grams > 0).map(d => { const m = DB.materials[d.matId]; return `Material: ${m ? `${m.tipo} ${m.color}` : d.nombre}`; }),
-        `Impresión 3D (${c.tiempo.toFixed(1)} h de impresión)`,
+        `Impresión 3D (${horasTexto(c.tiempo)} de impresión)`,
         ...(c.empaqueMonto > 0 ? ['Empaque y envío'] : []),
         ...(c.ivaMonto > 0 ? ['IVA 16 % incluido'] : []),
         ...(c.urgencia && c.urgencia !== 'normal' ? [`Entrega ${ENTREGA[c.urgencia].toLowerCase()}`] : []),
@@ -2159,6 +2165,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261006a"></script>
+  <script src="nav.js?v=20261006b"></script>
 </body>
 </html>
