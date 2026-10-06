@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20260928e"></script>
-  <script src="whatsapp.js?v=20260928e"></script>
-  <script src="categorias.js?v=20260928e"></script>
-  <link rel="stylesheet" href="styles.css?v=20260928e" />
+  <script src="theme.js?v=20261006a"></script>
+  <script src="whatsapp.js?v=20261006a"></script>
+  <script src="categorias.js?v=20261006a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261006a" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -175,13 +175,26 @@
       align-items: center;
       margin-bottom: 8px;
     }
+    /* Cada impresión: impresora arriba; horas, minutos y veces abajo */
     .time-row {
       display: grid;
-      grid-template-columns: 1.8fr 0.8fr 0.8fr 36px;
+      grid-template-columns: 24px repeat(3, minmax(0, 1fr)) 36px;
       gap: 8px;
       align-items: center;
-      margin-bottom: 8px;
+      padding: 10px 0;
+      border-top: 0.5px solid var(--ios-separator, rgba(128,128,128,.3));
     }
+    .time-row:first-child { border-top: none; padding-top: 0; }
+    .time-row .tr-num { grid-row: 1 / span 2; align-self: start; margin-top: 10px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; background: var(--ios-fill); font-size: 12px; font-weight: 700; color: var(--ios-label-2); }
+    .time-row select { grid-column: 2 / span 3; }
+    .time-row .rm-btn { grid-column: 5; }
+    .tr-in { position: relative; display: block; min-width: 0; }
+    .form-card .tr-in input { width: 100%; box-sizing: border-box; padding-left: 12px !important; padding-right: 36px !important; text-align: left; }
+    .tr-in span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--ios-label-2); pointer-events: none; }
+    .form-card .tr-veces input { padding-left: 30px !important; padding-right: 10px !important; }
+    .tr-veces .tr-pre { left: 12px; right: auto; font-size: 15px; font-weight: 700; color: var(--ios-green); }
+    .tr-ayuda { margin: 0 0 4px; font-size: 12px; color: var(--ios-label-2); line-height: 1.4; }
+    .tr-total { margin: 4px 0 10px; font-size: 13px; font-weight: 600; color: var(--ios-label-2); text-align: right; }
     .time-row-header {
       display: grid;
       grid-template-columns: 1.8fr 0.8fr 0.8fr 36px;
@@ -530,17 +543,15 @@
       .btn-confirm { width: 100%; text-align: center; }
       .rh-amount { font-size: 2.4rem; }
       .mat-row { grid-template-columns: 1fr 80px 36px; }
-      .time-row { grid-template-columns: 1fr 60px 60px 36px; }
     }
     @media (max-width: 480px) {
       .breakdown-grid { grid-template-columns: 1fr; }
       .mat-row { grid-template-columns: 1fr 72px 36px; }
-      .time-row { grid-template-columns: 1fr 56px 56px 36px; }
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20260928e" />
-  <link rel="stylesheet" href="nav.css?v=20260928e" />
+  <link rel="stylesheet" href="ios.css?v=20261006a" />
+  <link rel="stylesheet" href="nav.css?v=20261006a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -551,7 +562,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20260928e"></script>
+  <script type="module" src="firebase-sync.js?v=20261006a"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1214,13 +1225,7 @@
         syncUI();
       } else {
         const defaultPrinter = state.timeRows[0]?.printer || 'A1 MINI';
-        if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', printer: defaultPrinter }, { h: '', m: '', printer: defaultPrinter }];
-        const header = document.createElement('div');
-        header.className = 'time-row-header';
-        header.innerHTML = '<span>Impresora</span><span>Horas</span><span>Min</span><span></span>';
-        c.appendChild(header);
-
-        const printerOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
+        if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', n: 1, printer: defaultPrinter }, { h: '', m: '', n: 1, printer: defaultPrinter }];
         state.timeRows.forEach((row, i) => {
           const d = document.createElement('div');
           d.className = 'time-row';
@@ -1228,23 +1233,47 @@
           row.printer = rowPrinter;
           const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${rowPrinter===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
-            <select class="mat-select" onchange="state.timeRows[${i}].printer=this.value; debouncedSave()">${opts}</select>
-            <input type="number" min="0" step="1" placeholder="0" value="${row.h}" oninput="state.timeRows[${i}].h=this.value; debouncedSave()" style="background:rgba(var(--ink), 0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
-            <input type="number" min="0" max="59" step="1" placeholder="0" value="${row.m}" oninput="state.timeRows[${i}].m=this.value; debouncedSave()" style="background:rgba(var(--ink), 0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
-            <div class="rm-btn" onclick="removeTimeRow(${i})">✕</div>`;
+            <span class="tr-num" aria-hidden="true">${i + 1}</span>
+            <select class="mat-select" aria-label="Impresora de la impresión ${i + 1}" onchange="state.timeRows[${i}].printer=this.value; debouncedSave()">${opts}</select>
+            <button type="button" class="rm-btn" onclick="removeTimeRow(${i})" aria-label="Quitar impresión ${i + 1}">✕</button>
+            <label class="tr-in"><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${row.h}" aria-label="Horas" oninput="state.timeRows[${i}].h=this.value; pintarTotalTiempos(); debouncedSave()" /><span>h</span></label>
+            <label class="tr-in"><input type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="0" value="${row.m}" aria-label="Minutos" oninput="state.timeRows[${i}].m=this.value; pintarTotalTiempos(); debouncedSave()" /><span>min</span></label>
+            <label class="tr-in tr-veces"><span class="tr-pre">×</span><input type="number" inputmode="numeric" min="1" step="1" placeholder="1" value="${row.n > 1 ? row.n : ''}" aria-label="Veces que se repite esta impresión" oninput="state.timeRows[${i}].n=Math.max(1, parseInt(this.value) || 1); pintarTotalTiempos(); debouncedSave()" /></label>`;
           c.appendChild(d);
         });
+
+        const ayuda = document.createElement('p');
+        ayuda.className = 'tr-ayuda';
+        ayuda.textContent = 'Cada fila es el tiempo de una impresión. Si una se repite igual, ponle las veces en × (por ejemplo × 12).';
+        c.appendChild(ayuda);
+
+        const total = document.createElement('p');
+        total.className = 'tr-total';
+        total.id = 'tr-total';
+        c.appendChild(total);
 
         const btn = document.createElement('button');
         btn.className = 'add-row-btn';
         btn.textContent = '+ Agregar impresión';
         btn.onclick = () => {
-          if (state.timeRows.length >= 10) return showToast('Máximo 10 impresiones');
-          state.timeRows.push({ h: '', m: '', printer: state.timeRows[0]?.printer || 'A1 MINI' });
+          if (state.timeRows.length >= 60) return showToast('Máximo 60 filas; usa "veces" para las que se repiten');
+          const ult = state.timeRows[state.timeRows.length - 1] || {};
+          state.timeRows.push({ h: '', m: '', n: 1, printer: ult.printer || 'A1 MINI' });
           renderTimes();
         };
         c.appendChild(btn);
+        pintarTotalTiempos();
       }
+    }
+
+    // Total de impresiones y horas (cada fila puede repetirse varias veces)
+    function pintarTotalTiempos() {
+      const el = document.getElementById('tr-total');
+      if (!el) return;
+      let veces = 0, min = 0;
+      state.timeRows.forEach(r => { const n = Math.max(1, parseInt(r.n) || 1); veces += n; min += ((parseFloat(r.h) || 0) * 60 + (parseFloat(r.m) || 0)) * n; });
+      const h = Math.floor(min / 60), m = Math.round(min % 60);
+      el.textContent = `${veces} impresion${veces !== 1 ? 'es' : ''} · ${h} h${m ? ` ${m} min` : ''} en total`;
     }
 
     function removeTimeRow(i) {
@@ -1319,7 +1348,7 @@
         detTiempos.push({ printer: printerName, t: tiempo, consumo: printer.consumo, desgaste: printer.desgaste });
       } else {
         state.timeRows.forEach(r => {
-          const t  = (parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60;
+          const t  = ((parseFloat(r.h) || 0) + (parseFloat(r.m) || 0) / 60) * Math.max(1, parseInt(r.n) || 1);
           const pr = PRINTERS[r.printer] || PRINTERS['A1 MINI'];
           costoElec += t * (pr.consumo / 1000) * KWH;
           costoMaq  += t * pr.desgaste;
@@ -2130,6 +2159,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20260928e"></script>
+  <script src="nav.js?v=20261006a"></script>
 </body>
 </html>
