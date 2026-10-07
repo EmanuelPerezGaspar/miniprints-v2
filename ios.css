@@ -1094,7 +1094,7 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .cq-pieces { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cq-pieces label { font-size: 17px; color: var(--text); }
 .cq-pieces .cq-stepper { width: 160px; }
-.cq-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cq-row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
 .cq-readout {
   min-height: 44px; display: flex; align-items: center; padding: 0 14px;
   border-radius: var(--r-md); background: var(--ios-fill-2);
@@ -1451,7 +1451,14 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .inv-sheet .cq-stepper input { background: transparent; text-align: center; font-family: var(--ios-font-rounded); font-weight: 700; font-size: 20px; box-shadow: none !important; }
 .inv-sheet .cq-chips button { background: var(--ios-group); }
 .inv-sheet .cq-chips button[aria-checked="true"] { background: var(--ios-green); }
-.inv-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.inv-row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+/* Safari de iPhone: los campos de fecha traen ancho mínimo y altura propios; se ajustan a su columna
+   y miden lo mismo que los demás campos */
+input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; max-width: 100%; box-sizing: border-box; }
+input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.inv-sheet input[type="date"], .hx-dates input[type="date"], .field input[type="date"] { display: block; width: 100%; }
+.inv-sheet input[type="date"], .field input[type="date"] { height: 46px; min-height: 46px; line-height: 46px; padding-top: 0; padding-bottom: 0; }
+.hx-dates input[type="date"] { height: 40px; line-height: 40px; padding-top: 0; padding-bottom: 0; }
 .inv-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
 @media (max-width: 420px) { .inv-row3 { grid-template-columns: 1fr 1fr; } .inv-row3 > :first-child { grid-column: 1 / -1; } }
 .inv-hint { padding: 0; font-size: 13px; color: var(--nav-text-2); line-height: 1.4; }
