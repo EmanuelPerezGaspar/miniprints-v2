@@ -1631,6 +1631,19 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-dia:disabled { cursor: default; }
 .hx-cal-dia:disabled:active .hx-cal-n { background: none; }
 .sheet-close[hidden] { display: none; }
+#v-datos:empty { display: none; }
+/* Acciones de la venta: solo iconos */
+.hx-acciones { display: flex; justify-content: center; gap: 22px; padding-top: 4px; }
+.hx-acc {
+  width: 58px; height: 58px; display: grid; place-items: center; border: none; border-radius: 50%;
+  background: var(--ios-group); color: var(--ios-green); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: transform 120ms;
+}
+.hx-acc:active { transform: scale(0.92); }
+.hx-acc:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: 2px; }
+.hx-acc svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hx-acc.is-wa { background: #25d366; color: #fff; }
+.hx-acc.is-danger { color: var(--nav-danger); }
 .hx-hero-cliente { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: -4px; }
 #ed-vend-otro[hidden] { display: none; }
 .inv-f > .hx-vend-todas { padding: 10px 12px 10px var(--pad-card); font-size: 15px; font-weight: 400; color: var(--text); line-height: 1.3; }
