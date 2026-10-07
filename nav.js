@@ -108,7 +108,9 @@
     seg.innerHTML = [['stock-piezas.html', 'Piezas'], ['stock-material.html', 'Material']]
       .map(([href, label]) => `<a href="${href}"${href === page ? ' aria-current="page"' : ''}>${label}</a>`).join('');
     seg.addEventListener('click', e => { if (e.target.closest('a')) marcarVT('seg'); });
-    main.prepend(seg);
+    // Debajo del título, como los demás segmentos de la app
+    const head = main.querySelector('.dash-header');
+    if (head) head.after(seg); else main.prepend(seg);
   }
 
   /* ── Hoja "Más" ───────────────────────────────────── */
