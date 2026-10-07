@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20261006d"></script>
-  <script src="categorias.js?v=20261006d"></script>
-  <script src="inventario.js?v=20261006d"></script>
-  <link rel="stylesheet" href="styles.css?v=20261006d" />
+  <script src="theme.js?v=20261007a"></script>
+  <script src="categorias.js?v=20261007a"></script>
+  <script src="inventario.js?v=20261007a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007a" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261006d"></script>
-  <link rel="stylesheet" href="ios.css?v=20261006d" />
-  <link rel="stylesheet" href="nav.css?v=20261006d" />
+  <script src="ios-charts.js?v=20261007a"></script>
+  <link rel="stylesheet" href="ios.css?v=20261007a" />
+  <link rel="stylesheet" href="nav.css?v=20261007a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +24,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261006d"></script>
+  <script type="module" src="firebase-sync.js?v=20261007a"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -179,7 +179,7 @@
     function guardarEventos(l) { localStorage.setItem('mp_metas_eventos', JSON.stringify(l)); }
     function abonado(m) { return (m.abonos || []).reduce((s, a) => s + (Number(a.m) || 0), 0); }
     function ingresos(filtro) {
-      return DB.ventas.filter(v => ventaPagada(v) && filtro(mesKey(v)))
+      return DB.ventas.filter(v => ventaPagada(v) && filtro(cobroKey(v)))
         .reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
     }
     function plazo(limite) {
@@ -482,6 +482,8 @@
       renderCategorias();
     }));
 
+    // Mes en que entró el dinero: la fecha de cobro si se pagó después
+    function cobroKey(v) { return v.fechaPago ? String(v.fechaPago).slice(0, 7) : mesKey(v); }
     // ── Ventas por mes (enero a diciembre del año actual) ──
     let chartMeses = null, monthMetric = 'ventas';
     const MESES_CORTOS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -492,7 +494,7 @@
         const delMes = DB.ventas.filter(v => mesKey(v) === key);
         return monthMetric === 'ventas'
           ? delMes.length
-          : delMes.filter(ventaPagada).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
+          : DB.ventas.filter(v => ventaPagada(v) && cobroKey(v) === key).reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
       });
       const total = datos.reduce((a, b) => a + b, 0);
       const esVentas = monthMetric === 'ventas';
@@ -553,6 +555,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261006d"></script>
+  <script src="nav.js?v=20261007a"></script>
 </body>
 </html>

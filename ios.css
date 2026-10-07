@@ -1582,6 +1582,60 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .fn-share i { display: block; height: 100%; border-radius: var(--r-pill); background: var(--st-color, var(--ios-green)); }
 .hx-sub-amt { font-size: 13px; font-weight: 600; color: var(--st-color, var(--ios-label-2)); font-variant-numeric: tabular-nums; }
 .hx-list.is-plain .hx-row + .hx-row::before { left: var(--pad-card); }
+
+/* Historial: rango de fechas y calendario */
+#f-rango[hidden] { display: none; }
+#f-rango { display: flex; flex-direction: column; gap: 8px; }
+.hx-rango-info { margin: 0; font-size: 13px; color: var(--ios-label-2); }
+.hx-rango-info button { border: none; background: none; padding: 0; color: var(--ios-green); font: inherit; font-weight: 600; cursor: pointer; }
+.hx-pen { color: var(--ios-orange); font-weight: 600; }
+.hx-cal[hidden], #ed-metodo-seg[hidden] { display: none; }
+.hx-cal { border-radius: var(--r-lg); background: var(--ios-bg-2); padding: 8px 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.hx-cal-head { display: flex; align-items: center; justify-content: space-between; }
+.hx-cal-mes { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+.hx-cal-nav {
+  width: 44px; height: 44px; display: grid; place-items: center; border: none; background: none; border-radius: 50%;
+  color: var(--ios-green); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.hx-cal-nav:active { background: rgba(var(--ink), 0.06); }
+.hx-cal-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.hx-cal-sem, .hx-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.hx-cal-sem span { text-align: center; font-size: 12px; font-weight: 600; color: var(--ios-label-2); padding: 2px 0 4px; }
+.hx-cal-dia {
+  display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0 5px;
+  border: none; background: none; color: var(--text); font-family: var(--ios-font-rounded);
+  cursor: pointer; -webkit-tap-highlight-color: transparent; border-radius: 12px; min-height: 48px;
+}
+.hx-cal-dia:focus-visible { outline: 2px solid var(--ios-blue); outline-offset: -2px; }
+.hx-cal-n {
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%;
+  font-size: 17px; font-weight: 500; font-variant-numeric: tabular-nums;
+}
+.hx-cal-dia:not(.con-ventas) .hx-cal-n { color: var(--ios-label-2); }
+.hx-cal-dia.is-hoy .hx-cal-n { color: var(--ios-green); font-weight: 700; }
+.hx-cal-dia.is-sel .hx-cal-n { background: var(--ios-green); color: #fff; font-weight: 700; }
+.hx-cal-dia:active .hx-cal-n { background: rgba(var(--ink), 0.08); }
+.hx-cal-dia.is-sel:active .hx-cal-n { background: var(--ios-green); }
+.hx-cal-dot { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--ios-green); }
+.hx-cal-dot.is-pen { background: var(--ios-orange); }
+.hx-cal-dot.is-vacio { background: transparent; }
+.hx-cal-ley { display: flex; align-items: center; gap: 14px; padding: 6px 6px 0; font-size: 12px; color: var(--ios-label-2); }
+.hx-cal-ley span { display: inline-flex; align-items: center; gap: 5px; }
+.hx-cal-ley button { margin-left: auto; border: none; border-radius: var(--r-pill); padding: 5px 12px; background: var(--ios-fill); color: var(--ios-green); font-family: var(--ios-font); font-size: 13px; font-weight: 600; cursor: pointer; }
+.hx-empty-dia { padding: 22px 16px; }
+
+/* Historial: editar venta */
+.hx-ed-items { display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--ios-group); overflow: hidden; }
+.hx-ed-item { display: grid; grid-template-columns: 1fr 120px; grid-template-areas: "name name" "qty precio"; gap: 8px 10px; padding: 12px var(--pad-card); position: relative; }
+.hx-ed-item + .hx-ed-item::before { content: ''; position: absolute; top: 0; left: var(--pad-card); right: 0; border-top: 0.5px solid var(--ios-separator); }
+.hx-ed-item.is-quitada .hx-ed-name { text-decoration: line-through; color: var(--ios-label-2); }
+.hx-ed-item.is-quitada .hx-ed-precio { opacity: 0.4; }
+.hx-ed-name { grid-area: name; font-size: 16px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hx-ed-qty { grid-area: qty; max-width: 160px; }
+.inv-sheet .hx-ed-qty { background: var(--ios-bg-2); }
+.inv-sheet .hx-ed-qty input { width: 100%; min-width: 0; border: none; font-size: 17px; padding: 8px 0; color: var(--text); }
+.hx-ed-precio { grid-area: precio; }
+.inv-sheet .hx-ed-precio input { width: 100%; box-sizing: border-box; background: var(--ios-bg-2); }
 a.inv-tile { -webkit-tap-highlight-color: transparent; transition: transform 120ms; }
 a.inv-tile:active { transform: scale(0.97); }
 
