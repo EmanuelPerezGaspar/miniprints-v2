@@ -18,11 +18,27 @@
     });
   }
 
-  function abrir(id) {
+  // cambio: 'adelante' | 'atras' → si ya hay una hoja abierta, se sustituye
+  // dentro de la misma tarjeta (sin cerrar y abrir), como una navegación de iOS
+  function abrir(id, cambio) {
     ensureBackdrop();
-    if (abierta) cerrar(true);
     const s = document.getElementById(id);
     if (!s) return;
+    if (abierta && cambio && abierta !== s) {
+      const prev = abierta;
+      [prev, s].forEach(x => x.style.transition = 'none');
+      prev.classList.remove('open'); prev.hidden = true;
+      s.hidden = false; s.classList.add('open'); s.scrollTop = 0;
+      void s.offsetWidth;
+      [prev, s].forEach(x => x.style.transition = '');
+      s.classList.remove('sheet-swap-adelante', 'sheet-swap-atras');
+      void s.offsetWidth;
+      s.classList.add('sheet-swap-' + cambio);
+      clearTimeout(s._swap); s._swap = setTimeout(() => s.classList.remove('sheet-swap-' + cambio), 400);
+      abierta = s;
+      return;
+    }
+    if (abierta) cerrar(true);
     opener = document.activeElement;
     abierta = s;
     s.hidden = backdrop.hidden = false;
