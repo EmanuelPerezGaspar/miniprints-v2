@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007b"></script>
-  <script src="whatsapp.js?v=20261007b"></script>
-  <script src="inventario.js?v=20261007b"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007b" />
+  <script src="theme.js?v=20261007c"></script>
+  <script src="whatsapp.js?v=20261007c"></script>
+  <script src="inventario.js?v=20261007c"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007c" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007b" />
-  <link rel="stylesheet" href="nav.css?v=20261007b" />
+  <link rel="stylesheet" href="ios.css?v=20261007c" />
+  <link rel="stylesheet" href="nav.css?v=20261007c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007b"></script>
+  <script type="module" src="firebase-sync.js?v=20261007c"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -108,7 +108,7 @@
   <div class="sheet inv-sheet" id="sh-editar" role="dialog" aria-modal="true" aria-labelledby="sh-editar-t" hidden>
     <div class="sheet-head">
       <h2 id="sh-editar-t">Editar venta</h2>
-      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+      <button class="sheet-close hx-atras" type="button" onclick="abrirVenta(actual, !!diaAbierto, 'atras')" aria-label="Volver a la venta"><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
     </div>
     <div class="inv-f">
       <span class="inv-f-lbl">Piezas · pon 0 para quitar una</span>
@@ -332,7 +332,7 @@
 
     // ── Hoja del día ──
     let diaAbierto = null;      // día cuya hoja abrió el detalle (para regresar)
-    function abrirDia(f) {
+    function abrirDia(f, cambio) {
       const ventas = DB.ventas.filter(v => fechaVenta(v) === f).sort((a, b) => b.id - a.id);
       if (!ventas.length) { diaAbierto = null; return false; }
       const cob = ventas.filter(ventaPagada).reduce((s, v) => s + totalDe(v), 0);
@@ -349,16 +349,16 @@
         </div>`;
       document.getElementById('dia-list').innerHTML = ventas.map(filaVenta).join('');
       diaAbierto = f;
-      MP_INV.abrir('sh-dia');
+      MP_INV.abrir('sh-dia', cambio);
       return true;
     }
-    function volverDia() { if (!diaAbierto || !abrirDia(diaAbierto)) MP_INV.cerrar(); }
+    function volverDia() { if (!diaAbierto || !abrirDia(diaAbierto, 'atras')) MP_INV.cerrar(); }
     // Tras cobrar, editar o eliminar: si venías de un día, regresa a su hoja
     function trasCambio() {
       render();
-      if (!diaAbierto || !abrirDia(diaAbierto)) MP_INV.cerrar();
+      if (!diaAbierto || !abrirDia(diaAbierto, 'atras')) MP_INV.cerrar();
     }
-    document.getElementById('dia-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id), true); });
+    document.getElementById('dia-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id), true, 'adelante'); });
 
     // ── Filas ──
     const ICO = {
@@ -421,7 +421,7 @@
 
     // ── Detalle ──
     let actual = null;
-    function abrirVenta(id, desdeDia) {
+    function abrirVenta(id, desdeDia, cambio) {
       const v = DB.ventas.find(x => Number(x.id) === id);
       if (!v) return;
       actual = id;
@@ -443,7 +443,7 @@
         ${pagada && v.fechaPago ? `<div class="inv-group-row"><span>Cobrada</span><span>${esc(F.diaLargo(F.iso(v.fechaPago)))}</span></div>` : ''}
         ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}`;
       document.getElementById('v-cobrar').hidden = pagada;
-      MP_INV.abrir('sh-venta');
+      MP_INV.abrir('sh-venta', cambio);
     }
     function cobrar(metodo) {
       const v = DB.ventas.find(x => Number(x.id) === actual);
@@ -484,7 +484,7 @@
       document.getElementById('ed-cliente').value = v.cliente || '';
       document.getElementById('ed-notas').value = v.notas || '';
       pintarEdPago();
-      MP_INV.abrir('sh-editar');
+      MP_INV.abrir('sh-editar', 'adelante');
     }
     function pintarEdItems() {
       document.getElementById('ed-items').innerHTML = edItems.map((it, i) => `
@@ -558,6 +558,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007b"></script>
+  <script src="nav.js?v=20261007c"></script>
 </body>
 </html>

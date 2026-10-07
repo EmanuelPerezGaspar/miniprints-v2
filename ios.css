@@ -1626,6 +1626,15 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-dia:disabled { cursor: default; }
 .hx-cal-dia:disabled:active .hx-cal-n { background: none; }
 .sheet-close[hidden] { display: none; }
+#v-cobrar[hidden] { display: none; }
+/* Día, venta y edición miden lo mismo: al pasar de una a otra la tarjeta no cambia de tamaño */
+#sh-dia, #sh-venta, #sh-editar { height: min(680px, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px)); }
+@media (min-width: 900px) { #sh-dia, #sh-venta, #sh-editar { height: min(680px, 86vh); } }
+.sheet-swap-adelante > * { animation: hoja-adelante 320ms var(--ios-spring) both; }
+.sheet-swap-atras > * { animation: hoja-atras 320ms var(--ios-spring) both; }
+@keyframes hoja-adelante { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes hoja-atras { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sheet-swap-adelante > *, .sheet-swap-atras > * { animation: none; } }
 .sheet-close.hx-atras svg { width: 22px; height: 22px; fill: none; stroke-width: 2.4; stroke-linejoin: round; margin-left: -2px; }
 .inv-sheet .hx-list { background: var(--ios-group); border-radius: var(--r-sheet-in); }
 .hx-dia-split { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 14px; color: var(--nav-text-2); }
