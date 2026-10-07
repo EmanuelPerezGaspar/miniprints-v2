@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="whatsapp.js?v=20261007q"></script>
-  <script src="inventario.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="whatsapp.js?v=20261007r"></script>
+  <script src="inventario.js?v=20261007r"></script>
+  <script src="costos.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -173,7 +174,6 @@
       try { DB.piezas = JSON.parse(localStorage.getItem('mp_piezas')) || {}; } catch (e) { DB.piezas = {}; }
       try { DB.ventas = JSON.parse(localStorage.getItem('mp_ventas')) || []; } catch (e) { DB.ventas = []; }
       if (!Array.isArray(DB.ventas)) DB.ventas = [];
-      try { DB.costos = JSON.parse(localStorage.getItem('mp_costos_piezas')) || {}; } catch (e) { DB.costos = {}; }
     }
     const savePiezas = () => { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch (e) {} };
     const saveVentas = () => { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch (e) {} };
@@ -479,20 +479,28 @@
     // ganancia de la empresa llega hasta el precio cotizado; lo que la venta completa supere a lo
     // cotizado es la comisión del vendedor (100 %). Si se vende abajo de lo cotizado, la diferencia
     // sale de la ganancia y no hay comisión. En ventas pendientes la comisión cuenta hasta cobrar.
+    // Costo = producción (base + fallas) + empaque; el IVA (si la cotización lo llevaba) se aparta
+    // en la misma proporción y el reparto se hace sobre el monto sin IVA.
     function reparto(v) {
-      let C = 0, Q = 0, V = 0, sin = 0, aprox = false;
+      let C = 0, Q = 0, I = 0, V = 0, ivaV = 0, sin = 0, aprox = false;
+      const cache = {};
       ventaItems(v).forEach(it => {
-        const q = Number(it.cantidad) || 0, ref = DB.costos[it.pieza] || {};
-        const costo = it.costo > 0 ? it.costo : ref.costo, cot = it.cotizado > 0 ? it.cotizado : ref.cotizado;
-        if (!(costo > 0 && cot > 0) || !q) { sin += q; return; }
-        if (!(it.costo > 0)) aprox = true;
-        C += costo * q; Q += cot * q; V += (Number(it.precio) || 0) * q;
+        const q = Number(it.cantidad) || 0;
+        const ref = it.cv === 2 ? it : (cache[it.pieza] = cache[it.pieza] !== undefined ? cache[it.pieza] : MP_COSTOS.porPieza(it.pieza));
+        const prod = ref && (it.cv === 2 ? ref.costo : ref.produccion), cot = ref && ref.cotizado;
+        if (!(prod > 0 && cot > 0) || !q) { sin += q; return; }
+        if (it.cv !== 2) aprox = true;
+        C += (prod + (Number(ref.empaque) || 0)) * q; Q += cot * q; I += (Number(ref.iva) || 0) * q;
+        const venta = (Number(it.precio) || 0) * q;
+        V += venta;
+        ivaV += cot > 0 ? venta * (Number(ref.iva) || 0) / cot : 0;   // la parte del precio que es IVA, pieza por pieza
       });
       if (!C) return { sin };
-      const recupera = Math.min(V, C);
-      const ganancia = V >= Q ? Q - C : V - C;
-      const comision = Math.max(0, V - Q);
-      return { C, Q, V, recupera, ganancia, comision, sin, aprox };
+      const Vn = V - ivaV, Qn = Q - I;
+      const recupera = Math.min(Vn, C);
+      const ganancia = Vn >= Qn ? Qn - C : Vn - C;
+      const comision = Math.max(0, Vn - Qn);
+      return { C, Q, V, iva: ivaV, recupera, ganancia, comision, sin, aprox };
     }
     function pintarReparto(v) {
       const r = reparto(v);
@@ -511,16 +519,17 @@
           <span><small>Vendido</small><b>${money(r.V)}</b></span>
         </div>
         ${r.V > 0 ? `<div class="hx-rep-bar" role="img" aria-label="Reparto: costo ${money(r.recupera)}, ganancia ${money(r.ganancia)}, comisión ${money(r.comision)}">
-          ${seg('is-costo', r.recupera, 'Recupera costo ' + money(r.recupera))}${seg('is-gan', r.ganancia, 'Ganancia ' + money(r.ganancia))}${seg('is-com', r.comision, 'Comisión (sobre-ganancia) ' + money(r.comision))}
+          ${seg('is-costo', r.recupera, 'Recupera costo ' + money(r.recupera))}${seg('is-gan', r.ganancia, 'Ganancia ' + money(r.ganancia))}${seg('is-iva', r.iva, 'IVA ' + money(r.iva))}${seg('is-com', r.comision, 'Comisión (sobre-ganancia) ' + money(r.comision))}
         </div>` : ''}
         <div class="hx-rep-filas">
           ${fila('is-costo', 'Recupera costo', money(r.recupera), 'Empresa')}
           ${perdida
             ? fila('is-perd', 'Pérdida', '−' + money(-r.ganancia), 'Vendida abajo del costo')
             : fila('is-gan', 'Ganancia', money(r.ganancia), r.V < r.Q ? `Empresa · ${money(r.Q - r.V)} abajo de lo cotizado` : 'Empresa')}
+          ${r.iva > 0.004 ? fila('is-iva', 'IVA', money(r.iva), 'Impuestos') : ''}
           ${fila('is-com', 'Comisión', money(r.comision), r.comision > 0 ? `${esc(quien)}${pend ? ' · al cobrar' : ''}` : 'Sin comisión')}
         </div>
-        ${r.sin || r.aprox ? `<p class="hx-rep-nota">${[r.sin ? nota(r.sin) + ' (no se incluyen)' : '', r.aprox ? 'costo tomado de la última cotización' : ''].filter(Boolean).join(' · ')}</p>` : ''}`;
+        ${r.sin || r.aprox ? `<p class="hx-rep-nota">${[r.sin ? nota(r.sin) + ' (no se incluyen)' : '', r.aprox ? 'valores de la última cotización de la pieza' : ''].filter(Boolean).join(' · ')}</p>` : ''}`;
     }
 
     function cobrar(metodo) {
@@ -676,6 +685,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>

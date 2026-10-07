@@ -1659,6 +1659,10 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-rep-bar .is-gan, .hx-rep-dot.is-gan { background: var(--rep-gan); }
 .hx-rep-bar .is-com, .hx-rep-dot.is-com { background: var(--rep-com); }
 .hx-rep-dot.is-perd { background: var(--rep-perd); }
+.hx-rep-bar .is-iva, .hx-rep-dot.is-iva { background: var(--ios-purple); }
+.cz-det { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.cz-det small { font-size: 12px; color: var(--nav-text-2); }
+.pz-aprox { font-size: 11px; font-weight: 600; color: var(--nav-text-2); }
 .hx-rep-filas { display: flex; flex-direction: column; gap: 6px; }
 .hx-rep-fila { display: grid; grid-template-columns: 10px auto minmax(0, 1fr) auto; grid-template-areas: "dot lbl dest monto"; column-gap: 8px; align-items: baseline; }
 .hx-rep-fila .hx-rep-dot { align-self: center; }

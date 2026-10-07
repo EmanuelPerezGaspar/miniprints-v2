@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="whatsapp.js?v=20261007q"></script>
-  <script src="categorias.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="whatsapp.js?v=20261007r"></script>
+  <script src="categorias.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,7 +595,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1550,7 +1550,10 @@
         urgencia,
         total:     precioFinal,
         costo_base: costoBase,
+        falla:     margenFalla,
         ganancia,
+        urgencia_monto: urgenciaMonto,
+        empaque:   empaqueMonto,
         iva:       ivaMonto,
         fue_aceptada: null,
       };
@@ -1844,10 +1847,13 @@
 
       // Precio cotizado, costo y tu precio por pieza: para saber cuánto más le sacas
       const cotizadoU = precioSugerido();
-      const costoU = state.pendingCot?.costo_base > 0 ? Math.round(state.pendingCot.costo_base / cantidad * 100) / 100 : null;
+      // Costo de producción por pieza = costo base + reserva por fallas (misma definición que el PDF)
+      const pc = state.pendingCot;
+      const costoU = pc?.costo_base > 0 ? Math.round((pc.costo_base + (pc.falla || 0)) / cantidad * 100) / 100 : null;
       if (cotizadoU > 0) {
         const cp = leerJSON('mp_costos_piezas', {});
-        cp[nombre] = { cotizado: cotizadoU, costo: costoU, precio: precio != null ? Math.round(precio * 100) / 100 : (leerJSON('mp_precios', {})[nombre] || null), fecha: new Date().toISOString().slice(0, 10) };
+        cp[nombre] = { v: 2, cotizado: cotizadoU, costo: costoU,
+          empaque: pc ? Math.round((pc.empaque || 0) / cantidad * 100) / 100 : 0, iva: pc ? Math.round((pc.iva || 0) / cantidad * 100) / 100 : 0, precio: precio != null ? Math.round(precio * 100) / 100 : (leerJSON('mp_precios', {})[nombre] || null), fecha: new Date().toISOString().slice(0, 10) };
         localStorage.setItem('mp_costos_piezas', JSON.stringify(cp));
       }
 
@@ -2360,6 +2366,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>

@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="categorias.js?v=20261007q"></script>
-  <script src="whatsapp.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="categorias.js?v=20261007r"></script>
+  <script src="whatsapp.js?v=20261007r"></script>
+  <script src="costos.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -85,8 +86,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -99,7 +100,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -556,8 +557,6 @@
       const notas       = document.getElementById('venta-notas').value.trim();
       const cliente     = estatusPago === 'pendiente' ? document.getElementById('venta-cliente').value.trim() : '';
 
-      let costosPiezas = {};
-      try { costosPiezas = JSON.parse(localStorage.getItem('mp_costos_piezas')) || {}; } catch (e) {}
       // El inventario pudo cambiar en otro dispositivo mientras armabas el pedido: se revisa el más reciente
       try { const fresco = JSON.parse(localStorage.getItem('mp_piezas')); if (fresco && typeof fresco === 'object') DB.piezas = fresco; } catch (e) {}
       const falta = carrito.find(it => it.cantidad > disponible(it.pieza));
@@ -582,11 +581,11 @@
         estatusPago,
         notas,
         items: carrito.map(it => {
-          // Se guarda el costo y el precio cotizado de ese momento, para el reparto en el historial
+          // Se guardan los valores por pieza de ese momento (costos.js), para el reparto en el historial
           const item = { pieza: it.pieza, cantidad: it.cantidad, precio: it.precio };
-          const ref = costosPiezas[it.pieza] || {};
-          if (ref.costo > 0) item.costo = ref.costo;
-          if (ref.cotizado > 0) item.cotizado = ref.cotizado;
+          const ref = window.MP_COSTOS && MP_COSTOS.porPieza(it.pieza);
+          if (ref && ref.produccion > 0 && ref.cotizado > 0 && !ref.aprox)
+            Object.assign(item, { cv: 2, costo: ref.produccion, empaque: ref.empaque, iva: ref.iva, cotizado: ref.cotizado });
           return item;
         })
       };
@@ -665,6 +664,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>
