@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007p"></script>
-  <script src="whatsapp.js?v=20261007p"></script>
-  <script src="inventario.js?v=20261007p"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007p" />
+  <script src="theme.js?v=20261007q"></script>
+  <script src="whatsapp.js?v=20261007q"></script>
+  <script src="inventario.js?v=20261007q"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007q" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007p" />
-  <link rel="stylesheet" href="nav.css?v=20261007p" />
+  <link rel="stylesheet" href="ios.css?v=20261007q" />
+  <link rel="stylesheet" href="nav.css?v=20261007q" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007p"></script>
+  <script type="module" src="firebase-sync.js?v=20261007q"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -87,6 +87,7 @@
       <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar" id="v-cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
     </div>
     <div class="inv-hero" id="v-hero"></div>
+    <div class="hx-rep" id="v-reparto"></div>
     <div class="inv-group hx-items" id="v-items"></div>
     <div class="inv-f" id="v-cobrar">
       <span class="inv-f-lbl">Registrar el pago (hoy)</span>
@@ -172,6 +173,7 @@
       try { DB.piezas = JSON.parse(localStorage.getItem('mp_piezas')) || {}; } catch (e) { DB.piezas = {}; }
       try { DB.ventas = JSON.parse(localStorage.getItem('mp_ventas')) || []; } catch (e) { DB.ventas = []; }
       if (!Array.isArray(DB.ventas)) DB.ventas = [];
+      try { DB.costos = JSON.parse(localStorage.getItem('mp_costos_piezas')) || {}; } catch (e) { DB.costos = {}; }
     }
     const savePiezas = () => { try { localStorage.setItem('mp_piezas', JSON.stringify(DB.piezas)); } catch (e) {} };
     const saveVentas = () => { try { localStorage.setItem('mp_ventas', JSON.stringify(DB.ventas)); } catch (e) {} };
@@ -467,9 +469,60 @@
         ${v.notas ? `<span class="hx-hero-nota">“${esc(v.notas)}”</span>` : ''}`;
       document.getElementById('v-items').innerHTML = items.map(it => `
         <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${Number(it.cantidad) || 0} × ${money(it.precio)}</span></div>`).join('');
+      document.getElementById('v-reparto').innerHTML = pintarReparto(v);
       document.getElementById('v-cobrar').hidden = pagada;
       MP_INV.abrir('sh-venta', cambio);
     }
+    // ── Reparto del dinero de la venta ──
+    // Costo y precio cotizado por pieza: los guardados en la venta (desde esta versión) o, para ventas
+    // anteriores, los de la última cotización de la pieza. Reglas: primero se recupera el costo; la
+    // ganancia de la empresa llega hasta el precio cotizado; lo que la venta completa supere a lo
+    // cotizado es la comisión del vendedor (100 %). Si se vende abajo de lo cotizado, la diferencia
+    // sale de la ganancia y no hay comisión. En ventas pendientes la comisión cuenta hasta cobrar.
+    function reparto(v) {
+      let C = 0, Q = 0, V = 0, sin = 0, aprox = false;
+      ventaItems(v).forEach(it => {
+        const q = Number(it.cantidad) || 0, ref = DB.costos[it.pieza] || {};
+        const costo = it.costo > 0 ? it.costo : ref.costo, cot = it.cotizado > 0 ? it.cotizado : ref.cotizado;
+        if (!(costo > 0 && cot > 0) || !q) { sin += q; return; }
+        if (!(it.costo > 0)) aprox = true;
+        C += costo * q; Q += cot * q; V += (Number(it.precio) || 0) * q;
+      });
+      if (!C) return { sin };
+      const recupera = Math.min(V, C);
+      const ganancia = V >= Q ? Q - C : V - C;
+      const comision = Math.max(0, V - Q);
+      return { C, Q, V, recupera, ganancia, comision, sin, aprox };
+    }
+    function pintarReparto(v) {
+      const r = reparto(v);
+      const nota = n => `${n} pieza${n !== 1 ? 's' : ''} sin costo registrado`;
+      if (!r.C) return `<p class="hx-rep-vacio">Sin costo registrado · al confirmar la impresión en Cotizar se guarda el costo y el precio cotizado de la pieza.</p>`;
+      const pend = !ventaPagada(v);
+      const quien = v.vendedor ? nombreDe(v.vendedor) : 'Vendedor';
+      const pct = x => Math.max(0, x) / r.V * 100;
+      const perdida = r.ganancia < 0;
+      const seg = (cls, x, t) => x > 0.004 ? `<i class="${cls}" style="flex-grow:${pct(x).toFixed(2)}" title="${esc(t)}"></i>` : '';
+      const fila = (cls, lbl, monto, destino) => `<div class="hx-rep-fila"><span class="hx-rep-dot ${cls}" aria-hidden="true"></span><span class="hx-rep-lbl">${lbl}</span><span class="hx-rep-monto">${monto}</span><span class="hx-rep-dest">${destino}</span></div>`;
+      return `
+        <div class="hx-rep-kpis">
+          <span><small>Costo</small><b>${money(r.C)}</b></span>
+          <span><small>Cotizado</small><b>${money(r.Q)}</b></span>
+          <span><small>Vendido</small><b>${money(r.V)}</b></span>
+        </div>
+        ${r.V > 0 ? `<div class="hx-rep-bar" role="img" aria-label="Reparto: costo ${money(r.recupera)}, ganancia ${money(r.ganancia)}, comisión ${money(r.comision)}">
+          ${seg('is-costo', r.recupera, 'Recupera costo ' + money(r.recupera))}${seg('is-gan', r.ganancia, 'Ganancia ' + money(r.ganancia))}${seg('is-com', r.comision, 'Comisión (sobre-ganancia) ' + money(r.comision))}
+        </div>` : ''}
+        <div class="hx-rep-filas">
+          ${fila('is-costo', 'Recupera costo', money(r.recupera), 'Empresa')}
+          ${perdida
+            ? fila('is-perd', 'Pérdida', '−' + money(-r.ganancia), 'Vendida abajo del costo')
+            : fila('is-gan', 'Ganancia', money(r.ganancia), r.V < r.Q ? `Empresa · ${money(r.Q - r.V)} abajo de lo cotizado` : 'Empresa')}
+          ${fila('is-com', 'Comisión', money(r.comision), r.comision > 0 ? `${esc(quien)}${pend ? ' · al cobrar' : ''}` : 'Sin comisión')}
+        </div>
+        ${r.sin || r.aprox ? `<p class="hx-rep-nota">${[r.sin ? nota(r.sin) + ' (no se incluyen)' : '', r.aprox ? 'costo tomado de la última cotización' : ''].filter(Boolean).join(' · ')}</p>` : ''}`;
+    }
+
     function cobrar(metodo) {
       const v = DB.ventas.find(x => Number(x.id) === actual);
       if (!v) return;
@@ -623,6 +676,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007p"></script>
+  <script src="nav.js?v=20261007q"></script>
 </body>
 </html>

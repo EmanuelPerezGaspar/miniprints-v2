@@ -1644,6 +1644,30 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-hero-meta svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
 .hx-hero-nota { max-width: 100%; font-size: 14px; font-style: italic; color: var(--nav-text-2); text-align: center; overflow-wrap: anywhere; }
 /* Acciones de la venta: solo iconos */
+/* Reparto del dinero de la venta (mini tablero) */
+.hx-rep { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; border-radius: var(--r-sheet-in); background: var(--ios-group);
+  --rep-costo: #8e8e93; --rep-gan: var(--ios-green); --rep-com: var(--ios-blue); --rep-perd: var(--ios-red, #ff453a); }
+.hx-rep:empty { display: none; }
+.hx-rep-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.hx-rep-kpis span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.hx-rep-kpis small { font-size: 12px; font-weight: 600; color: var(--nav-text-2); }
+.hx-rep-kpis b { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hx-rep-kpis span + span { border-left: 0.5px solid var(--ios-sep, var(--ios-separator)); }
+.hx-rep-bar { display: flex; gap: 2px; height: 12px; border-radius: 6px; overflow: hidden; }
+.hx-rep-bar i { display: block; min-width: 4px; height: 100%; }
+.hx-rep-bar .is-costo, .hx-rep-dot.is-costo { background: var(--rep-costo); }
+.hx-rep-bar .is-gan, .hx-rep-dot.is-gan { background: var(--rep-gan); }
+.hx-rep-bar .is-com, .hx-rep-dot.is-com { background: var(--rep-com); }
+.hx-rep-dot.is-perd { background: var(--rep-perd); }
+.hx-rep-filas { display: flex; flex-direction: column; gap: 6px; }
+.hx-rep-fila { display: grid; grid-template-columns: 10px auto minmax(0, 1fr) auto; grid-template-areas: "dot lbl dest monto"; column-gap: 8px; align-items: baseline; }
+.hx-rep-fila .hx-rep-dot { align-self: center; }
+.hx-rep-dot { grid-area: dot; width: 10px; height: 10px; border-radius: 3px; }
+.hx-rep-lbl { grid-area: lbl; font-size: 15px; color: var(--text); }
+.hx-rep-monto { grid-area: monto; font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 15px; font-weight: 700; color: var(--text); }
+.hx-rep-dest { grid-area: dest; font-size: 12px; color: var(--nav-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hx-rep-nota, .hx-rep-vacio { margin: 0; font-size: 12px; line-height: 1.4; color: var(--nav-text-2); }
+.hx-rep-vacio { text-align: center; }
 .hx-acciones { display: flex; justify-content: center; gap: 22px; padding-top: 4px; }
 /* Con pocas piezas, el cobro y las acciones bajan al fondo de la hoja (con muchas quedan al final) */
 #sh-venta #v-cobrar { margin-top: auto; }
