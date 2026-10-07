@@ -1427,7 +1427,7 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 
 /* Hojas (agregar / editar) */
 .inv-sheet { display: flex; flex-direction: column; gap: 16px; color: var(--text); }
-.inv-sheet .sheet-head { padding-bottom: 0; }
+.inv-sheet .sheet-head { padding-bottom: 10px; margin-bottom: -10px; }
 .inv-sheet .sheet-head h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px; }
 .inv-sheet-sub { margin-top: -12px; padding: 0 var(--pad-card); text-align: center; font-size: 15px; color: var(--nav-text-2); }
 .inv-f { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
@@ -1853,7 +1853,7 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
   height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px);
   overflow: hidden; gap: 12px;
 }
-.vs-sheet .sheet-head { padding-bottom: 0; }
+.vs-sheet .sheet-head { padding-bottom: 10px; margin-bottom: -10px; }
 .vs-sheet-scroll {
   flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   margin: 0 -14px; padding: 0 14px 12px; scrollbar-width: none;

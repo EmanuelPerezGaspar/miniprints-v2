@@ -28,7 +28,7 @@
       const prev = abierta;
       [prev, s].forEach(x => x.style.transition = 'none');
       prev.classList.remove('open'); prev.hidden = true;
-      s.hidden = false; s.classList.add('open'); s.scrollTop = 0;
+      s.hidden = false; s.classList.add('open'); s.scrollTop = 0; s.classList.remove('is-scrolled');
       void s.offsetWidth;
       [prev, s].forEach(x => x.style.transition = '');
       s.classList.remove('sheet-swap-adelante', 'sheet-swap-atras');
@@ -42,7 +42,7 @@
     opener = document.activeElement;
     abierta = s;
     s.hidden = backdrop.hidden = false;
-    s.scrollTop = 0;
+    s.scrollTop = 0; s.classList.remove('is-scrolled');
     document.documentElement.style.overflow = 'hidden';
     requestAnimationFrame(() => requestAnimationFrame(() => {
       s.classList.add('open');

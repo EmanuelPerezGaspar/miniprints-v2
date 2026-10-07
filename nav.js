@@ -97,6 +97,12 @@
     return { nav, moveBubble, currentEl };
   }
 
+  /* ── Hojas: el encabezado fijo toma fondo al desplazar ── */
+  document.addEventListener('scroll', e => {
+    const s = e.target;
+    if (s && s.classList && s.classList.contains('sheet')) s.classList.toggle('is-scrolled', s.scrollTop > 2);
+  }, true);
+
   /* ── Selector Piezas / Material en Inventario ─────── */
   function buildSegmented() {
     if (page !== 'stock-piezas.html' && page !== 'stock-material.html') return;
