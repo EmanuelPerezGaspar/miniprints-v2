@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <!-- Fondo de un solo color: iOS lo separa del dibujo en el modo transparente -->
-  <rect width="1024" height="1024" fill="#22a34a"/>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#123a22"/><stop offset="1" stop-color="#07170d"/></linearGradient></defs><rect width="1024" height="1024" fill="url(#bg)"/>
   <g transform="translate(0 34)">
     <!-- Cama de impresión -->
-    <rect x="206" y="802" width="612" height="26" rx="13" fill="#ffffff" opacity="0.55"/>
+    <rect x="206" y="802" width="612" height="26" rx="13" fill="#ffffff" opacity="0.5"/>
     <!-- Pieza (maceta) en capas -->
     <rect x="322" y="738" width="380" height="56" rx="28" fill="#ffffff"/>
     <rect x="300" y="674" width="424" height="56" rx="28" fill="#ffffff"/>
