@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007e"></script>
-  <script src="whatsapp.js?v=20261007e"></script>
-  <script src="inventario.js?v=20261007e"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007e" />
+  <script src="theme.js?v=20261007f"></script>
+  <script src="whatsapp.js?v=20261007f"></script>
+  <script src="inventario.js?v=20261007f"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007f" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007e" />
-  <link rel="stylesheet" href="nav.css?v=20261007e" />
+  <link rel="stylesheet" href="ios.css?v=20261007f" />
+  <link rel="stylesheet" href="nav.css?v=20261007f" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007e"></script>
+  <script type="module" src="firebase-sync.js?v=20261007f"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -187,6 +187,9 @@
     ];
     const pasaPago = (v, f) => f === 'todos' || (f === 'pendiente' ? !ventaPagada(v) : ventaPagada(v) && v.metodoPago === f);
     const pasaBusqueda = (v, q) => !q || norm([...ventaItems(v).map(it => it.pieza), v.notas, v.cliente].join(' ')).includes(q);
+    const textoBusqueda = () => norm(document.getElementById('f-buscar').value.trim());
+    // En el calendario, filtros y búsqueda solo deciden qué días se marcan
+    const coincide = v => pasaPago(v, pagoFiltro) && pasaBusqueda(v, textoBusqueda());
 
     function render() {
       const r = rango();
@@ -237,10 +240,17 @@
         return;
       }
 
-      // Calendario sin filtros: las ventas se ven al tocar un día (en su hoja)
-      if (vista() === 'cal' && pagoFiltro === 'todos' && !q) {
-        info.innerHTML = '<span>Toca un día con punto para ver sus ventas.</span>';
+      // Calendario: nunca se lista aquí; los filtros marcan días y las ventas se ven al tocar uno
+      if (vista() === 'cal') {
         cont.innerHTML = '';
+        if (pagoFiltro === 'todos' && !q) { info.innerHTML = '<span>Toca un día con punto para ver sus ventas.</span>'; return; }
+        const todas = DB.ventas.filter(coincide);
+        const delMes = todas.filter(v => fechaVenta(v).startsWith(mesVista)).length;
+        // Si en este mes no hay coincidencias, ofrece saltar al mes más reciente que sí tenga
+        const otro = !delMes && todas.length ? todas.map(v => fechaVenta(v).slice(0, 7)).filter(Boolean).sort().pop() : '';
+        const txt = !todas.length ? 'Ninguna venta coincide'
+          : `${delMes} venta${delMes !== 1 ? 's' : ''} en ${F.mesNombre(mesVista).toLowerCase()}${todas.length > delMes ? ` · ${todas.length - delMes} en otros meses` : ''}`;
+        info.innerHTML = `<span>${txt}</span><span class="hx-info-acc">${otro ? `<button type="button" onclick="irMes('${otro}')">Ver ${esc(F.mesNombre(otro).toLowerCase())}</button>` : ''}<button type="button" onclick="limpiar()">Quitar filtros</button></span>`;
         return;
       }
 
@@ -283,7 +293,7 @@
       const primero = new Date(y, m - 1, 1), nDias = new Date(y, m, 0).getDate();
       const hueco = (primero.getDay() + 6) % 7;   // la semana empieza en lunes
       const porDia = {};
-      DB.ventas.forEach(v => { const f = fechaVenta(v); if (f.startsWith(mesVista)) (porDia[f] = porDia[f] || []).push(v); });
+      DB.ventas.forEach(v => { const f = fechaVenta(v); if (f.startsWith(mesVista) && coincide(v)) (porDia[f] = porDia[f] || []).push(v); });
       const hoy = F.hoy();
       let celdas = '';
       for (let i = 0; i < hueco; i++) celdas += '<span class="hx-cal-vacio"></span>';
@@ -322,6 +332,7 @@
       limite = POR_PAGINA;
       render();
     }
+    function irMes(m) { mesVista = m; render(); }
     function irHoy() { mesVista = F.hoy().slice(0, 7); diaSel = F.hoy(); render(); }
     document.getElementById('hx-cal').addEventListener('click', e => {
       const b = e.target.closest('[data-dia]');
@@ -334,7 +345,7 @@
     // ── Hoja del día ──
     let diaAbierto = null;      // día cuya hoja abrió el detalle (para regresar)
     function abrirDia(f, cambio) {
-      const ventas = DB.ventas.filter(v => fechaVenta(v) === f).sort((a, b) => b.id - a.id);
+      const ventas = DB.ventas.filter(v => fechaVenta(v) === f && coincide(v)).sort((a, b) => b.id - a.id);
       if (!ventas.length) { diaAbierto = null; return false; }
       const cob = ventas.filter(ventaPagada).reduce((s, v) => s + totalDe(v), 0);
       const pen = ventas.filter(v => !ventaPagada(v)).reduce((s, v) => s + totalDe(v), 0);
@@ -558,6 +569,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007e"></script>
+  <script src="nav.js?v=20261007f"></script>
 </body>
 </html>
