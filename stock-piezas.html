@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20261007o"></script>
-  <script src="categorias.js?v=20261007o"></script>
-  <script src="inventario.js?v=20261007o"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007o" />
+  <script src="theme.js?v=20261007p"></script>
+  <script src="categorias.js?v=20261007p"></script>
+  <script src="inventario.js?v=20261007p"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007p" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007o" />
-  <link rel="stylesheet" href="nav.css?v=20261007o" />
+  <link rel="stylesheet" href="ios.css?v=20261007p" />
+  <link rel="stylesheet" href="nav.css?v=20261007p" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007o"></script>
+  <script type="module" src="firebase-sync.js?v=20261007p"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -157,6 +157,19 @@
     <div class="inv-btns">
       <button type="button" class="inv-btn" onclick="guardarPieza()">Guardar</button>
       <button type="button" class="inv-btn is-danger" onclick="eliminarPieza()">Eliminar del inventario</button>
+    </div>
+  </div>
+
+  <!-- Hoja: confirmar eliminación (y decidir qué pasa con el filamento) -->
+  <div class="sheet inv-sheet" id="sh-eliminar" role="dialog" aria-modal="true" aria-labelledby="sh-eliminar-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-eliminar-t">Eliminar pieza</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cancelar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <p class="inv-sheet-sub" id="el-texto"></p>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn is-danger" onclick="confirmarEliminar(false)" id="el-solo">Eliminar</button>
+      <button type="button" class="inv-btn is-plain" onclick="confirmarEliminar(true)" id="el-devolver" hidden></button>
     </div>
   </div>
 
@@ -556,20 +569,43 @@
       render();
       MP_INV.toast('Cambios guardados');
     }
-    // Al eliminar se devuelve al stock el filamento que se descontó al agregarla
+    // Eliminar una pieza no regresa el filamento por sí solo: ese plástico ya se usó al imprimir.
+    // Solo si se registró por error (y nunca se ha vendido) se ofrece regresar los gramos a los rollos.
     function eliminarPieza() {
       const nombre = editando;
-      if (!nombre || !confirm(`¿Eliminar "${nombre}" del inventario?`)) return;
+      if (!nombre) return;
       const usados = DB.historial[nombre] || [];
-      usados.forEach(u => { if (DB.materials[u.matId]) DB.materials[u.matId].pesoTotal += parseFloat(u.grams); });
-      if (usados.length) { saveMats(); delete DB.historial[nombre]; saveHistorial(); }
+      const gramos = Math.round(usados.reduce((s, u) => s + (parseFloat(u.grams) || 0), 0) * 10) / 10;
+      const vendida = DB.ventas.some(v => (v.items || [{ pieza: v.pieza }]).some(it => it.pieza === nombre));
+      const puedeDevolver = usados.length && gramos > 0 && !vendida;
+      document.getElementById('sh-eliminar-t').textContent = `Eliminar "${nombre}"`;
+      document.getElementById('el-texto').textContent = !usados.length
+        ? 'Se quita del inventario de piezas.'
+        : puedeDevolver
+          ? `Al imprimirla se descontaron ${gramos} g de filamento. Si la pieza existe (se rompió, la regalaste…) ese filamento ya se usó. Si la registraste por error y nunca se imprimió, puedes regresarlo a tus rollos.`
+          : `Ya tiene ventas registradas, así que el filamento que usó (${gramos} g) no se regresa a tus rollos.`;
+      document.getElementById('el-solo').textContent = puedeDevolver ? 'Eliminar (el filamento ya se usó)' : 'Eliminar del inventario';
+      const dev = document.getElementById('el-devolver');
+      dev.hidden = !puedeDevolver;
+      dev.textContent = `Fue un error · regresar ${gramos} g`;
+      MP_INV.abrir('sh-eliminar');
+    }
+    function confirmarEliminar(devolver) {
+      const nombre = editando;
+      if (!nombre) return;
+      const usados = DB.historial[nombre] || [];
+      if (devolver) {
+        usados.forEach(u => { if (DB.materials[u.matId]) DB.materials[u.matId].pesoTotal += parseFloat(u.grams) || 0; });
+        saveMats();
+      }
+      if (usados.length) { delete DB.historial[nombre]; saveHistorial(); }
       delete DB.piezas[nombre];
       savePiezas();
       if (nombre in DB.precios) { delete DB.precios[nombre]; savePrecios(); }
       if (DB.costos && nombre in DB.costos) { delete DB.costos[nombre]; save('mp_costos_piezas', DB.costos); }
       MP_INV.cerrar();
       render();
-      MP_INV.toast(usados.length ? 'Pieza eliminada · filamento devuelto al stock' : 'Pieza eliminada');
+      MP_INV.toast(devolver ? 'Pieza eliminada · filamento regresado a tus rollos' : 'Pieza eliminada');
     }
 
     function render() { renderResumen(); renderLista(); }
@@ -577,6 +613,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261007o"></script>
+  <script src="nav.js?v=20261007p"></script>
 </body>
 </html>

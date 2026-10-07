@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261007o"></script>
-  <script src="whatsapp.js?v=20261007o"></script>
-  <script src="categorias.js?v=20261007o"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007o" />
+  <script src="theme.js?v=20261007p"></script>
+  <script src="whatsapp.js?v=20261007p"></script>
+  <script src="categorias.js?v=20261007p"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007p" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007o" />
-  <link rel="stylesheet" href="nav.css?v=20261007o" />
+  <link rel="stylesheet" href="ios.css?v=20261007p" />
+  <link rel="stylesheet" href="nav.css?v=20261007p" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,7 +595,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007o"></script>
+  <script type="module" src="firebase-sync.js?v=20261007p"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -1453,7 +1453,9 @@
 
       const printerName = document.getElementById('single-printer')?.value || 'A1 MINI';
       const printer = PRINTERS[printerName] || PRINTERS['A1 MINI'];
-      const margenPct   = (parseFloat(document.getElementById('inp-margen').value) || 60) / 100;
+      // 0 % es válido (vender a costo); solo un campo vacío usa el 60 % por defecto
+      const margenVal   = parseFloat(document.getElementById('inp-margen').value);
+      const margenPct   = (Number.isFinite(margenVal) ? Math.max(0, margenVal) : 60) / 100;
       const numPiezas   = Math.max(1, parseInt(document.getElementById('inp-piezas').value) || 1);
       const aplicaMO    = document.getElementById('chk-mo').checked;
       const costoMOH    = aplicaMO ? (parseFloat(document.getElementById('inp-mo-costo').value) || 0) : 0;
@@ -2358,6 +2360,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261007o"></script>
+  <script src="nav.js?v=20261007p"></script>
 </body>
 </html>
