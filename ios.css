@@ -75,6 +75,8 @@
 
 /* ── Base ───────────────────────────────────────── */
 html, body { background: var(--ios-bg) !important; }
+/* Reserva el espacio de la barra de desplazamiento (PC): nada se mueve al cambiar de página o abrir una hoja */
+@media (hover: hover) and (pointer: fine) { html { scrollbar-gutter: stable; } }
 body {
   font-family: var(--ios-font);
   color: var(--text);
@@ -1937,14 +1939,12 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
    En iPhone (menos de 768 px) no cambia nada.
 ───────────────────────────────────────────────── */
 @media (min-width: 768px) {
-  .dash-main { --page-w: 720px; }
-  .dash-main:has(.inv-wrap) { --page-w: 960px; }
-  .dash-main:has(.home-stack), .dash-main:has(.vs-wrap) { --page-w: 1040px; }
-  .dash-main > .dash-header, .dash-main > .home-stack,
+  /* Un solo ancho para todas las páginas: título y contenido empiezan en el mismo lugar */
+  .dash-main { --page-w: 960px; }
+  .dash-main > .dash-header, .dash-main > .home-stack, .dash-main > .ios-segmented,
   .dash-main > .cq-wrap, .dash-main > .inv-wrap, .dash-main > .hx-wrap {
     width: 100%; max-width: var(--page-w) !important; margin-left: auto; margin-right: auto; box-sizing: border-box;
   }
-  .dash-main > .ios-segmented { margin-left: max(0px, calc((100% - var(--page-w)) / 2)); }
 
   /* Inicio: metas e indicadores a la izquierda, gráficas a la derecha */
   .home-stack { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; gap: var(--sp); }
