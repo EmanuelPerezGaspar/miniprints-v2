@@ -1646,6 +1646,9 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-hero-nota { max-width: 100%; font-size: 14px; font-style: italic; color: var(--nav-text-2); text-align: center; overflow-wrap: anywhere; }
 /* Acciones de la venta: solo iconos */
 .hx-acciones { display: flex; justify-content: center; gap: 22px; padding-top: 4px; }
+/* Con pocas piezas, el cobro y las acciones bajan al fondo de la hoja (con muchas quedan al final) */
+#sh-venta #v-cobrar { margin-top: auto; }
+#sh-venta #v-cobrar[hidden] + .hx-acciones { margin-top: auto; }
 .hx-acc {
   width: 58px; height: 58px; display: grid; place-items: center; border: none; border-radius: 50%;
   background: var(--ios-group); color: var(--ios-green); cursor: pointer;
