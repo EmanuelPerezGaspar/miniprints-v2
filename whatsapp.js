@@ -17,7 +17,7 @@
     msg += `📅 ${fechaLarga(v.fecha)}\n\n`;
     items.forEach(it => { msg += `• ${it.cantidad} × ${it.pieza} — ${fmt(it.precio * it.cantidad)}\n`; });
     msg += `\n💰 *Total: ${fmt(total)}*\n`;
-    msg += pagada ? `✅ Pagado${v.metodoPago ? ' · ' + v.metodoPago : ''}\n` : '⏳ Pago pendiente\n';
+    msg += pagada ? `✅ Pagado${v.metodoPago ? ' · ' + v.metodoPago : ''}\n` : `⏳ Pago pendiente${v.cliente ? ' · ' + v.cliente : ''}\n`;
     if (v.notas) msg += `📝 ${v.notas}\n`;
     msg += '\n¡Gracias por tu compra! 🙌';
     return msg;
