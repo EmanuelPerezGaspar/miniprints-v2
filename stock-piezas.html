@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="categorias.js?v=20261007q"></script>
-  <script src="inventario.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="categorias.js?v=20261007r"></script>
+  <script src="inventario.js?v=20261007r"></script>
+  <script src="costos.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -513,14 +514,14 @@
     function pintarCotizacion() {
       const box = document.getElementById('e-cotiz');
       const hint = document.getElementById('e-precio-hint');
-      const c = (DB.costos || {})[editando];
+      const c = MP_COSTOS.porPieza(editando, DB.cotizaciones, DB.costos);
       if (!c || !(c.cotizado > 0)) { box.innerHTML = ''; hint.className = 'inv-hint pz-edit-hint'; return; }
       const txt = document.getElementById('e-precio').value.trim();
       const tuyo = txt !== '' && parseFloat(txt) >= 0 ? parseFloat(txt) : (DB.precios[editando] || c.precio || 0);
       const d = Math.round((tuyo - c.cotizado) * 100) / 100, pct = Math.round(d / c.cotizado * 100);
       box.innerHTML = `
-        <div class="inv-group-row"><span>Precio cotizado</span><span>${MP_INV.money(c.cotizado)}</span></div>
-        ${c.costo > 0 ? `<div class="inv-group-row"><span>Costo de producción</span><span>${MP_INV.money(c.costo)}</span></div>` : ''}`;
+        <div class="inv-group-row"><span>Precio cotizado c/u</span><span>${MP_INV.money(c.cotizado)}</span></div>
+        ${c.produccion > 0 ? `<div class="inv-group-row"><span>Costo de producción c/u${c.aprox ? ' <small class="pz-aprox">aprox.</small>' : ''}</span><span>${MP_INV.money(c.produccion)}</span></div>` : ''}`;
       hint.className = 'inv-hint pz-edit-hint' + (tuyo && d > 0 ? ' is-ok' : tuyo && d < 0 ? ' is-warn' : '');
       hint.textContent = !tuyo ? `Cotizado: ${MP_INV.money(c.cotizado)} c/u`
         : d === 0 ? 'Igual a lo cotizado'
@@ -613,6 +614,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>

@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Finanzas</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="inventario.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="inventario.js?v=20261007r"></script>
+  <script src="costos.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261007q"></script>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <script src="ios-charts.js?v=20261007r"></script>
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -23,7 +24,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -106,7 +107,7 @@
       const acc = {};
       DB.cotizaciones.filter(c => c.fue_aceptada === true && c.pieza).forEach(c => {
         const a = acc[c.pieza] = acc[c.pieza] || { costo: 0, uds: 0 };
-        a.costo += c.costo_base || 0; a.uds += Number(c.cantidad) || 1;
+        { const d = MP_COSTOS.desglose(c); a.costo += d.produccion + d.empaque; } a.uds += Number(c.cantidad) || 1;
       });
       return Object.fromEntries(Object.entries(acc).map(([p, a]) => [p, a.uds ? a.costo / a.uds : 0]));
     }
@@ -117,7 +118,8 @@
       const pagadas = DB.ventas.filter(v => ventaPagada(v) && (!d0 || fechaCobro(v) >= d0));
       const aceptadas = DB.cotizaciones.filter(c => c.fue_aceptada === true && !c.asociada && (!d0 || fechaCot(c) >= d0));
       const ingresos = pagadas.reduce((s, v) => s + totalDe(v), 0);
-      const costos = aceptadas.reduce((s, c) => s + (c.costo_base || 0), 0);
+      const costoDe = c => { const d = MP_COSTOS.desglose(c); return d.produccion + d.empaque; };
+      const costos = aceptadas.reduce((s, c) => s + costoDe(c), 0);
       const ganancia = ingresos - costos;
       const margen = ingresos > 0 ? Math.round(ganancia / ingresos * 100) : 0;
       const porCobrar = ventas.filter(v => !ventaPagada(v)).reduce((s, v) => s + totalDe(v), 0);
@@ -140,7 +142,7 @@
           <div class="fn-legend-row"><i style="background:var(--ios-orange)"></i><span>Costo de producción</span><span>− ${money(costos)}</span></div>
           <div class="fn-legend-row"><i style="background:var(--ios-green)"></i><span>Te queda</span><span style="color:var(--st-color)">${money(ganancia)}</span></div>
         </div>
-        <p class="fn-note">El costo sale de las cotizaciones aceptadas (material, luz, desgaste, mano de obra y fallas).</p>`;
+        <p class="fn-note">El costo sale de las cotizaciones aceptadas (material, luz, desgaste, mano de obra, fallas y empaque).</p>`;
 
       document.getElementById('fn-sum').innerHTML = `
         <div class="inv-tile" style="--tile-color:var(--ios-blue)">
@@ -176,7 +178,7 @@
       const meses = [];
       for (let i = n - 1; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); meses.push(F.isoDe(d).slice(0, 7)); }
       const ing = meses.map(m => DB.ventas.filter(v => ventaPagada(v) && F.mesKey(fechaCobro(v)) === m).reduce((s, v) => s + totalDe(v), 0));
-      const cos = meses.map(m => DB.cotizaciones.filter(c => c.fue_aceptada === true && !c.asociada && F.mesKey(fechaCot(c)) === m).reduce((s, c) => s + (c.costo_base || 0), 0));
+      const cos = meses.map(m => DB.cotizaciones.filter(c => c.fue_aceptada === true && !c.asociada && F.mesKey(fechaCot(c)) === m).reduce((s, c) => { const d = MP_COSTOS.desglose(c); return s + d.produccion + d.empaque; }, 0));
       document.getElementById('fn-mes-cap').textContent = `Últimos ${n} ${n === 1 ? 'mes' : 'meses'} · ingresos cobrados vs costo de producción`;
       if (!window.Chart) return;
       if (chart) chart.destroy();
@@ -307,6 +309,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>

@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizaciones</title>
-  <script src="theme.js?v=20261007q"></script>
-  <script src="inventario.js?v=20261007q"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007q" />
+  <script src="theme.js?v=20261007r"></script>
+  <script src="inventario.js?v=20261007r"></script>
+  <script src="costos.js?v=20261007r"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007r" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007q" />
-  <link rel="stylesheet" href="nav.css?v=20261007q" />
+  <link rel="stylesheet" href="ios.css?v=20261007r" />
+  <link rel="stylesheet" href="nav.css?v=20261007r" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007q"></script>
+  <script type="module" src="firebase-sync.js?v=20261007r"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -129,7 +130,7 @@
       const decididas = periodo.filter(c => c.fue_aceptada === true || c.fue_aceptada === false).length;
       const tasa = decididas ? Math.round(acept.length / decididas * 100) : 0;
       const monto = acept.reduce((s, c) => s + (c.total || 0), 0);
-      const gan = acept.reduce((s, c) => s + (c.ganancia || 0), 0);
+      const gan = acept.reduce((s, c) => s + MP_COSTOS.desglose(c).ganancia, 0);
       document.getElementById('hx-sum').innerHTML = `
         <div class="inv-tile" style="--tile-color:var(--ios-blue)">
           <span class="inv-tile-lbl"><i></i>Cotizadas</span>
@@ -249,10 +250,14 @@
         + row('Pieza', c.pieza ? esc(c.pieza) + (c.cantidad ? ' × ' + c.cantidad : '') : '')
         + row('Tipo', c.tipo_pieza ? esc(c.tipo_pieza.charAt(0).toUpperCase() + c.tipo_pieza.slice(1)) : '')
         + row('Entrega', c.urgencia ? URG[c.urgencia] || esc(c.urgencia) : '');
+      // Costo de producción = base + fallas; la urgencia cuenta como ganancia (ver costos.js)
+      const d = MP_COSTOS.desglose(c);
+      const det = (t, sub) => `<span class="cz-det">${t}${sub ? `<small>${sub}</small>` : ''}</span>`;
       document.getElementById('c-desglose').innerHTML =
-        row('Costo de producción', money(c.costo_base))
-        + row('Ganancia', money(c.ganancia))
-        + (c.iva ? row('IVA', money(c.iva)) : '')
+        row(det('Costo de producción', `Base ${money(d.base)} + fallas ${money(d.falla)}`), money(d.produccion))
+        + (d.empaque > 0.004 ? row('Empaque', money(d.empaque)) : '')
+        + row(det('Ganancia', d.urgencia > 0.004 ? `Incluye ${money(d.urgencia)} por urgencia` : ''), money(d.ganancia))
+        + (d.iva > 0.004 ? row('IVA', money(d.iva)) : '')
         + `<div class="inv-group-row hx-total-row"><span>Total</span><span>${money(c.total)}</span></div>`;
       document.getElementById('c-estado').value = e === 'pend' ? '' : e;
       MP_INV.syncChips();
@@ -280,6 +285,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261007q"></script>
+  <script src="nav.js?v=20261007r"></script>
 </body>
 </html>
