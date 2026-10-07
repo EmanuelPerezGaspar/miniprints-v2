@@ -1522,6 +1522,7 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 }
 .hx-info { font-size: 13px; color: var(--ios-label-2); padding: 0; display: flex; justify-content: space-between; gap: 8px; }
 .hx-info button { border: none; background: none; padding: 0; color: var(--ios-green); font: inherit; font-weight: 600; cursor: pointer; }
+.hx-info-acc { display: inline-flex; gap: 14px; flex-shrink: 0; }
 
 .hx-day { display: flex; flex-direction: column; gap: var(--sp-title); }
 .hx-day-head { display: flex; justify-content: space-between; align-items: baseline; padding: 0 var(--pad-card); font-size: 13px; font-weight: 600; color: var(--ios-label-2); }
