@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007j"></script>
-  <script src="whatsapp.js?v=20261007j"></script>
-  <script src="inventario.js?v=20261007j"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007j" />
+  <script src="theme.js?v=20261007k"></script>
+  <script src="whatsapp.js?v=20261007k"></script>
+  <script src="inventario.js?v=20261007k"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007k" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007j" />
-  <link rel="stylesheet" href="nav.css?v=20261007j" />
+  <link rel="stylesheet" href="ios.css?v=20261007k" />
+  <link rel="stylesheet" href="nav.css?v=20261007k" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007j"></script>
+  <script type="module" src="firebase-sync.js?v=20261007k"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -97,10 +97,10 @@
         <button type="button" onclick="cobrar('Tarjeta')">Tarjeta</button>
       </div>
     </div>
-    <div class="inv-btns">
-      <button type="button" class="inv-btn is-plain" onclick="abrirEditar()">Editar venta</button>
-      <button type="button" class="inv-btn is-wa" onclick="reenviar()">Enviar por WhatsApp</button>
-      <button type="button" class="inv-btn is-danger" onclick="eliminarVenta()">Eliminar venta</button>
+    <div class="hx-acciones">
+      <button type="button" class="hx-acc" onclick="abrirEditar()" aria-label="Editar venta" title="Editar venta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>
+      <button type="button" class="hx-acc is-wa" onclick="reenviar()" aria-label="Enviar por WhatsApp" title="Enviar por WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg></button>
+      <button type="button" class="hx-acc is-danger" onclick="eliminarVenta()" aria-label="Eliminar venta" title="Eliminar venta"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>
     </div>
   </div>
 
@@ -461,11 +461,11 @@
         <span class="hx-tag">${pagada ? 'Pagada' + (v.metodoPago ? ' · ' + esc(v.metodoPago) : '') : 'Pendiente de cobro'}</span>`;
       document.getElementById('v-items').innerHTML = items.map(it => `
         <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${Number(it.cantidad) || 0} × ${money(it.precio)}</span></div>`).join('');
+      // La fecha de venta ya es el título de la hoja
       document.getElementById('v-datos').innerHTML = `
-        <div class="inv-group-row"><span>Fecha de venta</span><span>${esc(fechaVenta(v) ? F.diaLargo(fechaVenta(v)) : v.fecha || '—')}</span></div>
         ${pagada && v.fechaPago ? `<div class="inv-group-row"><span>Cobrada</span><span>${esc(F.diaLargo(F.iso(v.fechaPago)))}</span></div>` : ''}
         ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}
-        ${v.vendedor ? `<div class="inv-group-row"><span>Registró</span><span title="${esc(v.vendedor)}">${esc(nombreDe(v.vendedor))}</span></div>` : ''}`;
+        ${v.vendedor ? `<div class="inv-group-row"><span>Registró</span><span title="${esc(v.vendedor)}">${esc(nombreDe(v.vendedor))}</span></div>` : ''}`.trim();
       document.getElementById('v-cobrar').hidden = pagada;
       MP_INV.abrir('sh-venta', cambio);
     }
@@ -622,6 +622,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007j"></script>
+  <script src="nav.js?v=20261007k"></script>
 </body>
 </html>
