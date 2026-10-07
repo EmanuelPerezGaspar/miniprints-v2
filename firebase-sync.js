@@ -220,6 +220,12 @@ window.MP_AUTH = {
     location.reload();
   },
   usuario: null,
+  // Quién usa la app en este dispositivo (sirve también en modo local, sin conexión)
+  quien() {
+    let u = this.usuario;
+    if (!u) { try { u = JSON.parse(localStorage.getItem('mp_usuario')); } catch (_) { u = null; } }
+    return u && u.email ? u : null;
+  },
 };
 
 // ── Arranque ──────────────────────────────────────
@@ -253,6 +259,7 @@ async function iniciar() {
     _salir = async () => {
       try { await A.signOut(auth); } catch (_) {}
       localStorage.removeItem(AUTH_FLAG);
+      localStorage.removeItem('mp_usuario');
       SYNC_KEYS.forEach(k => localStorage.removeItem(k));
     localStorage.removeItem(PENDIENTE);
     localStorage.removeItem(BASE);
@@ -267,6 +274,7 @@ async function iniciar() {
     }
     _origSetItem(AUTH_FLAG, '1');
     window.MP_AUTH.usuario = { email: user.email, uid: user.uid };
+    try { _origSetItem('mp_usuario', JSON.stringify(window.MP_AUTH.usuario)); } catch (_) {}
     window.dispatchEvent(new CustomEvent('mp-auth', { detail: window.MP_AUTH.usuario }));
     listo();
     syncBadge('connecting');
