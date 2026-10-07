@@ -1631,7 +1631,12 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-dia:disabled { cursor: default; }
 .hx-cal-dia:disabled:active .hx-cal-n { background: none; }
 .sheet-close[hidden] { display: none; }
-#v-datos:empty { display: none; }
+#v-hero { gap: 6px; padding: 14px 16px; }
+.hx-hero-meta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px 8px; margin-top: 2px; font-size: 13px; color: var(--nav-text-2); }
+.hx-hero-meta > span { display: inline-flex; align-items: center; gap: 4px; }
+.hx-hero-meta i { font-style: normal; opacity: 0.6; }
+.hx-hero-meta svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.hx-hero-nota { max-width: 100%; font-size: 14px; font-style: italic; color: var(--nav-text-2); text-align: center; overflow-wrap: anywhere; }
 /* Acciones de la venta: solo iconos */
 .hx-acciones { display: flex; justify-content: center; gap: 22px; padding-top: 4px; }
 .hx-acc {

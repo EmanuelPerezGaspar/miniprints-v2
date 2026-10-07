@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007k"></script>
-  <script src="whatsapp.js?v=20261007k"></script>
-  <script src="inventario.js?v=20261007k"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007k" />
+  <script src="theme.js?v=20261007l"></script>
+  <script src="whatsapp.js?v=20261007l"></script>
+  <script src="inventario.js?v=20261007l"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007l" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007k" />
-  <link rel="stylesheet" href="nav.css?v=20261007k" />
+  <link rel="stylesheet" href="ios.css?v=20261007l" />
+  <link rel="stylesheet" href="nav.css?v=20261007l" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007k"></script>
+  <script type="module" src="firebase-sync.js?v=20261007l"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -88,7 +88,6 @@
     </div>
     <div class="inv-hero" id="v-hero"></div>
     <div class="inv-group hx-items" id="v-items"></div>
-    <div class="inv-group" id="v-datos"></div>
     <div class="inv-f" id="v-cobrar">
       <span class="inv-f-lbl">Registrar el pago (hoy)</span>
       <div class="inv-quick">
@@ -455,17 +454,19 @@
       const pagada = ventaPagada(v), items = ventaItems(v);
       document.getElementById('sh-venta-t').textContent = F.diaLargo(fechaVenta(v));
       document.getElementById('v-hero').className = 'inv-hero ' + (pagada ? 'st-ok' : 'st-low');
+      // Todo lo de la venta en la primera tarjeta: cliente, monto, estado, quién la registró, cobro y notas
+      const meta = [
+        v.vendedor ? `<span title="${esc(v.vendedor)}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>${esc(nombreDe(v.vendedor))}</span>` : '',
+        pagada && v.fechaPago && F.iso(v.fechaPago) !== fechaVenta(v) ? `<span>Cobrada ${esc(F.diaLargo(F.iso(v.fechaPago)).toLowerCase())}</span>` : '',
+      ].filter(Boolean);
       document.getElementById('v-hero').innerHTML = `
         ${v.cliente ? `<span class="hx-hero-cliente">${esc(v.cliente)}</span>` : ''}
         <span class="inv-hero-num is-small">${money(totalDe(v))}</span>
-        <span class="hx-tag">${pagada ? 'Pagada' + (v.metodoPago ? ' · ' + esc(v.metodoPago) : '') : 'Pendiente de cobro'}</span>`;
+        <span class="hx-tag">${pagada ? 'Pagada' + (v.metodoPago ? ' · ' + esc(v.metodoPago) : '') : 'Pendiente de cobro'}</span>
+        ${meta.length ? `<span class="hx-hero-meta">${meta.join('<i aria-hidden="true">·</i>')}</span>` : ''}
+        ${v.notas ? `<span class="hx-hero-nota">“${esc(v.notas)}”</span>` : ''}`;
       document.getElementById('v-items').innerHTML = items.map(it => `
         <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${Number(it.cantidad) || 0} × ${money(it.precio)}</span></div>`).join('');
-      // La fecha de venta ya es el título de la hoja
-      document.getElementById('v-datos').innerHTML = `
-        ${pagada && v.fechaPago ? `<div class="inv-group-row"><span>Cobrada</span><span>${esc(F.diaLargo(F.iso(v.fechaPago)))}</span></div>` : ''}
-        ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}
-        ${v.vendedor ? `<div class="inv-group-row"><span>Registró</span><span title="${esc(v.vendedor)}">${esc(nombreDe(v.vendedor))}</span></div>` : ''}`.trim();
       document.getElementById('v-cobrar').hidden = pagada;
       MP_INV.abrir('sh-venta', cambio);
     }
@@ -622,6 +623,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007k"></script>
+  <script src="nav.js?v=20261007l"></script>
 </body>
 </html>
