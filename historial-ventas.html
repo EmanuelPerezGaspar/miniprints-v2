@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007h"></script>
-  <script src="whatsapp.js?v=20261007h"></script>
-  <script src="inventario.js?v=20261007h"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007h" />
+  <script src="theme.js?v=20261007i"></script>
+  <script src="whatsapp.js?v=20261007i"></script>
+  <script src="inventario.js?v=20261007i"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007i" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007h" />
-  <link rel="stylesheet" href="nav.css?v=20261007h" />
+  <link rel="stylesheet" href="ios.css?v=20261007i" />
+  <link rel="stylesheet" href="nav.css?v=20261007i" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007h"></script>
+  <script type="module" src="firebase-sync.js?v=20261007i"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -135,6 +135,16 @@
       <div class="inv-f"><label for="ed-cliente">Cliente</label><input type="text" id="ed-cliente" placeholder="Opcional" maxlength="40" autocomplete="off" /></div>
     </div>
     <div class="inv-f"><label for="ed-notas">Notas</label><input type="text" id="ed-notas" placeholder="Opcional" maxlength="80" autocomplete="off" /></div>
+    <div class="inv-f">
+      <span class="inv-f-lbl">Registró</span>
+      <div class="cq-chips" data-for="ed-vendedor" role="radiogroup" aria-label="Quién registró la venta" id="ed-vend-chips"></div>
+      <input type="hidden" id="ed-vendedor" value="" />
+      <input type="text" id="ed-vend-otro" placeholder="Nombre de quien vendió" maxlength="40" autocomplete="off" hidden />
+      <label class="hx-vend-todas" id="ed-vend-todas-row" hidden>
+        <span id="ed-vend-todas-txt"></span>
+        <span class="toggle"><input type="checkbox" id="ed-vend-todas" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+      </label>
+    </div>
     <div class="inv-btns">
       <button type="button" class="inv-btn" onclick="guardarEdicion()">Guardar cambios</button>
     </div>
@@ -499,6 +509,7 @@
       document.getElementById('ed-cliente').value = v.cliente || '';
       document.getElementById('ed-notas').value = v.notas || '';
       pintarEdPago();
+      pintarVendedores(v);
       MP_INV.abrir('sh-editar', 'adelante');
     }
     function pintarEdItems() {
@@ -514,6 +525,37 @@
         </div>`).join('');
       pintarEdTotal();
     }
+    // ── Quién registró: personas conocidas (ventas anteriores + la cuenta actual) ──
+    const OTRO = '__otro';
+    function pintarVendedores(v) {
+      const yo = window.MP_AUTH && MP_AUTH.quien && MP_AUTH.quien();
+      const gente = [...new Set([yo && yo.email, ...DB.ventas.map(x => x.vendedor)].filter(Boolean))];
+      const actualV = v.vendedor || '';
+      if (actualV && !gente.includes(actualV)) gente.push(actualV);
+      document.getElementById('ed-vend-chips').innerHTML =
+        gente.map(g => `<button type="button" data-v="${esc(g)}">${esc(nombreDe(g))}${yo && g === yo.email ? ' (tú)' : ''}</button>`).join('')
+        + `<button type="button" data-v="${OTRO}">Otra persona…</button><button type="button" data-v="">Sin registrar</button>`;
+      document.getElementById('ed-vendedor').value = actualV;
+      document.getElementById('ed-vend-otro').value = '';
+      document.getElementById('ed-vend-todas').checked = false;
+      MP_INV.syncChips(document.getElementById('sh-editar'));
+      pintarVendOtro();
+    }
+    // Ventas sin registrar (sin contar la que se edita)
+    const sinVendedor = () => DB.ventas.filter(x => !x.vendedor && Number(x.id) !== actual);
+    function pintarVendOtro() {
+      const val = document.getElementById('ed-vendedor').value;
+      document.getElementById('ed-vend-otro').hidden = val !== OTRO;
+      const v = DB.ventas.find(x => Number(x.id) === actual);
+      const n = sinVendedor().length;
+      const fila = document.getElementById('ed-vend-todas-row');
+      fila.hidden = !(v && !v.vendedor && val && n);
+      document.getElementById('ed-vend-todas-txt').textContent = `Aplicar también a ${n === 1 ? 'la otra venta' : `las otras ${n} ventas`} sin registrar`;
+    }
+    document.getElementById('ed-vendedor').addEventListener('change', () => {
+      pintarVendOtro();
+      if (document.getElementById('ed-vendedor').value === OTRO) document.getElementById('ed-vend-otro').focus();
+    });
     function pintarEdTotal() {
       const t = edItems.reduce((s, it) => s + it.cantidad * it.precio, 0);
       document.getElementById('ed-total').textContent = `Total: ${money(t)}`;
@@ -543,6 +585,8 @@
       if (quedan.some(it => !(it.precio > 0))) return MP_INV.toast('Falta el precio de alguna pieza');
       const fecha = document.getElementById('ed-fecha').value;
       if (!fecha) return MP_INV.toast('Elige la fecha de la venta');
+      if (document.getElementById('ed-vendedor').value === OTRO && !document.getElementById('ed-vend-otro').value.trim())
+        return MP_INV.toast('Escribe el nombre de quien registró la venta');
       // El inventario se ajusta con la diferencia de cada pieza
       edItems.forEach(it => {
         const d = it.cantidad - it.antes;
@@ -558,6 +602,12 @@
       v.cliente = document.getElementById('ed-cliente').value.trim();
       if (!v.cliente) delete v.cliente;
       v.notas = document.getElementById('ed-notas').value.trim();
+      let vend = document.getElementById('ed-vendedor').value;
+      if (vend === OTRO) vend = document.getElementById('ed-vend-otro').value.trim();
+      const aTodas = vend && !v.vendedor && document.getElementById('ed-vend-todas').checked;
+      if (vend) v.vendedor = vend; else delete v.vendedor;
+      const otras = aTodas ? sinVendedor() : [];
+      otras.forEach(x => { x.vendedor = vend; });
       if (pend) { v.estatusPago = 'pendiente'; v.metodoPago = null; delete v.fechaPago; }
       else {
         const eraPendiente = v.estatusPago === 'pendiente';
@@ -566,13 +616,13 @@
       }
       saveVentas();
       trasCambio();
-      MP_INV.toast('Venta actualizada');
+      MP_INV.toast(otras.length ? `Venta actualizada · ${otras.length + 1} ventas asignadas a ${nombreDe(vend)}` : 'Venta actualizada');
     }
 
     function mpInit() { loadDB(); MP_INV.syncChips(); cambioVista(); }
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007h"></script>
+  <script src="nav.js?v=20261007i"></script>
 </body>
 </html>
