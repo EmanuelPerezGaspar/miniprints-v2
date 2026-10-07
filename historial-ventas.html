@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007a"></script>
-  <script src="whatsapp.js?v=20261007a"></script>
-  <script src="inventario.js?v=20261007a"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007a" />
+  <script src="theme.js?v=20261007b"></script>
+  <script src="whatsapp.js?v=20261007b"></script>
+  <script src="inventario.js?v=20261007b"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007b" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007a" />
-  <link rel="stylesheet" href="nav.css?v=20261007a" />
+  <link rel="stylesheet" href="ios.css?v=20261007b" />
+  <link rel="stylesheet" href="nav.css?v=20261007b" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007a"></script>
+  <script type="module" src="firebase-sync.js?v=20261007b"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -69,11 +69,22 @@
     </main>
   </div>
 
+  <!-- Hoja: ventas del día elegido en el calendario -->
+  <div class="sheet inv-sheet" id="sh-dia" role="dialog" aria-modal="true" aria-labelledby="sh-dia-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-dia-t">Día</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-hero" id="dia-hero"></div>
+    <div class="hx-list" id="dia-list"></div>
+  </div>
+
   <!-- Hoja: detalle de la venta -->
   <div class="sheet inv-sheet" id="sh-venta" role="dialog" aria-modal="true" aria-labelledby="sh-venta-t" hidden>
     <div class="sheet-head">
       <h2 id="sh-venta-t">Venta</h2>
-      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+      <button class="sheet-close hx-atras" type="button" onclick="volverDia()" aria-label="Volver a las ventas del día" hidden><svg viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar" id="v-cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
     </div>
     <div class="inv-hero" id="v-hero"></div>
     <div class="inv-group hx-items" id="v-items"></div>
@@ -225,12 +236,10 @@
         return;
       }
 
-      // Calendario sin filtros: solo las ventas del día elegido
+      // Calendario sin filtros: las ventas se ven al tocar un día (en su hoja)
       if (vista() === 'cal' && pagoFiltro === 'todos' && !q) {
-        info.innerHTML = '';
-        const delDia = DB.ventas.filter(v => fechaVenta(v) === diaSel).sort((a, b) => b.id - a.id);
-        cont.innerHTML = delDia.length ? seccionDia(diaSel, delDia)
-          : `<div class="hx-empty hx-empty-dia"><b>${esc(F.diaLargo(diaSel))}</b>Sin ventas este día.</div>`;
+        info.innerHTML = '<span>Toca un día con punto para ver sus ventas.</span>';
+        cont.innerHTML = '';
         return;
       }
 
@@ -283,7 +292,7 @@
         const pend = vs.some(v => !ventaPagada(v));
         const cls = ['hx-cal-dia', f === diaSel ? 'is-sel' : '', f === hoy ? 'is-hoy' : '', vs.length ? 'con-ventas' : ''].filter(Boolean).join(' ');
         const lbl = `${F.diaLargo(f)}${vs.length ? `, ${vs.length} venta${vs.length !== 1 ? 's' : ''}${pend ? ', con pendientes' : ''}` : ', sin ventas'}`;
-        celdas += `<button type="button" class="${cls}" data-dia="${f}" aria-label="${esc(lbl)}" aria-pressed="${f === diaSel}">
+        celdas += `<button type="button" class="${cls}" data-dia="${f}" aria-label="${esc(lbl)}"${vs.length ? '' : ' disabled'}>
           <span class="hx-cal-n">${d}</span>${vs.length ? `<i class="hx-cal-dot${pend ? ' is-pen' : ''}" aria-hidden="true"></i>` : '<i class="hx-cal-dot is-vacio" aria-hidden="true"></i>'}
         </button>`;
       }
@@ -317,9 +326,39 @@
       const b = e.target.closest('[data-dia]');
       if (!b) return;
       diaSel = b.dataset.dia;
-      if (pagoFiltro !== 'todos' || document.getElementById('f-buscar').value) { pagoFiltro = 'todos'; document.getElementById('f-buscar').value = ''; }
-      render();
+      renderCal();
+      abrirDia(diaSel);
     });
+
+    // ── Hoja del día ──
+    let diaAbierto = null;      // día cuya hoja abrió el detalle (para regresar)
+    function abrirDia(f) {
+      const ventas = DB.ventas.filter(v => fechaVenta(v) === f).sort((a, b) => b.id - a.id);
+      if (!ventas.length) { diaAbierto = null; return false; }
+      const cob = ventas.filter(ventaPagada).reduce((s, v) => s + totalDe(v), 0);
+      const pen = ventas.filter(v => !ventaPagada(v)).reduce((s, v) => s + totalDe(v), 0);
+      const uds = ventas.reduce((s, v) => s + udsDe(v), 0);
+      document.getElementById('sh-dia-t').textContent = F.diaLargo(f);
+      document.getElementById('dia-hero').className = 'inv-hero';
+      document.getElementById('dia-hero').innerHTML = `
+        <span class="inv-hero-num is-small">${money(cob + pen)}</span>
+        <span class="inv-hero-sub">${ventas.length} venta${ventas.length !== 1 ? 's' : ''} · ${uds} pieza${uds !== 1 ? 's' : ''}</span>
+        <div class="hx-dia-split">
+          <span><i class="hx-cal-dot"></i>Cobrado <b>${money(cob)}</b></span>
+          ${pen ? `<span><i class="hx-cal-dot is-pen"></i>Por cobrar <b class="hx-pen">${money(pen)}</b></span>` : ''}
+        </div>`;
+      document.getElementById('dia-list').innerHTML = ventas.map(filaVenta).join('');
+      diaAbierto = f;
+      MP_INV.abrir('sh-dia');
+      return true;
+    }
+    function volverDia() { if (!diaAbierto || !abrirDia(diaAbierto)) MP_INV.cerrar(); }
+    // Tras cobrar, editar o eliminar: si venías de un día, regresa a su hoja
+    function trasCambio() {
+      render();
+      if (!diaAbierto || !abrirDia(diaAbierto)) MP_INV.cerrar();
+    }
+    document.getElementById('dia-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id), true); });
 
     // ── Filas ──
     const ICO = {
@@ -378,14 +417,17 @@
     ['f-desde', 'f-hasta'].forEach(id => document.getElementById(id).addEventListener('change', () => { pintarRangoInfo(); limite = POR_PAGINA; render(); }));
     document.getElementById('f-buscar').addEventListener('input', () => { limite = POR_PAGINA; render(); });
     document.getElementById('f-pago').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (b) setPago(b.dataset.f); });
-    document.getElementById('hx-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id)); });
+    document.getElementById('hx-list').addEventListener('click', e => { const r = e.target.closest('[data-id]'); if (r) abrirVenta(Number(r.dataset.id), false); });
 
     // ── Detalle ──
     let actual = null;
-    function abrirVenta(id) {
+    function abrirVenta(id, desdeDia) {
       const v = DB.ventas.find(x => Number(x.id) === id);
       if (!v) return;
       actual = id;
+      if (!desdeDia) diaAbierto = null;
+      document.querySelector('#sh-venta .hx-atras').hidden = !diaAbierto;
+      document.getElementById('v-cerrar').hidden = !!diaAbierto;
       const pagada = ventaPagada(v), items = ventaItems(v);
       document.getElementById('sh-venta-t').textContent = F.diaLargo(fechaVenta(v));
       document.getElementById('v-hero').className = 'inv-hero ' + (pagada ? 'st-ok' : 'st-low');
@@ -408,7 +450,7 @@
       if (!v) return;
       v.estatusPago = 'pagado'; v.metodoPago = metodo; v.fechaPago = F.hoy();
       saveVentas();
-      MP_INV.cerrar(); render();
+      trasCambio();
       MP_INV.toast(`Pago registrado · ${metodo}`);
     }
     function reenviar() {
@@ -425,7 +467,7 @@
       savePiezas();
       DB.ventas = DB.ventas.filter(x => Number(x.id) !== actual);
       saveVentas();
-      MP_INV.cerrar(); render();
+      trasCambio();
       MP_INV.toast('Venta eliminada · piezas devueltas al inventario');
     }
 
@@ -508,7 +550,7 @@
         if (eraPendiente) v.fechaPago = F.hoy();
       }
       saveVentas();
-      MP_INV.cerrar(); render();
+      trasCambio();
       MP_INV.toast('Venta actualizada');
     }
 
@@ -516,6 +558,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007a"></script>
+  <script src="nav.js?v=20261007b"></script>
 </body>
 </html>
