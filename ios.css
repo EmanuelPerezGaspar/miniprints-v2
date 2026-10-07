@@ -1623,6 +1623,15 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-ley span { display: inline-flex; align-items: center; gap: 5px; }
 .hx-cal-ley button { margin-left: auto; border: none; border-radius: var(--r-pill); padding: 5px 12px; background: var(--ios-fill); color: var(--ios-green); font-family: var(--ios-font); font-size: 13px; font-weight: 600; cursor: pointer; }
 .hx-empty-dia { padding: 22px 16px; }
+.hx-cal-dia:disabled { cursor: default; }
+.hx-cal-dia:disabled:active .hx-cal-n { background: none; }
+.sheet-close[hidden] { display: none; }
+.sheet-close.hx-atras svg { width: 22px; height: 22px; fill: none; stroke-width: 2.4; stroke-linejoin: round; margin-left: -2px; }
+.inv-sheet .hx-list { background: var(--ios-group); border-radius: var(--r-sheet-in); }
+.hx-dia-split { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: 14px; color: var(--nav-text-2); }
+.hx-dia-split span { display: inline-flex; align-items: center; gap: 6px; }
+.hx-dia-split b { color: var(--text); font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; }
+.hx-dia-split b.hx-pen { color: var(--ios-orange); }
 
 /* Historial: editar venta */
 .hx-ed-items { display: flex; flex-direction: column; border-radius: var(--r-lg); background: var(--ios-group); overflow: hidden; }
