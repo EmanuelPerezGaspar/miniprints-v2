@@ -12,6 +12,7 @@
   --ios-sheet:    #1c1c1e;
   --ios-group:    rgba(255, 255, 255, 0.09);
   --sheet-glass:  rgba(30, 30, 34, 0.72);
+  --sheet-head:   rgb(32, 32, 36);
   --sheet-card:   rgba(255, 255, 255, 0.09);
   --ios-sep:      rgba(84, 84, 88, 0.55);
   --nav-text:     #ffffff;
@@ -243,7 +244,8 @@
   max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 14px 14px 20px;
+  /* Mismo margen abajo que a los lados: las esquinas de las tarjetas quedan concéntricas con la hoja */
+  padding: 14px;
   border-radius: var(--r-xl);
   background: var(--sheet-glass);
   backdrop-filter: blur(40px) saturate(190%);
@@ -274,6 +276,17 @@
   align-items: center;
   gap: 8px;
   padding: 0 0 14px;
+  /* Fijo arriba al desplazar el contenido de la hoja (X, ‹ y título no se mueven) */
+  position: sticky; top: -14px; z-index: 5;
+  margin: -14px -14px 0; padding: 14px 14px 14px;
+  transition: background-color 200ms, box-shadow 200ms;
+}
+/* Al desplazar, el encabezado toma material de cristal y una línea fina, como en iOS */
+.sheet.is-scrolled .sheet-head {
+  background: var(--sheet-head);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  backdrop-filter: blur(30px) saturate(180%);
+  box-shadow: 0 0.5px 0 var(--ios-stroke);
 }
 .sheet-head h2 {
   grid-column: 2; grid-row: 1;
@@ -391,6 +404,7 @@
     --ios-sheet:    #f2f2f7;
     --ios-group:    rgba(255, 255, 255, 0.86);
     --sheet-glass:  rgba(242, 242, 247, 0.76);
+    --sheet-head:   rgb(238, 238, 243);
     --sheet-card:   rgba(255, 255, 255, 0.86);
     --ios-sep:      rgba(60, 60, 67, 0.29);
     --nav-text:     #000000;
