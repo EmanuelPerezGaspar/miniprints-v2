@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007g"></script>
-  <script src="whatsapp.js?v=20261007g"></script>
-  <script src="inventario.js?v=20261007g"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007g" />
+  <script src="theme.js?v=20261007h"></script>
+  <script src="whatsapp.js?v=20261007h"></script>
+  <script src="inventario.js?v=20261007h"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007h" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007g" />
-  <link rel="stylesheet" href="nav.css?v=20261007g" />
+  <link rel="stylesheet" href="ios.css?v=20261007h" />
+  <link rel="stylesheet" href="nav.css?v=20261007h" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007g"></script>
+  <script type="module" src="firebase-sync.js?v=20261007h"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -186,7 +186,10 @@
       { id: 'Tarjeta', nombre: 'Tarjeta' },
     ];
     const pasaPago = (v, f) => f === 'todos' || (f === 'pendiente' ? !ventaPagada(v) : ventaPagada(v) && v.metodoPago === f);
-    const pasaBusqueda = (v, q) => !q || norm([...ventaItems(v).map(it => it.pieza), v.notas, v.cliente].join(' ')).includes(q);
+    const pasaBusqueda = (v, q) => !q || norm([...ventaItems(v).map(it => it.pieza), v.notas, v.cliente, v.vendedor && nombreDe(v.vendedor)].join(' ')).includes(q);
+    // "emanuel.perez@gmail.com" → "Emanuel Perez"
+    const nombreDe = email => String(email || '').split('@')[0].replace(/[._-]+/g, ' ').replace(/\d+$/, '').trim()
+      .replace(/\b\w/g, c => c.toUpperCase()) || String(email || '');
     const textoBusqueda = () => norm(document.getElementById('f-buscar').value.trim());
     // En el calendario, filtros y búsqueda solo deciden qué días se marcan
     const coincide = v => pasaPago(v, pagoFiltro) && pasaBusqueda(v, textoBusqueda());
@@ -452,7 +455,8 @@
         ${v.cliente ? `<div class="inv-group-row"><span>Cliente</span><span>${esc(v.cliente)}</span></div>` : ''}
         <div class="inv-group-row"><span>Fecha de venta</span><span>${esc(fechaVenta(v) ? F.diaLargo(fechaVenta(v)) : v.fecha || '—')}</span></div>
         ${pagada && v.fechaPago ? `<div class="inv-group-row"><span>Cobrada</span><span>${esc(F.diaLargo(F.iso(v.fechaPago)))}</span></div>` : ''}
-        ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}`;
+        ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}
+        ${v.vendedor ? `<div class="inv-group-row"><span>Registró</span><span title="${esc(v.vendedor)}">${esc(nombreDe(v.vendedor))}</span></div>` : ''}`;
       document.getElementById('v-cobrar').hidden = pagada;
       MP_INV.abrir('sh-venta', cambio);
     }
@@ -569,6 +573,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007g"></script>
+  <script src="nav.js?v=20261007h"></script>
 </body>
 </html>
