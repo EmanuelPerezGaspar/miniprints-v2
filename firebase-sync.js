@@ -50,42 +50,19 @@ function hayPendientes() {
   return !!base && base.startsWith('v2:') && base !== huella(datosLocales());
 }
 
-// Badge visible de estado — ayuda a diagnosticar en iPad sin acceso a consola
 // Estado visible en Más (para diagnosticar desde el iPhone)
 window.MP_SYNC = { estado: 'inicio', subida: null, bajada: null, error: '' };
 const hora = () => new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+// El estado se muestra como un punto en la pestaña "Más" (nav.css) y con detalle al pie de la hoja "Más"
 function syncBadge(state) {
   window.MP_SYNC.estado = state;
-  let el = document.getElementById('mp-sync-badge');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'mp-sync-badge';
-    el.style.cssText = [
-      'position:fixed', 'bottom:72px', 'right:16px', 'z-index:9998',
-      'font-size:0.68rem', 'font-weight:700', 'padding:4px 10px',
-      'border-radius:20px', 'pointer-events:none', 'transition:opacity 0.4s',
-      'font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",system-ui,sans-serif'
-    ].join(';');
-    document.body.appendChild(el);
-  }
-  clearTimeout(el._t);
-  el.style.opacity = '1';
-  const cfg = {
-    connecting: ['#2c2c2e','#aeaeb2','#3a3a3c', '⟳ Conectando...', 0],
-    ok:         ['#052e16','#30d158','#166534', '✓ Guardado',       3000],
-    error:      ['#450a0a','#ff6961','#7f1d1d', '⚠ Error de sync',  0],
-    local:      ['#1c1917','#78716c','#292524', '● Modo local',     5000],
-    denied:     ['#450a0a','#ff6961','#7f1d1d', '⚠ Sin permiso',   0],
-  }[state];
-  if (!cfg) { el.style.opacity = '0'; return; }
-  el.style.background = cfg[0];
-  el.style.color       = cfg[1];
-  el.style.border      = `1px solid ${cfg[2]}`;
-  el.textContent       = cfg[3];
-  if (cfg[4]) el._t = setTimeout(() => { el.style.opacity = '0'; }, cfg[4]);
+  const root = document.documentElement;
+  clearTimeout(syncBadge._t);
+  root.dataset.sync = { connecting: 'connecting', ok: 'ok', error: 'error', denied: 'error', local: 'local' }[state] || '';
+  if (state === 'ok') syncBadge._t = setTimeout(() => { if (root.dataset.sync === 'ok') root.dataset.sync = ''; }, 3000);
+  window.dispatchEvent(new CustomEvent('mp-sync-estado', { detail: state }));
 }
-
 Storage.prototype.setItem = function (key, value) {
   _protoSetItem.call(this, key, value);
   if (this === localStorage && !applyingRemote && SYNC_KEYS.includes(key)) {
@@ -213,6 +190,7 @@ const conTiempo = (promesa, ms, codigo) => Promise.race([
 
 // Cerrar sesión: se borra la copia local (sin sincronizar el borrado) y se vuelve a pedir acceso
 let _salir = null;
+let _subirAhora = null;   // sube los datos locales en este momento (lo define iniciarSync)
 window.MP_AUTH = {
   salir() {
     if (_salir) return _salir();
@@ -257,6 +235,13 @@ async function iniciar() {
     }), 15000, 'auth-lento');
 
     _salir = async () => {
+      // Antes de borrar la copia local, los cambios que no han llegado a la nube se suben
+      if (hayPendientes()) {
+        syncBadge('connecting');
+        let subido = false;
+        try { if (_subirAhora) { await conTiempo(_subirAhora(), 10000, 'sin-conexion'); subido = !hayPendientes(); } } catch (_) {}
+        if (!subido && !confirm('Hay cambios que todavía no se guardan en tu cuenta (sin conexión).\n\nSi cierras sesión ahora se perderán. ¿Cerrar sesión de todos modos?')) { syncBadge('error'); return; }
+      }
       try { await A.signOut(auth); } catch (_) {}
       localStorage.removeItem(AUTH_FLAG);
       localStorage.removeItem('mp_usuario');
@@ -322,6 +307,15 @@ function iniciarSync({ doc: docRef, getDoc, setDoc, onSnapshot }) {
   }
 
   _schedulePush = () => { clearTimeout(pushTimer); pushTimer = setTimeout(flushPush, 150); };
+  _subirAhora = async () => {
+    clearTimeout(pushTimer);
+    _pendingLocalWrite = false;
+    const marca = localStorage.getItem(PENDIENTE), payload = datosLocales();
+    await setDoc(docRef, payload, { merge: true });
+    if (localStorage.getItem(PENDIENTE) === marca) localStorage.removeItem(PENDIENTE);
+    marcarSincronizado(payload);
+    window.MP_SYNC.subida = hora();
+  };
 
   // Al salir de la pantalla se sube cualquier cambio que no esté en la nube
   document.addEventListener('visibilitychange', () => { if (document.hidden && (_pendingLocalWrite || hayPendientes())) flushPush(); });

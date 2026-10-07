@@ -59,7 +59,9 @@
     nav.innerHTML = `<div class="tabbar-glass"><div class="tab-bubble no-anim"></div>${
       TABS.map(t => {
         const current = t === activeTab ? ' aria-current="page"' : '';
-        const inner = svg(ICONS[t.id]) + `<span>${t.label}</span>`;
+        // En "Más" un punto pequeño indica el estado de la sincronización (sin tapar nada de la pantalla)
+        const ico = t.id === 'mas' ? `<i class="tab-ico">${svg(ICONS[t.id])}<i class="tab-sync" aria-hidden="true"></i></i>` : svg(ICONS[t.id]);
+        const inner = ico + `<span>${t.label}</span>`;
         return t.href
           ? `<a class="tab" data-tab="${t.id}" href="${t.href}"${current}>${inner}</a>`
           : `<button class="tab" type="button" data-tab="${t.id}" aria-haspopup="dialog"${current}>${inner}</button>`;
@@ -194,6 +196,8 @@
     sheet.querySelector('#sheet-foot').innerHTML = `MiniPrints · versión ${VERSION}<br>Sincronización: ${txt}${pend ? ' · cambios sin subir' : ''}`
       + `${S.subida ? ' · última subida ' + S.subida : ''}${S.error ? '<br>Error: ' + String(S.error).replace(/[<>&]/g, '') : ''}`;
   }
+
+  window.addEventListener('mp-sync-estado', () => { if (sheet && !sheet.hidden) pintarPie(); });
 
   function openSheet(btn) {
     if (!sheet) buildSheet();

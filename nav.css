@@ -148,6 +148,19 @@
   transition: transform 300ms var(--ios-spring);
 }
 .tab span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+/* Punto de sincronización sobre el ícono de "Más": verde = guardado, gris = sin conexión, rojo = error */
+.tab-ico { position: relative; display: grid; place-items: center; font-style: normal; }
+.tab-sync {
+  position: absolute; top: -1px; right: -3px; width: 9px; height: 9px; border-radius: 50%;
+  background: transparent; box-shadow: 0 0 0 2px var(--nav-cut, #fff);
+  opacity: 0; transform: scale(0.4); transition: opacity 300ms, transform 300ms var(--ios-spring), background-color 300ms;
+}
+html[data-sync="ok"] .tab-sync { background: var(--ios-green); opacity: 1; transform: none; }
+html[data-sync="local"] .tab-sync { background: #8e8e93; opacity: 1; transform: none; }
+html[data-sync="connecting"] .tab-sync { background: #8e8e93; opacity: 1; transform: none; animation: tab-sync-pulso 1.2s ease-in-out infinite; }
+html[data-sync="error"] .tab-sync { background: var(--ios-red, #ff453a); opacity: 1; transform: none; }
+@keyframes tab-sync-pulso { 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { html[data-sync="connecting"] .tab-sync { animation: none; } }
 .tab[aria-current="page"], .tab.is-open { color: var(--ios-tint); }
 /* Símbolo relleno en la pestaña activa, como SF Symbols ".fill" */
 .tab[aria-current="page"] .i-fill, .tab.is-open .i-fill { fill: currentColor; }
@@ -189,10 +202,7 @@
   }
   /* Avisos y badge de sincronización por encima de la barra */
   #toast { bottom: calc(var(--tabbar-space) + 4px) !important; }
-  #mp-sync-badge { bottom: calc(var(--tabbar-space) + 4px) !important; }
 }
-/* La hoja "Más" queda por encima del badge de sincronización */
-#mp-sync-badge { z-index: 1050 !important; }
 
 /* Selector de segmento (Piezas / Material) en Inventario */
 .ios-segmented {

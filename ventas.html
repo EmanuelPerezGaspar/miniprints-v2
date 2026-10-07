@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20261007o"></script>
-  <script src="categorias.js?v=20261007o"></script>
-  <script src="whatsapp.js?v=20261007o"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007o" />
+  <script src="theme.js?v=20261007p"></script>
+  <script src="categorias.js?v=20261007p"></script>
+  <script src="whatsapp.js?v=20261007p"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007p" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -85,8 +85,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007o" />
-  <link rel="stylesheet" href="nav.css?v=20261007o" />
+  <link rel="stylesheet" href="ios.css?v=20261007p" />
+  <link rel="stylesheet" href="nav.css?v=20261007p" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -99,7 +99,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007o"></script>
+  <script type="module" src="firebase-sync.js?v=20261007p"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -556,6 +556,16 @@
       const notas       = document.getElementById('venta-notas').value.trim();
       const cliente     = estatusPago === 'pendiente' ? document.getElementById('venta-cliente').value.trim() : '';
 
+      // El inventario pudo cambiar en otro dispositivo mientras armabas el pedido: se revisa el más reciente
+      try { const fresco = JSON.parse(localStorage.getItem('mp_piezas')); if (fresco && typeof fresco === 'object') DB.piezas = fresco; } catch (e) {}
+      const falta = carrito.find(it => it.cantidad > disponible(it.pieza));
+      if (falta) {
+        const hay = disponible(falta.pieza);
+        if (hay > 0) falta.cantidad = hay; else carrito.splice(carrito.indexOf(falta), 1);
+        renderCarrito(); refreshPiezaSelect();
+        return showToast(hay > 0 ? `Solo quedan ${hay} de "${falta.pieza}"; ajusté el pedido, revísalo` : `"${falta.pieza}" ya no está en inventario; la quité del pedido`);
+      }
+
       carrito.forEach(it => {
         DB.piezas[it.pieza] = (DB.piezas[it.pieza] || 0) - it.cantidad;
         if (DB.piezas[it.pieza] <= 0) delete DB.piezas[it.pieza];
@@ -646,6 +656,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20261007o"></script>
+  <script src="nav.js?v=20261007p"></script>
 </body>
 </html>

@@ -545,7 +545,6 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 
 /* Badge de sincronización más discreto */
-#mp-sync-badge { font-family: var(--ios-font) !important; font-size: 12px !important; font-weight: 600 !important; border: none !important; }
 
 /* ── Tarjeta de cobertura del dashboard ────────── */
 .kc-fade { background: linear-gradient(to bottom, transparent, var(--ios-bg-2) 80%) !important; }
