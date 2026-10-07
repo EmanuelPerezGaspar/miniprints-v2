@@ -1631,6 +1631,7 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-dia:disabled { cursor: default; }
 .hx-cal-dia:disabled:active .hx-cal-n { background: none; }
 .sheet-close[hidden] { display: none; }
+.hx-hero-cliente { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); text-align: center; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: -4px; }
 #ed-vend-otro[hidden] { display: none; }
 .inv-f > .hx-vend-todas { padding: 10px 12px 10px var(--pad-card); font-size: 15px; font-weight: 400; color: var(--text); line-height: 1.3; }
 .hx-vend-todas { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 4px var(--pad-card); border-radius: var(--r-md); background: var(--ios-group); font-size: 15px; cursor: pointer; }

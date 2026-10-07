@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007i"></script>
-  <script src="whatsapp.js?v=20261007i"></script>
-  <script src="inventario.js?v=20261007i"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007i" />
+  <script src="theme.js?v=20261007j"></script>
+  <script src="whatsapp.js?v=20261007j"></script>
+  <script src="inventario.js?v=20261007j"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007j" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007i" />
-  <link rel="stylesheet" href="nav.css?v=20261007i" />
+  <link rel="stylesheet" href="ios.css?v=20261007j" />
+  <link rel="stylesheet" href="nav.css?v=20261007j" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007i"></script>
+  <script type="module" src="firebase-sync.js?v=20261007j"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -456,13 +456,12 @@
       document.getElementById('sh-venta-t').textContent = F.diaLargo(fechaVenta(v));
       document.getElementById('v-hero').className = 'inv-hero ' + (pagada ? 'st-ok' : 'st-low');
       document.getElementById('v-hero').innerHTML = `
+        ${v.cliente ? `<span class="hx-hero-cliente">${esc(v.cliente)}</span>` : ''}
         <span class="inv-hero-num is-small">${money(totalDe(v))}</span>
         <span class="hx-tag">${pagada ? 'Pagada' + (v.metodoPago ? ' · ' + esc(v.metodoPago) : '') : 'Pendiente de cobro'}</span>`;
       document.getElementById('v-items').innerHTML = items.map(it => `
-        <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${Number(it.cantidad) || 0} × ${money(it.precio)}</span></div>`).join('')
-        + `<div class="inv-group-row hx-total-row"><span>Total</span><span>${money(totalDe(v))}</span></div>`;
+        <div class="inv-group-row"><span>${esc(it.pieza)}</span><span>${Number(it.cantidad) || 0} × ${money(it.precio)}</span></div>`).join('');
       document.getElementById('v-datos').innerHTML = `
-        ${v.cliente ? `<div class="inv-group-row"><span>Cliente</span><span>${esc(v.cliente)}</span></div>` : ''}
         <div class="inv-group-row"><span>Fecha de venta</span><span>${esc(fechaVenta(v) ? F.diaLargo(fechaVenta(v)) : v.fecha || '—')}</span></div>
         ${pagada && v.fechaPago ? `<div class="inv-group-row"><span>Cobrada</span><span>${esc(F.diaLargo(F.iso(v.fechaPago)))}</span></div>` : ''}
         ${v.notas ? `<div class="inv-group-row"><span>Notas</span><span>${esc(v.notas)}</span></div>` : ''}
@@ -623,6 +622,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007i"></script>
+  <script src="nav.js?v=20261007j"></script>
 </body>
 </html>
