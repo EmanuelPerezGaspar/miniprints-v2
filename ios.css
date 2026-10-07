@@ -1623,6 +1623,8 @@ button.inv-tile:focus-visible { outline: 2px solid var(--ios-blue); outline-offs
 .hx-cal-ley span { display: inline-flex; align-items: center; gap: 5px; }
 .hx-cal-ley button { margin-left: auto; border: none; border-radius: var(--r-pill); padding: 5px 12px; background: var(--ios-fill); color: var(--ios-green); font-family: var(--ios-font); font-size: 13px; font-weight: 600; cursor: pointer; }
 .hx-empty-dia { padding: 22px 16px; }
+#hx-list { display: flex; flex-direction: column; }
+#hx-list:empty, .hx-info:empty { display: none; }
 .hx-cal-dia:disabled { cursor: default; }
 .hx-cal-dia:disabled:active .hx-cal-n { background: none; }
 .sheet-close[hidden] { display: none; }

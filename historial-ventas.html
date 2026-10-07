@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Historial de ventas</title>
-  <script src="theme.js?v=20261007d"></script>
-  <script src="whatsapp.js?v=20261007d"></script>
-  <script src="inventario.js?v=20261007d"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007d" />
+  <script src="theme.js?v=20261007e"></script>
+  <script src="whatsapp.js?v=20261007e"></script>
+  <script src="inventario.js?v=20261007e"></script>
+  <link rel="stylesheet" href="styles.css?v=20261007e" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007d" />
-  <link rel="stylesheet" href="nav.css?v=20261007d" />
+  <link rel="stylesheet" href="ios.css?v=20261007e" />
+  <link rel="stylesheet" href="nav.css?v=20261007e" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007d"></script>
+  <script type="module" src="firebase-sync.js?v=20261007e"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -57,14 +57,14 @@
 
         <div class="inv-sum" id="hx-sum"></div>
 
-        <!-- Calendario del mes: punto verde = todo cobrado; naranja = hay pendientes -->
-        <section class="hx-cal" id="hx-cal" aria-label="Calendario de ventas"></section>
-
         <input type="search" id="f-buscar" class="hx-search" placeholder="Buscar pieza, cliente o nota" autocomplete="off" aria-label="Buscar venta" />
         <div class="vs-cats" id="f-pago" role="radiogroup" aria-label="Filtrar por pago"></div>
         <div class="hx-info" id="hx-info"></div>
 
-        <div id="hx-list" style="display:flex;flex-direction:column;gap:18px;"></div>
+        <div id="hx-list"></div>
+
+        <!-- Calendario del mes: punto verde = todo cobrado; naranja = hay pendientes -->
+        <section class="hx-cal" id="hx-cal" aria-label="Calendario de ventas"></section>
       </div>
     </main>
   </div>
@@ -558,6 +558,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); render(); });
   </script>
-  <script src="nav.js?v=20261007d"></script>
+  <script src="nav.js?v=20261007e"></script>
 </body>
 </html>
