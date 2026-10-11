@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Ventas</title>
-  <script src="theme.js?v=20261007r"></script>
-  <script src="categorias.js?v=20261007r"></script>
-  <script src="whatsapp.js?v=20261007r"></script>
-  <script src="costos.js?v=20261007r"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007r" />
+  <script src="theme.js?v=20261011a"></script>
+  <script src="categorias.js?v=20261011a"></script>
+  <script src="whatsapp.js?v=20261011a"></script>
+  <script src="costos.js?v=20261011a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261011a" />
   <style>
     .field { display: flex; flex-direction: column; gap: 5px; }
     .field label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); }
@@ -86,8 +86,8 @@
     .fb-field select option { background:var(--ios-bg-3); }
     #filter-info { font-size:0.72rem; color:var(--text-dim); padding:8px 20px 0; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261007r" />
-  <link rel="stylesheet" href="nav.css?v=20261007r" />
+  <link rel="stylesheet" href="ios.css?v=20261011a" />
+  <link rel="stylesheet" href="nav.css?v=20261011a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -100,7 +100,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007r"></script>
+  <script type="module" src="firebase-sync.js?v=20261011a"></script>
 
   <div class="page-container">
     <div class="dash-layout">
@@ -317,7 +317,7 @@
                   aria-label="${attr(nombreCat(o.id))}, ${o.ps.length} piezas${enPedido ? ', ' + enPedido + ' en el pedido' : ''}">
             <span class="vs-cat-ico" aria-hidden="true"><svg viewBox="0 0 24 24">${o.icono}</svg></span>
             <span class="vs-cat-name">${escapeHtml(nombreCat(o.id))}</span>
-            <span class="vs-cat-n">${o.ps.length} ${o.ps.length === 1 ? 'pieza' : 'piezas'}</span>
+            <span class="vs-cat-n">${(u => `${u} disponible${u === 1 ? '' : 's'}`)(o.ps.reduce((s, p) => s + disponible(p), 0))}</span>
             ${enPedido ? `<span class="vs-cat-badge" aria-hidden="true">${enPedido}</span>` : ''}
           </button>`;
       }).join('');
@@ -331,13 +331,13 @@
       const libres = disponible(p) - (item ? item.cantidad : 0);
       const precio = ultimoPrecio(p);
       // Tocar suma una; el "−" quita una sin bajar al pedido
-      return `<div class="vs-tile${item ? ' is-added' : ''}${libres <= 0 ? ' is-agotada' : ''}" role="listitem" data-pieza="${attr(p)}">
+      return `<div class="vs-tile${item ? ' is-added' : ''}${libres <= 0 ? ' is-agotada' : libres <= 2 ? ' is-poco' : ''}" role="listitem" data-pieza="${attr(p)}">
           <button type="button" class="vs-tile-main" ${libres <= 0 ? 'disabled' : ''}
                   aria-label="Agregar ${attr(p)}${precio ? '' : ', sin precio'}, ${libres} disponibles${item ? ', ' + item.cantidad + ' en el pedido' : ''}">
             <span class="vs-tile-name">${escapeHtml(p)}</span>
             <span class="vs-tile-pie">
               <span class="vs-tile-precio${precio ? '' : ' is-vacio'}">${precio ? precioCorto(precio) : '$ —'}</span>
-              <span class="vs-tile-disp">${libres > 0 ? libres + ' disp.' : item ? 'Todas' : 'Agotada'}</span>
+              <span class="vs-tile-disp">${libres > 0 ? (libres <= 2 ? `Queda${libres === 1 ? '' : 'n'} ${libres}` : libres + ' disp.') : item ? 'Todas' : 'Agotada'}</span>
             </span>
           </button>
           ${item ? `<span class="vs-tile-badge" aria-hidden="true">${item.cantidad}</span>
@@ -664,6 +664,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', () => { loadDB(); calcularPopularidad(); refreshPiezaSelect(); renderGrupoWA(); });
   </script>
-  <script src="nav.js?v=20261007r"></script>
+  <script src="nav.js?v=20261011a"></script>
 </body>
 </html>
