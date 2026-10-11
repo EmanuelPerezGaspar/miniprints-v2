@@ -50,5 +50,61 @@
     return null;
   }
 
-  window.MP_COSTOS = { desglose, porPieza, r2 };
+  // ── Reparto del dinero de una venta ──
+  // Primero se recupera el costo (producción + empaque); la ganancia de la empresa llega hasta lo
+  // cotizado; lo que la venta completa supere a lo cotizado (sobreprecio) se reparte: 50 % comisión
+  // del vendedor y 50 % para la meta elegida en Inicio (si no hay, se queda en la empresa).
+  // Abajo de lo cotizado se reduce la ganancia; el IVA (si la cotización lo llevaba) se aparta.
+  const PARTE_VENDEDOR = 0.5;
+  const itemsDe = v => v.items || [{ pieza: v.pieza, cantidad: v.cantidad, precio: v.precio }];
+  function reparto(v, cache) {
+    cache = cache || {};
+    let C = 0, Q = 0, I = 0, V = 0, iva = 0, sin = 0, aprox = false;
+    itemsDe(v).forEach(it => {
+      const q = Number(it.cantidad) || 0;
+      if (it.cv !== 2 && !(it.pieza in cache)) cache[it.pieza] = porPieza(it.pieza);
+      const ref = it.cv === 2 ? it : cache[it.pieza];
+      const prod = ref && (it.cv === 2 ? ref.costo : ref.produccion), cot = ref && ref.cotizado;
+      if (!(prod > 0 && cot > 0) || !q) { sin += q; return; }
+      if (it.cv !== 2) aprox = true;
+      C += (prod + (Number(ref.empaque) || 0)) * q; Q += cot * q; I += (Number(ref.iva) || 0) * q;
+      const venta = (Number(it.precio) || 0) * q;
+      V += venta;
+      iva += venta * (Number(ref.iva) || 0) / cot;        // la parte del precio que es IVA, pieza por pieza
+    });
+    if (!C) return { sin };
+    const Vn = V - iva, Qn = Q - I;
+    const recupera = Math.min(Vn, C);
+    const ganancia = Vn >= Qn ? Qn - C : Vn - C;
+    const sobre = Math.max(0, Vn - Qn);
+    const comision = sobre * PARTE_VENDEDOR;
+    return { C, Q, V, iva, recupera, ganancia, sobre, comision, paraMeta: sobre - comision, sin, aprox };
+  }
+
+  // Meta por evento que recibe la otra mitad del sobreprecio (solo una a la vez)
+  function metaDeSobreprecio(metas) {
+    metas = metas || leer('mp_metas_eventos', []);
+    return (Array.isArray(metas) ? metas : []).find(m => m && m.recibeSobreprecio) || null;
+  }
+  const isoDe = x => { const m = String(x || '').match(/^(\d{4}-\d{2}-\d{2})/); return m ? m[1] : ''; };
+  const pagada = v => !v.estatusPago || v.estatusPago === 'pagado';
+  // Ventas ya cobradas a partir de una fecha (se excluyen al activar una meta: solo cuentan las siguientes)
+  function cobradasDesde(fecha, ventas) {
+    ventas = ventas || leer('mp_ventas', []);
+    return (Array.isArray(ventas) ? ventas : []).filter(v => pagada(v) && (isoDe(v.fechaPago) || isoDe(v.fecha)) >= fecha).map(v => Number(v.id));
+  }
+  // Lo que las ventas cobradas desde que se activó le han aportado a esa meta
+  function aportesVentas(meta, ventas) {
+    if (!meta || !meta.recibeSobreprecio) return 0;
+    ventas = ventas || leer('mp_ventas', []);
+    const fuera = new Set((meta.excluir || []).map(Number));
+    const cache = {};
+    return (Array.isArray(ventas) ? ventas : []).reduce((s, v) => {
+      const cobro = isoDe(v.fechaPago) || isoDe(v.fecha);
+      if (!pagada(v) || !cobro || (meta.desde && cobro < meta.desde) || fuera.has(Number(v.id))) return s;
+      return s + (reparto(v, cache).paraMeta || 0);
+    }, 0);
+  }
+
+  window.MP_COSTOS = { desglose, porPieza, reparto, metaDeSobreprecio, aportesVentas, cobradasDesde, PARTE_VENDEDOR, r2 };
 })();

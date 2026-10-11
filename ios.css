@@ -1674,6 +1674,7 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-rep-bar .is-gan, .hx-rep-dot.is-gan { background: var(--rep-gan); }
 .hx-rep-bar .is-com, .hx-rep-dot.is-com { background: var(--rep-com); }
 .hx-rep-dot.is-perd { background: var(--rep-perd); }
+.hx-rep-bar .is-meta, .hx-rep-dot.is-meta { background: #2fb5c9; }
 .hx-rep-bar .is-iva, .hx-rep-dot.is-iva { background: var(--ios-purple); }
 .cz-det { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .cz-det small { font-size: 12px; color: var(--nav-text-2); }
@@ -1688,6 +1689,8 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-rep-tot { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding-top: 10px; border-top: 0.5px solid var(--ios-sep, var(--ios-separator)); }
 .hx-rep-tot span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .hx-rep-tot span + span { text-align: right; }
+.hx-rep-tot.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hx-rep-tot.is-3 span:nth-child(2) { text-align: center; }
 .hx-rep-tot small { font-size: 12px; font-weight: 600; color: var(--nav-text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hx-rep-tot b { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-size: 17px; font-weight: 700; color: var(--text); }
 .hx-rep-nota, .hx-rep-vacio { margin: 0; font-size: 12px; line-height: 1.4; color: var(--nav-text-2); }
@@ -1712,6 +1715,9 @@ input[type="date"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .hx-vend-todas { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 4px var(--pad-card); border-radius: var(--r-md); background: var(--ios-group); font-size: 15px; cursor: pointer; }
 .hx-vend-todas[hidden] { display: none; }
 .hx-vend-todas .toggle { flex-shrink: 0; }
+.me-sobre { padding: 10px 12px 10px var(--pad-card); font-size: 15px; color: var(--text); }
+.me-sobre > span:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.me-sobre small { font-size: 12px; line-height: 1.35; color: var(--nav-text-2); }
 .sheet-head .hx-atras { grid-column: 3; }
 #v-cobrar[hidden] { display: none; }
 /* Día, venta y edición miden lo mismo: al pasar de una a otra la tarjeta no cambia de tamaño */
