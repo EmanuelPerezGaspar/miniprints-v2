@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20261007r"></script>
-  <script src="categorias.js?v=20261007r"></script>
-  <script src="inventario.js?v=20261007r"></script>
-  <link rel="stylesheet" href="styles.css?v=20261007r" />
+  <script src="theme.js?v=20261011a"></script>
+  <script src="categorias.js?v=20261011a"></script>
+  <script src="inventario.js?v=20261011a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261011a" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261007r"></script>
-  <link rel="stylesheet" href="ios.css?v=20261007r" />
-  <link rel="stylesheet" href="nav.css?v=20261007r" />
+  <script src="ios-charts.js?v=20261011a"></script>
+  <link rel="stylesheet" href="ios.css?v=20261011a" />
+  <link rel="stylesheet" href="nav.css?v=20261011a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +24,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261007r"></script>
+  <script type="module" src="firebase-sync.js?v=20261011a"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -58,6 +58,7 @@
               </span>
             </div>
             <div class="st-value" id="st-stock-val"><span class="st-num">—</span> <span class="st-unit">piezas</span></div>
+            <span class="st-sub" id="st-stock-sub"></span>
           </a>
           <a class="stat-tile" href="ventas.html" aria-labelledby="st-ventas-lbl" aria-describedby="st-ventas-val">
             <div class="st-top">
@@ -67,6 +68,7 @@
               </span>
             </div>
             <div class="st-value" id="st-ventas-val"><span class="st-num">—</span> <span class="st-unit">ventas</span></div>
+            <span class="st-sub" id="st-ventas-sub"></span>
           </a>
         </div>
 
@@ -419,6 +421,22 @@
       document.querySelector('#st-stock-val .st-unit').textContent  = stock === 1 ? 'pieza' : 'piezas';
       document.querySelector('#st-ventas-val .st-num').textContent  = ventasMes.toLocaleString('es-MX');
       document.querySelector('#st-ventas-val .st-unit').textContent = ventasMes === 1 ? 'venta' : 'ventas';
+      // Contexto: piezas por agotarse (2 o menos, como en Inventario) y comparación con el mismo día del mes pasado
+      const bajos = Object.values(DB.piezas).filter(c => (Number(c) || 0) > 0 && Number(c) <= 2).length;
+      const subS = document.getElementById('st-stock-sub');
+      subS.textContent = bajos ? `${bajos} por agotarse` : 'Sin piezas por agotarse';
+      subS.classList.toggle('is-warn', !!bajos);
+      const hoy = new Date(), d = hoy.getDate();
+      const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1), keyAnt = localYM(ant);
+      const diaDe = v => { const m = String(v.fecha || '').match(/^\d{4}-\d{2}-(\d{2})/); return m ? Number(m[1]) : 0; };
+      const antMismoDia = DB.ventas.filter(v => mesKey(v) === keyAnt && diaDe(v) && diaDe(v) <= d).length;
+      const dif = ventasMes - antMismoDia;
+      const mesAnt = ant.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+      const subV = document.getElementById('st-ventas-sub');
+      subV.textContent = !antMismoDia && !ventasMes ? 'Aún sin ventas este mes'
+        : dif === 0 ? `Igual que ${mesAnt}` : `${dif > 0 ? '+' : '−'}${Math.abs(dif)} vs. ${mesAnt}`;
+      subV.title = `Comparado con las ventas del 1 al ${d} de ${mesAnt}`;
+      subV.className = 'st-sub' + (dif > 0 ? ' is-up' : dif < 0 ? ' is-down' : '');
     }
 
     // ── Ventas por categoría ───────────────────────────
@@ -555,6 +573,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261007r"></script>
+  <script src="nav.js?v=20261011a"></script>
 </body>
 </html>
