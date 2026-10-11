@@ -941,6 +941,16 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 .st-sub.is-down, .st-sub.is-warn { color: var(--ios-orange); }
 .vs-tile.is-poco .vs-tile-disp { color: var(--ios-orange); font-weight: 700; }
 
+/* ── Ventas por categoría: lista con monto, % y barra ── */
+.cat-lista { display: flex; flex-direction: column; gap: 14px; padding: var(--pad-card); border-radius: var(--r-lg); background: var(--ios-bg-2); }
+.cat-fila-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.cat-fila-n { min-width: 0; font-size: 16px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-fila-v { flex-shrink: 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cat-fila-v b { font-family: var(--ios-font-rounded); font-size: 16px; font-weight: 700; color: var(--text); }
+.cat-fila-v small { font-size: 13px; color: var(--ios-label-2); }
+.cat-fila-bar { height: 6px; margin-top: 8px; border-radius: 3px; background: var(--ios-fill); overflow: hidden; }
+.cat-fila-bar i { display: block; height: 100%; border-radius: 3px; background: var(--ios-green); }
+.cat-vacio { margin: 0; padding: 8px 0; text-align: center; font-size: 15px; color: var(--ios-label-2); }
 /* ── Ventas por categoría (estilo "Health Monitor") ── */
 .cat-section { margin-top: calc(var(--sp-section) - var(--sp)); }
 .cat-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: var(--sp-title); }

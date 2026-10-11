@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20261011a"></script>
-  <script src="categorias.js?v=20261011a"></script>
-  <script src="inventario.js?v=20261011a"></script>
-  <link rel="stylesheet" href="styles.css?v=20261011a" />
+  <script src="theme.js?v=20261011b"></script>
+  <script src="categorias.js?v=20261011b"></script>
+  <script src="inventario.js?v=20261011b"></script>
+  <link rel="stylesheet" href="styles.css?v=20261011b" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261011a"></script>
-  <link rel="stylesheet" href="ios.css?v=20261011a" />
-  <link rel="stylesheet" href="nav.css?v=20261011a" />
+  <script src="ios-charts.js?v=20261011b"></script>
+  <link rel="stylesheet" href="ios.css?v=20261011b" />
+  <link rel="stylesheet" href="nav.css?v=20261011b" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +24,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261011a"></script>
+  <script type="module" src="firebase-sync.js?v=20261011b"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -97,7 +97,7 @@
               <button type="button" role="radio" data-range="todo" aria-checked="false">Todo</button>
             </div>
           </div>
-          <div class="cat-grid" id="cat-grid"></div>
+          <div class="cat-lista" id="cat-grid" role="list"></div>
           <p class="cat-note" id="cat-note" hidden></p>
         </section>
       </div>
@@ -449,50 +449,48 @@
     function categoriaDe(pieza) { return MP_CAT.de(pieza, DB.categorias); }
 
     let catRange = 'mes';
-    const ICON_ESTADO = {
-      top:  '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M8 11.5v-7M5 7.2 8 4.2l3 3" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      ok:   '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M4.8 8.2 7 10.3l4.2-4.6" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      baja: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M8 4.5v7M5 8.8l3 3 3-3" stroke="var(--cat-on)" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-      cero: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor"/><path d="M5 8h6" stroke="var(--cat-on)" stroke-width="1.7" stroke-linecap="round"/></svg>',
-    };
 
+    // Lista ordenada: monto vendido por categoría, % del total y barra relativa a la mayor
     function renderCategorias() {
       const CATEGORIAS = categoriasConIcono();
-      const uds = Object.fromEntries(CATEGORIAS.map(c => [c.id, 0]));
-      let sinCategoria = 0;
+      const acc = Object.fromEntries(CATEGORIAS.map(c => [c.id, { monto: 0, uds: 0 }]));
+      const otros = { monto: 0, uds: 0 };
       DB.ventas
         .filter(v => catRange === 'todo' || mesKey(v) === getMesActual())
         .forEach(v => ventaItems(v).forEach(it => {
           const cat = categoriaDe(it.pieza);
-          const n = Number(it.cantidad) || 0;
-          if (cat && cat in uds) uds[cat] += n; else sinCategoria += n;
+          const n = Number(it.cantidad) || 0, m = n * (Number(it.precio) || 0);
+          const a = cat && cat in acc ? acc[cat] : otros;
+          a.monto += m; a.uds += n;
         }));
-      const max = Math.max(0, ...Object.values(uds));
-
-      document.getElementById('cat-grid').innerHTML = CATEGORIAS.map(c => {
-        const n = uds[c.id];
-        const pct = max > 0 ? n / max : 0;
-        const estado = n === 0 ? 'cero' : n === max ? 'top' : pct >= 0.5 ? 'ok' : 'baja';
-        const texto  = { top: 'Más vendida', ok: 'Normal', baja: 'Baja', cero: 'Sin ventas' }[estado];
-        const nivel  = Math.round(pct * 100);
-        return `
-          <article class="cat-card cat--${estado}" aria-label="${escCat(c.nombre)}: ${n} ${n === 1 ? 'unidad' : 'unidades'}, ${texto}">
-            <div class="cat-info">
-              <div class="cat-name"><svg class="cat-ico" viewBox="0 0 24 24" aria-hidden="true">${c.icon}</svg>${escCat(c.nombre)}</div>
-              <div class="cat-value"><span class="cat-num">${n.toLocaleString('es-MX')}</span><span class="cat-unit">uds</span></div>
-              <div class="cat-status">${ICON_ESTADO[estado]}${texto}</div>
+      const filas = CATEGORIAS.map(c => ({ nombre: c.nombre, icon: c.icon, ...acc[c.id] })).filter(f => f.uds > 0);
+      if (otros.uds > 0) filas.push({ nombre: 'Otros', icon: '', ...otros });
+      filas.sort((a, b) => b.monto - a.monto || b.uds - a.uds);
+      const total = filas.reduce((s, f) => s + f.monto, 0);
+      const max = Math.max(0, ...filas.map(f => f.monto));
+      const lista = document.getElementById('cat-grid');
+      if (!filas.length) {
+        lista.innerHTML = `<p class="cat-vacio">${catRange === 'todo' ? 'Aún no hay ventas registradas.' : 'Aún no hay ventas este mes.'}</p>`;
+      } else {
+        lista.innerHTML = filas.map(f => {
+          const pct = total > 0 ? Math.round(f.monto / total * 100) : 0;
+          const ancho = max > 0 ? Math.max(2, f.monto / max * 100) : 0;
+          return `
+          <div class="cat-fila" role="listitem" aria-label="${escCat(f.nombre)}: ${fmtCorto(f.monto)}, ${pct} por ciento, ${f.uds} ${f.uds === 1 ? 'pieza' : 'piezas'}">
+            <div class="cat-fila-top">
+              <span class="cat-fila-n">${escCat(f.nombre)}</span>
+              <span class="cat-fila-v"><b>${fmtCorto(f.monto)}</b><small> · ${pct}%</small></span>
             </div>
-            <div class="cat-gauge" aria-hidden="true">
-              <div class="cat-fill" style="height:calc((100% - 8px) * ${nivel / 100})"></div>
-              <div class="cat-knob" style="bottom:calc(9px + (100% - 18px) * ${nivel / 100})"></div>
-            </div>
-          </article>`;
-      }).join('');
-
+            <div class="cat-fila-bar" aria-hidden="true"><i style="width:${ancho.toFixed(1)}%"></i></div>
+          </div>`;
+        }).join('');
+      }
       const note = document.getElementById('cat-note');
-      note.hidden = sinCategoria === 0;
-      note.textContent = sinCategoria ? `${sinCategoria} ${sinCategoria === 1 ? 'pieza vendida' : 'piezas vendidas'} sin categoría` : '';
+      const uds = filas.reduce((s, f) => s + f.uds, 0);
+      note.hidden = !filas.length;
+      note.textContent = filas.length ? `${uds.toLocaleString('es-MX')} ${uds === 1 ? 'pieza vendida' : 'piezas vendidas'} · ${fmtCorto(total)} en total` : '';
     }
+
 
     document.querySelectorAll('.cat-seg button').forEach(b => b.addEventListener('click', () => {
       catRange = b.dataset.range;
@@ -573,6 +571,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261011a"></script>
+  <script src="nav.js?v=20261011b"></script>
 </body>
 </html>
