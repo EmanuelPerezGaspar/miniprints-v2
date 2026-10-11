@@ -4,14 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20261011b"></script>
-  <script src="categorias.js?v=20261011b"></script>
-  <script src="inventario.js?v=20261011b"></script>
-  <link rel="stylesheet" href="styles.css?v=20261011b" />
+  <script src="theme.js?v=20261011c"></script>
+  <script src="categorias.js?v=20261011c"></script>
+  <script src="inventario.js?v=20261011c"></script>
+  <script src="costos.js?v=20261011c"></script>
+  <link rel="stylesheet" href="styles.css?v=20261011c" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261011b"></script>
-  <link rel="stylesheet" href="ios.css?v=20261011b" />
-  <link rel="stylesheet" href="nav.css?v=20261011b" />
+  <script src="ios-charts.js?v=20261011c"></script>
+  <link rel="stylesheet" href="ios.css?v=20261011c" />
+  <link rel="stylesheet" href="nav.css?v=20261011c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261011b"></script>
+  <script type="module" src="firebase-sync.js?v=20261011c"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -126,6 +127,10 @@
       </div>
     </div>
     <p class="inv-hint" id="me-limite-h">La fecha límite es opcional.</p>
+    <label class="hx-vend-todas me-sobre">
+      <span><b>Recibe el 50 % del sobreprecio</b><small id="me-sobre-h"></small></span>
+      <span class="toggle"><input type="checkbox" id="me-sobre" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+    </label>
     <div class="inv-f" id="me-abonos-f">
       <span class="inv-f-lbl" id="me-abonos-lbl">Abonos</span>
       <div class="me-abonar">
@@ -179,7 +184,9 @@
     function leer(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } }
     function metasEventos() { const l = leer('mp_metas_eventos', []); return Array.isArray(l) ? l : []; }
     function guardarEventos(l) { localStorage.setItem('mp_metas_eventos', JSON.stringify(l)); }
-    function abonado(m) { return (m.abonos || []).reduce((s, a) => s + (Number(a.m) || 0), 0); }
+    // Abonos a mano + lo que aportan las ventas cobradas si la meta recibe el sobreprecio
+    function abonosManuales(m) { return (m.abonos || []).reduce((s, a) => s + (Number(a.m) || 0), 0); }
+    function abonado(m) { return abonosManuales(m) + MP_COSTOS.aportesVentas(m); }
     function ingresos(filtro) {
       return DB.ventas.filter(v => ventaPagada(v) && filtro(cobroKey(v)))
         .reduce((s, v) => s + ventaItems(v).reduce((si, it) => si + it.precio * it.cantidad, 0), 0);
@@ -345,15 +352,24 @@
       document.getElementById('me-limite').value = m ? (m.limite || '') : '';
       document.getElementById('me-abono').value = '';
       document.getElementById('me-abonos-f').hidden = !m;
+      const otra = metasEventos().find(x => x.recibeSobreprecio && (!m || x.id !== m.id));
+      document.getElementById('me-sobre').checked = !!(m && m.recibeSobreprecio);
+      document.getElementById('me-sobre-h').textContent = m && m.recibeSobreprecio
+        ? `${m.desde === MP_INV.fecha.hoy() ? 'Desde hoy' : 'Desde el ' + MP_INV.fecha.diaLargo(m.desde).toLowerCase()} · las ventas le han aportado ${fmtCorto(MP_COSTOS.aportesVentas(m))}`
+        : otra ? `Ahora lo recibe «${otra.nombre}»; si lo activas aquí, esa meta conserva lo que ya juntó.`
+        : 'Cada venta cobrada le suma su parte automáticamente.';
       document.getElementById('me-borrar').hidden = !m;
       if (m) pintarAbonos(m);
       MP_INV.abrir('sh-meta');
     }
     function pintarAbonos(m) {
       const lista = (m.abonos || []).map((a, i) => ({ ...a, i })).reverse();
-      document.getElementById('me-abonos-lbl').textContent = `Abonos · ${fmtCorto(abonado(m))} de ${fmtCorto(m.monto)}`;
+      const deVentas = MP_COSTOS.aportesVentas(m);
+      document.getElementById('me-abonos-lbl').textContent = deVentas > 0
+        ? `Abonos ${fmtCorto(abonosManuales(m))} + ventas ${fmtCorto(deVentas)} · ${fmtCorto(abonado(m))} de ${fmtCorto(m.monto)}`
+        : `Abonos · ${fmtCorto(abonado(m))} de ${fmtCorto(m.monto)}`;
       document.getElementById('me-abonos').innerHTML = lista.length
-        ? lista.map(a => `<div class="inv-group-row"><span>${MP_INV.fecha.diaLargo(a.f)}</span><span class="me-abono-m">${MP_INV.money(a.m)}<button type="button" class="me-quitar" onclick="quitarAbono(${a.i})" aria-label="Quitar abono de ${MP_INV.money(a.m)}">✕</button></span></div>`).join('')
+        ? lista.map(a => `<div class="inv-group-row"><span>${MP_INV.fecha.diaLargo(a.f)}${a.ventas ? ' · de ventas' : ''}</span><span class="me-abono-m">${MP_INV.money(a.m)}<button type="button" class="me-quitar" onclick="quitarAbono(${a.i})" aria-label="Quitar abono de ${MP_INV.money(a.m)}">✕</button></span></div>`).join('')
         : '<div class="inv-group-row"><span class="me-vacio">Aún no hay abonos</span></div>';
     }
     function guardarMeta() {
@@ -371,6 +387,22 @@
         metaEdit = 'm' + Date.now().toString(36);
         l.push({ id: metaEdit, nombre, monto, limite, abonos: [], creada: MP_INV.fecha.hoy() });
       }
+      // Solo una meta recibe el sobreprecio; la que deja de recibirlo conserva lo juntado como abono
+      const recibe = document.getElementById('me-sobre').checked;
+      const congelar = x => {
+        const aporte = Math.round(MP_COSTOS.aportesVentas(x) * 100) / 100;
+        if (aporte > 0) (x.abonos = x.abonos || []).push({ f: MP_INV.fecha.hoy(), m: aporte, ventas: true });
+        x.recibeSobreprecio = false; delete x.desde; delete x.excluir;
+      };
+      l.forEach(x => {
+        if (x.id === metaEdit) {
+          if (recibe && !x.recibeSobreprecio) {
+            // Cuenta desde ahora: las ventas que ya estaban cobradas hoy no se suman (ni se cuentan dos veces)
+            x.recibeSobreprecio = true; x.desde = MP_INV.fecha.hoy(); x.excluir = MP_COSTOS.cobradasDesde(x.desde);
+          }
+          else if (!recibe && x.recibeSobreprecio) congelar(x);
+        } else if (recibe && x.recibeSobreprecio) congelar(x);
+      });
       guardarEventos(l);
       metaFoco = metaEdit;
       MP_INV.cerrar();
@@ -571,6 +603,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261011b"></script>
+  <script src="nav.js?v=20261011c"></script>
 </body>
 </html>
