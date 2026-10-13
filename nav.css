@@ -534,3 +534,32 @@ body::after {
   }
   .sheet.open { transform: translate(-50%, 0) scale(1); }
 }
+
+/* Espacio en la nube (pie de la hoja "Más") */
+.sheet-espacio { margin: 0 0 12px; padding: 12px 14px; border-radius: 20px; background: var(--sheet-card); text-align: left; color: var(--nav-text); }
+.sheet-espacio-t { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.sheet-espacio-t b { font-variant-numeric: tabular-nums; }
+.sheet-espacio-bar { height: 6px; margin: 8px 0 6px; border-radius: 3px; background: var(--ios-sep); overflow: hidden; }
+.sheet-espacio-bar i { display: block; height: 100%; border-radius: 3px; background: var(--ios-green, #30d158); }
+.sheet-espacio-s { font-size: 12px; color: var(--nav-text-2); }
+.sheet-espacio.is-medio .sheet-espacio-bar i { background: #ff9f0a; }
+.sheet-espacio.is-medio .sheet-espacio-t b { color: #ff9f0a; }
+.sheet-espacio.is-alto .sheet-espacio-bar i { background: #ff453a; }
+.sheet-espacio.is-alto .sheet-espacio-t b { color: #ff453a; }
+
+/* Aviso de espacio: tarjeta sobre la barra de pestañas */
+.mp-aviso {
+  position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); z-index: 1050;
+  display: flex; align-items: center; gap: 4px; padding: 6px 6px 6px 4px; border-radius: 22px;
+  background: var(--sheet-card-solid, #2c2c2e); color: var(--nav-text); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 0 0 1.5px #ff9f0a;
+  animation: mp-aviso-in 420ms var(--ios-spring) both;
+}
+.mp-aviso.is-alto { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 0 0 1.5px #ff453a; }
+.mp-aviso-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border: 0; background: none; color: inherit; font-family: var(--ios-font); text-align: left; cursor: pointer; }
+.mp-aviso-txt b { font-size: 15px; }
+.mp-aviso-txt span { font-size: 13px; color: var(--nav-text-2); }
+.mp-aviso-x { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--ios-group); color: var(--nav-text); cursor: pointer; }
+.mp-aviso-x svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+@keyframes mp-aviso-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@media (min-width: 768px) { .mp-aviso { left: 50%; right: auto; width: 420px; transform: translateX(-50%); animation: none; } }
+@media print { .mp-aviso { display: none !important; } }
