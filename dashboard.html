@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Dashboard</title>
-  <script src="theme.js?v=20261012a"></script>
-  <script src="categorias.js?v=20261012a"></script>
-  <script src="inventario.js?v=20261012a"></script>
-  <script src="costos.js?v=20261012a"></script>
-  <link rel="stylesheet" href="styles.css?v=20261012a" />
+  <script src="theme.js?v=20261013a"></script>
+  <script src="categorias.js?v=20261013a"></script>
+  <script src="inventario.js?v=20261013a"></script>
+  <script src="costos.js?v=20261013a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261013a" />
   <script src="vendor/chart-4.4.0.umd.js"></script>
-  <script src="ios-charts.js?v=20261012a"></script>
-  <link rel="stylesheet" href="ios.css?v=20261012a" />
-  <link rel="stylesheet" href="nav.css?v=20261012a" />
+  <script src="ios-charts.js?v=20261013a"></script>
+  <link rel="stylesheet" href="ios.css?v=20261013a" />
+  <link rel="stylesheet" href="nav.css?v=20261013a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -25,7 +25,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261012a"></script>
+  <script type="module" src="firebase-sync.js?v=20261013a"></script>
 
   <!-- DASHBOARD -->
   <div class="page-container">
@@ -53,7 +53,7 @@
         <div class="stat-tiles">
           <a class="stat-tile" href="stock-piezas.html" aria-labelledby="st-stock-lbl" aria-describedby="st-stock-val">
             <div class="st-top">
-              <span class="st-label" id="st-stock-lbl">Piezas en<br>stock</span>
+              <span class="st-label" id="st-stock-lbl">En stock</span>
               <span class="st-icon st-icon--orange" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M12 2.8 20.2 7.2v9.6L12 21.2l-8.2-4.4V7.2z"/><path d="M3.8 7.2 12 11.6l8.2-4.4M12 11.6v9.6"/></svg>
               </span>
@@ -63,7 +63,7 @@
           </a>
           <a class="stat-tile" href="ventas.html" aria-labelledby="st-ventas-lbl" aria-describedby="st-ventas-val">
             <div class="st-top">
-              <span class="st-label" id="st-ventas-lbl">Ventas<br>del mes</span>
+              <span class="st-label" id="st-ventas-lbl">Este mes</span>
               <span class="st-icon st-icon--blue" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M5.2 8h13.6l-1 11.6a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg>
               </span>
@@ -463,11 +463,12 @@
       const ant = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1), keyAnt = localYM(ant);
       const ventasAnt = DB.ventas.filter(v => mesKey(v) === keyAnt).length;
       const mesAnt = ant.toLocaleDateString('es-MX', { month: 'long' });
-      const MesAnt = mesAnt.charAt(0).toUpperCase() + mesAnt.slice(1);
       const supera = ventasAnt > 0 && ventasMes > ventasAnt;
       const subV = document.getElementById('st-ventas-sub');
-      subV.textContent = supera ? `Ya superaste ${mesAnt} (${ventasAnt})`
-        : `${MesAnt}: ${ventasAnt ? ventasAnt + (ventasAnt === 1 ? ' venta' : ' ventas') : 'sin ventas'}`;
+      const corto = ant.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
+      const Corto = corto.charAt(0).toUpperCase() + corto.slice(1);
+      subV.textContent = supera ? `Superaste ${corto} (${ventasAnt})`
+        : `${Corto}: ${ventasAnt ? ventasAnt + (ventasAnt === 1 ? ' venta' : ' ventas') : 'sin ventas'}`;
       subV.title = `Ventas de todo ${mesAnt}: ${ventasAnt}`;
       subV.className = 'st-sub' + (supera ? ' is-up' : '');
     }
@@ -604,6 +605,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261012a"></script>
+  <script src="nav.js?v=20261013a"></script>
 </body>
 </html>
