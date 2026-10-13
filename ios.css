@@ -2362,3 +2362,5 @@ html .sheet.is-scrolled .sheet-head { -webkit-backdrop-filter: none; backdrop-fi
 html .sheet.vs-sheet { height: auto; min-height: min(460px, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px)); }
 .vs-sheet-scroll { margin: 0 -16px; padding: 0 16px 4px; }
 .mp-sheet .mp-tipos { margin: 2px -16px 0; padding: 2px 16px; }
+/* La lista de los buscadores se encoge al alto disponible y se desplaza por dentro */
+html .sheet.vs-sheet .vs-sheet-scroll { flex: 1 1 auto; min-height: 0; }
