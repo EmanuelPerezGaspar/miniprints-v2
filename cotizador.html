@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261013e"></script>
-  <script src="whatsapp.js?v=20261013e"></script>
-  <script src="categorias.js?v=20261013e"></script>
-  <link rel="stylesheet" href="styles.css?v=20261013e" />
+  <script src="theme.js?v=20261014a"></script>
+  <script src="whatsapp.js?v=20261014a"></script>
+  <script src="categorias.js?v=20261014a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261014a" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261013e" />
-  <link rel="stylesheet" href="nav.css?v=20261013e" />
+  <link rel="stylesheet" href="ios.css?v=20261014a" />
+  <link rel="stylesheet" href="nav.css?v=20261014a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,7 +595,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261013e"></script>
+  <script type="module" src="firebase-sync.js?v=20261014a"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -849,9 +849,10 @@
   <div class="sheet inv-sheet vs-sheet mp-sheet" id="mp-sheet" role="dialog" aria-modal="true" aria-labelledby="mp-sheet-t" hidden>
     <div class="sheet-head">
       <button class="sheet-close" type="button" onclick="cerrarMatPicker()" aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
-      <h2 id="mp-sheet-t">Elegir filamento</h2>
+      <h2 id="mp-sheet-t">Filamento<small class="mp-sub" id="mp-sub"></small></h2>
     </div>
-    <input type="search" id="mp-buscar" class="vs-search" placeholder="Buscar por tipo, color o marca" autocomplete="off" enterkeyhint="search" aria-label="Buscar filamento" />
+    <input type="search" id="mp-buscar" class="vs-search" placeholder="Buscar color, marca o tipo" autocomplete="off" enterkeyhint="search" aria-label="Buscar filamento" />
+    <div class="vs-cats mp-tipos" id="mp-tipos" role="radiogroup" aria-label="Tipo de filamento"></div>
     <div class="vs-sheet-scroll" id="mp-scroll"><div id="mp-lista" role="listbox" aria-labelledby="mp-sheet-t"></div></div>
   </div>
 
@@ -962,7 +963,7 @@
     function abrirMatPicker(sel) {
       if (!Object.keys(DB.materials).length) { showToast('Primero registra tus filamentos en Inventario › Material'); return; }
       _pickSel = sel; _pickAbridor = document.activeElement;
-      const q = document.getElementById('mp-buscar'); q.value = '';
+      const q = document.getElementById('mp-buscar'); q.value = ''; _pickTipo = '';
       pintarMatLista();
       const sh = document.getElementById('mp-sheet'), bd = document.getElementById('mp-backdrop');
       sh.hidden = bd.hidden = false;
@@ -987,37 +988,46 @@
       pintarPicks();
       cerrarMatPicker();
     }
+    // Lista en una sola tarjeta: color, nombre, "tipo · marca · gramos" y marca de elegido
+    let _pickTipo = '';
     function pintarMatLista() {
       const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
       const q = norm(document.getElementById('mp-buscar').value).trim();
       const actual = _pickSel ? _pickSel.value : '';
       const mats = Object.values(DB.materials);
+      const tipos = [...new Set(mats.map(m => m.tipo || 'Otro'))].sort((a, b) => a.localeCompare(b, 'es'));
+      if (_pickTipo && !tipos.includes(_pickTipo)) _pickTipo = '';
+      document.getElementById('mp-tipos').innerHTML = tipos.length > 1
+        ? [['', 'Todos', mats.length], ...tipos.map(t => [t, t, mats.filter(m => (m.tipo || 'Otro') === t).length])]
+            .map(([v, n, c]) => `<button type="button" data-tipo="${escMat(v)}" aria-checked="${v === _pickTipo}">${escMat(n)} <span>${c}</span></button>`).join('')
+        : '';
+      const palabras = q ? q.split(/\s+/) : [];
+      const rec = recientes();
+      const lista = mats
+        .filter(m => !_pickTipo || (m.tipo || 'Otro') === _pickTipo)
+        .filter(m => { const t = norm(`${m.tipo} ${m.color} ${m.marca}`); return palabras.every(w => t.includes(w)); })
+        .sort((a, b) => {
+          // Sin buscar: los usados hace poco arriba; luego por tipo y color
+          if (!q) { const ra = rec.indexOf(a.id), rb = rec.indexOf(b.id); if (ra !== rb) return (ra < 0 ? 99 : ra) - (rb < 0 ? 99 : rb); }
+          return (a.tipo || '').localeCompare(b.tipo || '', 'es') || String(a.color).localeCompare(String(b.color), 'es');
+        });
+      document.getElementById('mp-sub').textContent = `${lista.length} de ${mats.length} filamento${mats.length !== 1 ? 's' : ''}`;
       const fila = m => {
-        const poco = (m.pesoTotal || 0) < 100;
-        return `<button type="button" class="mp-row${m.id === actual ? ' is-on' : ''}" role="option" aria-selected="${m.id === actual}" data-id="${escMat(m.id)}">
+        const poco = (m.pesoTotal || 0) < 200, on = m.id === actual;
+        return `<button type="button" class="mp-row${on ? ' is-on' : ''}" role="option" aria-selected="${on}" data-id="${escMat(m.id)}">
           ${swatch(m)}
-          <span class="mp-txt"><span class="mp-name">${escMat(m.tipo)} ${escMat(m.color)}</span><span class="mp-meta">${escMat(m.marca)}</span></span>
-          <span class="mp-g${poco ? ' is-low' : ''}">${gramosTxt(m.pesoTotal)}</span>
-          <svg class="mp-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+          <span class="mp-txt"><span class="mp-name">${escMat(m.color)}</span><span class="mp-meta">${escMat(m.tipo)} · ${escMat(m.marca)} · <span class="mp-g${poco ? ' is-low' : ''}">${gramosTxt(m.pesoTotal)}</span></span></span>
+          <span class="mp-check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
         </button>`;
       };
-      const grupo = (t, ms) => `<section class="mp-grupo"><h3 class="mp-grupo-t">${escMat(t)}<span>${ms.length}</span></h3><div class="mp-grupo-l">${ms.map(fila).join('')}</div></section>`;
-      const porColor = (a, b) => (a.color + a.marca).localeCompare(b.color + b.marca, 'es');
-      let html = '';
-      if (q) {
-        const palabras = q.split(/\s+/);
-        const res = mats.filter(m => { const t = norm(`${m.tipo} ${m.color} ${m.marca}`); return palabras.every(w => t.includes(w)); })
-          .sort((a, b) => (a.tipo + a.color).localeCompare(b.tipo + b.color, 'es'));
-        html = res.length ? grupo('Resultados', res) : `<div class="vs-empty">Sin filamentos para "${escMat(document.getElementById('mp-buscar').value.trim())}"</div>`;
-      } else {
-        const rec = recientes().map(id => DB.materials[id]);
-        if (rec.length && mats.length > 6) html += grupo('Recientes', rec);
-        const tipos = {};
-        mats.forEach(m => (tipos[m.tipo || 'Otro'] = tipos[m.tipo || 'Otro'] || []).push(m));
-        Object.keys(tipos).sort((a, b) => a.localeCompare(b, 'es')).forEach(t => { html += grupo(t, tipos[t].sort(porColor)); });
-      }
-      document.getElementById('mp-lista').innerHTML = html;
+      document.getElementById('mp-lista').innerHTML = lista.length
+        ? `<div class="mp-grupo-l">${lista.map(fila).join('')}</div>`
+        : `<div class="vs-empty">Sin filamentos para "${escMat(document.getElementById('mp-buscar').value.trim())}"</div>`;
     }
+    document.getElementById('mp-tipos').addEventListener('click', e => {
+      const b = e.target.closest('[data-tipo]'); if (!b) return;
+      _pickTipo = b.dataset.tipo; pintarMatLista(); document.getElementById('mp-scroll').scrollTop = 0;
+    });
     document.getElementById('mp-buscar').addEventListener('input', () => { pintarMatLista(); document.getElementById('mp-scroll').scrollTop = 0; });
     document.getElementById('mp-lista').addEventListener('click', e => { const b = e.target.closest('.mp-row'); if (b) elegirMat(b.dataset.id); });
     document.getElementById('mp-backdrop').addEventListener('click', cerrarMatPicker);
@@ -2242,6 +2252,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261013e"></script>
+  <script src="nav.js?v=20261014a"></script>
 </body>
 </html>
