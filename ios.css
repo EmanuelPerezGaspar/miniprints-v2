@@ -2337,3 +2337,28 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .inv-row-main { padding-left: 14px; }
 /* Inventario agrupado: cada grupo es una tarjeta de renglones */
 .inv-list.is-grid .inv-list-g { border-radius: 20px; background: var(--ios-fill-2); overflow: hidden; }
+
+/* ─────────────────────────────────────────────────
+   Hojas como la tarjeta de los AirPods: sólidas, pegadas abajo, del alto de su contenido
+   y con esquinas que siguen la curva del iPhone.
+───────────────────────────────────────────────── */
+:root { --sheet-solid: #1c1c1e; --sheet-card-solid: #2c2c2e; }
+@media (prefers-color-scheme: light) { :root { --sheet-solid: #f2f2f7; --sheet-card-solid: #ffffff; } }
+html .sheet {
+  --sheet-gap: 8px;
+  --sheet-card: var(--sheet-card-solid);
+  --sheet-head: var(--sheet-solid);
+  border-radius: 46px;
+  background: var(--sheet-solid) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  padding: 16px;
+}
+html .sheet .sheet-head { top: -16px; margin-top: -16px; margin-left: -16px; margin-right: -16px; padding-top: 16px; padding-left: 16px; padding-right: 16px; }
+html .sheet.is-scrolled .sheet-head { -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Alto según el contenido (antes el día, la venta y la edición medían siempre 680 px) */
+#sh-dia, #sh-venta, #sh-editar { height: auto; }
+@media (min-width: 900px) { #sh-dia, #sh-venta, #sh-editar { height: auto; } }
+/* Buscadores (piezas, filamentos): crecen con la lista, sin pasar del alto de la pantalla */
+html .sheet.vs-sheet { height: auto; min-height: min(460px, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 40px)); }
+.vs-sheet-scroll { margin: 0 -16px; padding: 0 16px 4px; }
+.mp-sheet .mp-tipos { margin: 2px -16px 0; padding: 2px 16px; }
