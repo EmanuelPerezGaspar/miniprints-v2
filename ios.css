@@ -2193,3 +2193,84 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .cq2-msg { margin-top: 8px; font-size: 13px; color: var(--ios-label-2); text-align: center; }
 .cq2-msg:empty { display: none; }
 #result-panel .cq-details { margin-top: var(--sp); }
+
+/* Cotizar · ajustes para parecerse más al diseño */
+.cq2-header .dash-title { margin: 2px 0 0; font-size: 34px; line-height: 41px; }
+.cq2-eyebrow { margin: 0; font-size: 15px; font-weight: 500; color: var(--ios-label-2); }
+.cq2-header .inv-actions { padding-top: 0; }
+.cq2-header .inv-icon-btn { width: 44px; height: 44px; }
+#cq-form > .cq2-proyecto { gap: 0; }
+#cq-form .cq2-proyecto .cq2-card { border-radius: 16px; }
+#cq-form .cq-step-title { margin: 8px 4px 0; }
+#cq-form .cq2-card { border-radius: 20px; }
+.cq2-row { min-height: 52px; padding-top: 10px; padding-bottom: 10px; }
+.cq2-tipo { cursor: pointer; }
+#cq-form .cq2-sel {
+  width: auto; min-height: 0; height: auto; padding: 0 22px 0 0 !important; border: 0 !important; background-color: transparent !important;
+  box-shadow: none !important; color: var(--ios-label-2); font-size: 16px !important; text-align: right; text-align-last: right;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 10 4 4 4-4'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right center !important; background-size: 18px 18px !important;
+}
+/* Pie de cada paso: dos datos, uno a cada lado */
+#cq-form .cq-step-sub { display: flex; justify-content: space-between; gap: 12px; margin: -2px 6px 0; font-weight: 400; }
+#cq-form .cq-step-sub:empty { display: none; }
+/* Filamento */
+.cq2-mat { gap: 12px; }
+.cq2-mat .mat-pick { gap: 12px; }
+.cq2-mat .mp-meta { color: var(--ios-label-2); }
+#cq-form .cq2-g input { width: 58px; }
+/* Renglón "+ Agregar" con ícono */
+#cq-form .cq2-add { display: flex; align-items: center; gap: 8px; }
+#cq-form .cq2-add svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; flex-shrink: 0; }
+/* Tiempo: "Impresión" con su impresora debajo y horas/minutos a la derecha */
+.cq2-trow { gap: 8px; }
+.cq2-tlbl { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 16px; line-height: 1.2; }
+.cq2-psel { display: block; }
+#cq-form .cq2-psel select {
+  width: auto; max-width: 100%; min-height: 0; height: auto; padding: 1px 18px 0 0 !important; border: 0 !important; background-color: transparent !important;
+  box-shadow: none !important; color: var(--ios-label-2); font-size: 13px !important; font-weight: 500;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m8 10 4 4 4-4'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important; background-position: right center !important; background-size: 14px 14px !important;
+}
+.cq2-hm { gap: 8px; flex-shrink: 0; }
+#cq-form .cq2-hm input { width: 46px; }
+#cq-form .cq2-veces input { width: 40px; }
+.cq2-veces > span { color: var(--ios-green); font-weight: 700; }
+.cq2-trow .rm-btn { flex-shrink: 0; }
+#tr-notas:empty { display: none; }
+#cq-form #tr-notas .tr-ayuda { padding: 0 6px; margin: 0; }
+#cq-form #tr-notas .tr-total { display: none; }
+@media (max-width: 380px) {
+  #cq-form .cq2-hm input { width: 40px; }
+  #cq-form .cq2-veces input { width: 34px; }
+  .cq2-hm { gap: 5px; }
+}
+/* Precio */
+#cq-form .cq2-gan .cq-margin-val input { font-size: 17px !important; font-weight: 700; width: 48px !important; }
+.cq2-gan .cq-margin-val span { font-size: 17px; font-weight: 700; }
+.cq2-urg button { font-size: 14px; font-weight: 600; }
+.cq2-urg button small { font-size: 11px; }
+/* Plantillas: al final, discretas */
+#cq-form .cq-tpl-row { align-items: flex-start; gap: 6px; padding: 0 6px; }
+#cq-form .cq-tpl-row .cq-link { padding: 0; }
+#cq-form .cq2-add { background: transparent !important; box-shadow: none !important; border-radius: 0 !important; }
+#cq-form .cq2-mat .rm-btn, #cq-form .cq2-trow .rm-btn {
+  width: 28px; height: 28px; min-height: 0; padding: 0; border-radius: 50%; background: var(--ios-fill) !important; color: var(--ios-label-2) !important; font-size: 12px;
+}
+#cq-form .cq2-sel { color: var(--ios-label-2) !important; }
+/* Barra inferior más compacta */
+.cq-bar-total { font-size: 22px; line-height: 26px; }
+#cq-form .mat-row.cq2-mat { margin: 0; min-height: 60px; }
+#cq-form .cq2-add { border-top: 0.5px solid var(--ios-separator) !important; font-size: 16px !important; margin: 0 !important; min-height: 50px; }
+.cq2-tlbl { white-space: nowrap; }
+.cq2-tlbl, .cq2-psel { overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 400px) {
+  .cq2-trow:has(.cq2-veces) { gap: 6px; padding-left: 14px !important; padding-right: 12px !important; }
+  .cq2-trow:has(.cq2-veces) .cq2-hm { gap: 3px; }
+  #cq-form .cq2-trow:has(.cq2-veces) .cq2-hm input { width: 38px; padding: 0 2px !important; }
+  #cq-form .cq2-trow:has(.cq2-veces) .cq2-veces input { width: 32px; }
+  .cq2-trow:has(.cq2-veces) .cq2-g { gap: 2px; font-size: 13px; }
+  #cq-form .cq2-trow:has(.cq2-veces) .rm-btn { width: 24px; height: 24px; }
+}

@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261013b"></script>
-  <script src="whatsapp.js?v=20261013b"></script>
-  <script src="categorias.js?v=20261013b"></script>
-  <link rel="stylesheet" href="styles.css?v=20261013b" />
+  <script src="theme.js?v=20261013c"></script>
+  <script src="whatsapp.js?v=20261013c"></script>
+  <script src="categorias.js?v=20261013c"></script>
+  <link rel="stylesheet" href="styles.css?v=20261013c" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261013b" />
-  <link rel="stylesheet" href="nav.css?v=20261013b" />
+  <link rel="stylesheet" href="ios.css?v=20261013c" />
+  <link rel="stylesheet" href="nav.css?v=20261013c" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,16 +595,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261013b"></script>
+  <script type="module" src="firebase-sync.js?v=20261013c"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
     <div class="dash-layout">
       <main class="dash-main">
-        <div class="dash-header cq-header inv-header">
+        <div class="dash-header cq-header inv-header cq2-header">
           <div>
+            <p class="cq2-eyebrow">Nueva cotización</p>
             <h1 class="dash-title">Cotizar</h1>
-            <p class="dash-subtitle">Llena los pasos y el precio se calcula solo.</p>
           </div>
           <div class="inv-actions">
             <a class="inv-icon-btn" href="cotizaciones.html" aria-label="Historial de cotizaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></a>
@@ -613,41 +613,27 @@
         </div>
 
         <div class="cq-wrap" id="cq-form">
-          <!-- Plantillas: empezar rápido -->
-          <div class="cq-tpl-row">
-            <div class="cq-tpl-list" id="tpl-list"></div>
-            <button class="cq-link" type="button" onclick="saveTemplate()">Guardar como plantilla</button>
-          </div>
-
-          <!-- 1. Proyecto -->
-          <section class="form-card cq-step" aria-labelledby="cq-s1">
-            <h2 class="cq-step-title" id="cq-s1"><span class="cq-num">1</span>¿Qué vas a imprimir?</h2>
+          <!-- Proyecto -->
+          <section class="form-card cq-step cq2-proyecto" aria-label="¿Qué vas a imprimir?">
             <div class="cq2-card">
-              <label class="cq2-name" for="inp-cliente"><span>Cliente o modelo</span>
+              <label class="cq2-name" for="inp-cliente"><span>¿Qué vas a imprimir?</span>
                 <input type="text" id="inp-cliente" placeholder="Ej: Ana López · Llavero logo" autocomplete="off" oninput="debouncedSave()" /></label>
-              <div class="cq2-row cq2-stack">
-                <span class="cq2-lbl">Tipo de pieza</span>
-                <div class="cq-chips" data-for="inp-tipo-pieza" role="radiogroup" aria-label="Tipo de pieza">
-                  <button type="button" data-v="">General</button>
-                  <button type="button" data-v="decorativa">Decorativa</button>
-                  <button type="button" data-v="funcional">Funcional</button>
-                  <button type="button" data-v="prototipo">Prototipo</button>
-                  <button type="button" data-v="repuesto">Repuesto</button>
-                </div>
-                <select id="inp-tipo-pieza" hidden onchange="updateMarkupSuggestion()">
+              <label class="cq2-row cq2-tipo" for="inp-tipo-pieza">
+                <span>Tipo de pieza</span>
+                <select id="inp-tipo-pieza" class="cq2-sel" onchange="updateMarkupSuggestion()">
                   <option value="">General</option>
                   <option value="funcional">Funcional</option>
                   <option value="decorativa">Decorativa</option>
                   <option value="prototipo">Prototipo</option>
                   <option value="repuesto">Repuesto</option>
                 </select>
-              </div>
+              </label>
             </div>
           </section>
 
           <!-- 2. Material -->
           <section class="form-card cq-step" aria-labelledby="cq-s2">
-            <h2 class="cq-step-title" id="cq-s2"><span class="cq-num">2</span>Material</h2>
+            <h2 class="cq-step-title" id="cq-s2"><span class="cq-num">1</span>Material</h2>
             <div class="cq2-card">
               <label class="cq2-row cq2-toggle"><span>Varios colores</span>
                 <span class="toggle"><input type="checkbox" id="chk-multicolor" onchange="renderMats()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
@@ -660,19 +646,20 @@
 
           <!-- 3. Impresión -->
           <section class="form-card cq-step" aria-labelledby="cq-s3">
-            <h2 class="cq-step-title" id="cq-s3"><span class="cq-num">3</span>Tiempo de impresión</h2>
+            <h2 class="cq-step-title" id="cq-s3"><span class="cq-num">2</span>Tiempo de impresión</h2>
             <div class="cq2-card">
               <label class="cq2-row cq2-toggle"><span>Varias impresiones</span>
                 <span class="toggle"><input type="checkbox" id="chk-multi-imp" onchange="renderTimes()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
               <div id="time-container"></div>
             </div>
+            <div id="tr-notas"></div>
             <p class="cq-step-sub" id="sub-tiempo" aria-live="polite"></p>
           </section>
 
           <!-- 4. Precio -->
           <section class="form-card cq-step" aria-labelledby="cq-s4">
-            <h2 class="cq-step-title" id="cq-s4"><span class="cq-num">4</span>Precio</h2>
+            <h2 class="cq-step-title" id="cq-s4"><span class="cq-num">3</span>Precio</h2>
             <div class="cq2-card">
               <div class="cq2-row">
                 <label for="inp-piezas">Piezas que salen</label>
@@ -710,8 +697,8 @@
                 <span class="cq2-lbl">Urgencia</span>
                 <div class="cq-seg cq2-urg" data-for="inp-urgencia" role="radiogroup" aria-label="Urgencia">
                   <button type="button" data-v="normal">Normal <small>sin cargo</small></button>
-                  <button type="button" data-v="express">2-3 días <small>+25%</small></button>
-                  <button type="button" data-v="urgente">24 h <small>+50%</small></button>
+                  <button type="button" data-v="express">Express <small>2-3 días · +25%</small></button>
+                  <button type="button" data-v="urgente">Urgente <small>24 h · +50%</small></button>
                 </div>
                 <select id="inp-urgencia" hidden>
                   <option value="normal">Normal</option>
@@ -721,6 +708,12 @@
               </div>
             </div>
           </section>
+
+          <!-- Plantillas: trabajos frecuentes -->
+          <div class="cq-tpl-row">
+            <div class="cq-tpl-list" id="tpl-list"></div>
+            <button class="cq-link" type="button" onclick="saveTemplate()">Guardar como plantilla</button>
+          </div>
 
           <!-- Ajustes del taller (se cambian poco) -->
           <details class="form-card cq-settings">
@@ -951,7 +944,7 @@
         const poco = m && (m.pesoTotal || 0) < 100;
         btn.setAttribute('aria-label', m ? `Filamento: ${m.tipo} ${m.color}, ${m.marca}. Cambiar` : 'Elegir filamento');
         btn.innerHTML = m
-          ? `${swatch(m)}<span class="mp-txt"><span class="mp-name">${escMat(m.tipo)} ${escMat(m.color)}</span><span class="mp-meta${poco ? ' is-low' : ''}">${escMat(m.marca)} · ${gramosTxt(m.pesoTotal)}</span></span><svg class="mp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>`
+          ? `${swatch(m)}<span class="mp-txt"><span class="mp-name">${escMat(m.tipo)} · ${escMat(m.color)}</span><span class="mp-meta${poco ? ' is-low' : ''}">${escMat(m.marca)} · ${gramosTxt(m.pesoTotal)} disponibles</span></span>`
           : `<span class="mp-txt"><span class="mp-name">${Object.keys(DB.materials).length ? 'Elegir filamento' : 'Sin filamentos registrados'}</span></span><svg class="mp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 10 4 4 4-4"/></svg>`;
       });
     }
@@ -1220,7 +1213,7 @@
         const btn = document.createElement('button');
         btn.className = 'add-row-btn cq2-add';
         btn.type = 'button';
-        btn.textContent = '+ Agregar filamento';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar filamento';
         btn.onclick = () => {
           if (state.matRows.length >= 20) return showToast('Máximo 20 materiales');
           state.matRows.push({ matId: matsSorted()[0]?.id || '', grams: '' });
@@ -1243,18 +1236,14 @@
       const isMulti = document.getElementById('chk-multi-imp').checked;
       const c = document.getElementById('time-container');
       c.innerHTML = '';
+      document.getElementById('tr-notas').innerHTML = '';
 
       if (!isMulti) {
         const prOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
-        const prBtns = Object.keys(PRINTERS).map(k => `<button type="button" data-v="${k}">${k}</button>`).join('');
         c.innerHTML = `
-          <div class="cq2-row cq2-stack">
-            <span class="cq2-lbl">Impresora</span>
-            <div class="cq-seg" data-for="single-printer" role="radiogroup" aria-label="Impresora">${prBtns}</div>
-            <select id="single-printer" hidden onchange="debouncedSave()">${prOpts}</select>
-          </div>
-          <div class="cq2-row">
-            <span>Tiempo</span>
+          <div class="cq2-row cq2-trow">
+            <span class="cq2-tlbl">Impresión
+              <span class="cq2-psel"><select id="single-printer" aria-label="Impresora" onchange="debouncedSave()">${prOpts}</select></span></span>
             <span class="cq2-hm">
               <label class="cq2-g"><input type="number" inputmode="numeric" id="single-hours" min="0" step="1" placeholder="0" aria-label="Horas" oninput="debouncedSave()" /><span>h</span></label>
               <label class="cq2-g"><input type="number" inputmode="numeric" id="single-minutes" min="0" max="59" step="1" placeholder="0" aria-label="Minutos" oninput="debouncedSave()" /><span>min</span></label>
@@ -1266,34 +1255,30 @@
         if (state.timeRows.length < 2) state.timeRows = [{ h: '', m: '', n: 1, printer: defaultPrinter }, { h: '', m: '', n: 1, printer: defaultPrinter }];
         state.timeRows.forEach((row, i) => {
           const d = document.createElement('div');
-          d.className = 'time-row';
+          d.className = 'cq2-row cq2-trow';
           const rowPrinter = row.printer || 'A1 MINI';
           row.printer = rowPrinter;
           const opts = Object.keys(PRINTERS).map(k => `<option value="${k}" ${rowPrinter===k?'selected':''}>${k}</option>`).join('');
           d.innerHTML = `
-            <span class="tr-num" aria-hidden="true">${i + 1}</span>
-            <select class="mat-select" aria-label="Impresora de la impresión ${i + 1}" onchange="state.timeRows[${i}].printer=this.value; debouncedSave()">${opts}</select>
-            <button type="button" class="rm-btn" onclick="removeTimeRow(${i})" aria-label="Quitar impresión ${i + 1}">✕</button>
-            <label class="tr-in"><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${row.h}" aria-label="Horas" oninput="state.timeRows[${i}].h=this.value; pintarTotalTiempos(); debouncedSave()" /><span>h</span></label>
-            <label class="tr-in"><input type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="0" value="${row.m}" aria-label="Minutos" oninput="state.timeRows[${i}].m=this.value; pintarTotalTiempos(); debouncedSave()" /><span>min</span></label>
-            <label class="tr-in tr-veces"><span class="tr-pre">×</span><input type="number" inputmode="numeric" min="1" step="1" placeholder="1" value="${row.n > 1 ? row.n : ''}" aria-label="Veces que se repite esta impresión" oninput="state.timeRows[${i}].n=Math.max(1, parseInt(this.value) || 1); pintarTotalTiempos(); debouncedSave()" /></label>`;
+            <span class="cq2-tlbl">Impresión ${i + 1}
+              <span class="cq2-psel"><select aria-label="Impresora de la impresión ${i + 1}" onchange="state.timeRows[${i}].printer=this.value; debouncedSave()">${opts}</select></span></span>
+            <span class="cq2-hm">
+              <label class="cq2-g"><input type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="${row.h}" aria-label="Horas" oninput="state.timeRows[${i}].h=this.value; pintarTotalTiempos(); debouncedSave()" /><span>h</span></label>
+              <label class="cq2-g"><input type="number" inputmode="numeric" min="0" max="59" step="1" placeholder="0" value="${row.m}" aria-label="Minutos" oninput="state.timeRows[${i}].m=this.value; pintarTotalTiempos(); debouncedSave()" /><span>min</span></label>
+              <label class="cq2-g cq2-veces"><span>×</span><input type="number" inputmode="numeric" min="1" step="1" placeholder="1" value="${row.n > 1 ? row.n : ''}" aria-label="Veces que se repite esta impresión" oninput="state.timeRows[${i}].n=Math.max(1, parseInt(this.value) || 1); pintarTotalTiempos(); debouncedSave()" /></label>
+            </span>
+            <button type="button" class="rm-btn" onclick="removeTimeRow(${i})" aria-label="Quitar impresión ${i + 1}">✕</button>`;
           c.appendChild(d);
         });
 
-        const ayuda = document.createElement('p');
-        ayuda.className = 'tr-ayuda';
-        ayuda.textContent = 'Cada fila es el tiempo de una impresión. Si una se repite igual, ponle las veces en × (por ejemplo × 12).';
-        c.appendChild(ayuda);
-
-        const total = document.createElement('p');
-        total.className = 'tr-total';
-        total.id = 'tr-total';
-        c.appendChild(total);
+        // Ayuda y total van debajo de la tarjeta
+        const notas = document.getElementById('tr-notas');
+        notas.innerHTML = '<p class="tr-ayuda">Cada fila es el tiempo de una impresión. Si una se repite igual, ponle las veces en × (por ejemplo × 12).</p><p class="tr-total" id="tr-total"></p>';
 
         const btn = document.createElement('button');
         btn.className = 'add-row-btn cq2-add';
         btn.type = 'button';
-        btn.textContent = '+ Agregar impresión';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Agregar impresión';
         btn.onclick = () => {
           if (state.timeRows.length >= 60) return showToast('Máximo 60 filas; usa "veces" para las que se repiten');
           const ult = state.timeRows[state.timeRows.length - 1] || {};
@@ -1974,7 +1959,7 @@
       let tpls = [];
       try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
       if (!tpls.length) {
-        list.innerHTML = '<span class="cq-tpl-empty">Guarda tus trabajos frecuentes como plantilla para cotizar en segundos.</span>';
+        list.innerHTML = '<span class="cq-tpl-empty">Guarda los trabajos que repites como plantilla.</span>';
         return;
       }
       list.innerHTML = tpls.map((t, i) => `
@@ -2201,14 +2186,15 @@
     });
 
     // Precio en vivo en la barra inferior
+    const horasTxt = q => { const t = Math.round((q.tiempo || 0) * 60), h = Math.floor(t / 60), m = t % 60; return `${h} h${m ? ` ${m} min` : ''} en total`; };
     function updateBar(q) {
       // Subtotal de cada paso (solo informativo; el cálculo es el mismo de computeQuote)
       const gTot = (q.detMat || []).reduce((s, d) => s + (Number(d.grams) || 0), 0);
-      document.getElementById('sub-mat').textContent = gTot > 0 ? `${Math.round(gTot * 10) / 10} g en total · material ${fmt(q.costoMat || 0)}` : '';
+      document.getElementById('sub-mat').innerHTML = gTot > 0 ? `<span>${Math.round(gTot * 10) / 10} g en total</span><span>Material: ${fmt(q.costoMat || 0)}</span>` : '';
       const maq = (q.costoElec || 0) + (q.costoMaq || 0);
-      document.getElementById('sub-tiempo').textContent = maq > 0 ? `Luz ${fmt(q.costoElec || 0)} · desgaste ${fmt(q.costoMaq || 0)}` : '';
+      document.getElementById('sub-tiempo').innerHTML = maq > 0 ? `<span>${horasTxt(q)}</span><span>Luz y máquina: ${fmt(maq)}</span>` : '';
       document.getElementById('cq-bar-total').textContent = fmt(q.precioFinal);
-      document.getElementById('cq-bar-sub').textContent = q.numPiezas > 1 ? `${fmt(q.xUnidad)} c/u · ${q.numPiezas} piezas` : '';
+      document.getElementById('cq-bar-sub').textContent = q.numPiezas > 1 ? `${fmt(q.xUnidad)} por pieza` : '';
     }
     let _liveTimer = null;
     function updateLive() {
@@ -2251,6 +2237,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261013b"></script>
+  <script src="nav.js?v=20261013c"></script>
 </body>
 </html>
