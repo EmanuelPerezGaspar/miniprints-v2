@@ -52,6 +52,17 @@ function hayPendientes() {
 
 // Estado visible en Más (para diagnosticar desde el iPhone)
 window.MP_SYNC = { estado: 'inicio', subida: null, bajada: null, error: '' };
+// Espacio que ocupan los datos en la nube. Todo vive en un solo documento (negocio/data) y
+// Firestore no acepta documentos de más de 1 MiB. Se calcula como lo mide Firestore:
+// nombre del documento + 32 bytes, y por cada campo su nombre y su texto (UTF-8) + 1 byte cada uno.
+const LIMITE_DOC = 1048576;
+function bytesDoc(d) {
+  const enc = new TextEncoder();
+  let n = 32 + ('negocio'.length + 1) + ('data'.length + 1) + 16;
+  Object.keys(d).forEach(k => { if (d[k] != null) n += enc.encode(k).length + 1 + enc.encode(d[k]).length + 1; });
+  return n;
+}
+window.MP_SYNC.espacio = () => { const bytes = bytesDoc(datosLocales()); return { bytes, limite: LIMITE_DOC, pct: bytes / LIMITE_DOC * 100 }; };
 const hora = () => new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 // El estado se muestra como un punto en la pestaña "Más" (nav.css) y con detalle al pie de la hoja "Más"

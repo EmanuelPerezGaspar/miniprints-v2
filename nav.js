@@ -195,9 +195,45 @@
     let pend = false;
     try { pend = !!localStorage.getItem('mp_sync_pendiente'); } catch (_) {}
     const txt = { ok: 'al día', none: 'al día', connecting: 'conectando', error: 'error', denied: 'sin permiso', local: 'sin conexión', inicio: 'iniciando' }[S.estado] || S.estado || '—';
-    sheet.querySelector('#sheet-foot').innerHTML = `MiniPrints · versión ${VERSION}<br>Sincronización: ${txt}${pend ? ' · cambios sin subir' : ''}`
+    sheet.querySelector('#sheet-foot').innerHTML = pieEspacio() + `MiniPrints · versión ${VERSION}<br>Sincronización: ${txt}${pend ? ' · cambios sin subir' : ''}`
       + `${S.subida ? ' · última subida ' + S.subida : ''}${S.error ? '<br>Error: ' + String(S.error).replace(/[<>&]/g, '') : ''}`;
   }
+
+  // ── Espacio en la nube (límite de 1 MB del documento de Firestore) ──
+  const kb = b => b >= 1048576 ? `${(b / 1048576).toLocaleString('es-MX', { maximumFractionDigits: 2 })} MB` : `${Math.round(b / 1024).toLocaleString('es-MX')} KB`;
+  function espacio() { try { return window.MP_SYNC && MP_SYNC.espacio ? MP_SYNC.espacio() : null; } catch (_) { return null; } }
+  const nivelDe = pct => pct >= 95 ? 95 : pct >= 85 ? 85 : pct >= 70 ? 70 : 0;
+  function pieEspacio() {
+    const e = espacio();
+    if (!e) return '';
+    const pct = Math.min(100, e.pct), cls = pct >= 85 ? ' is-alto' : pct >= 70 ? ' is-medio' : '';
+    const txt = pct < 1 ? 'menos de 1' : Math.round(pct);
+    return `<div class="sheet-espacio${cls}" role="group" aria-label="Espacio en la nube">
+      <div class="sheet-espacio-t"><span>Espacio en la nube</span><b>${txt} %</b></div>
+      <div class="sheet-espacio-bar" aria-hidden="true"><i style="width:${Math.max(1, pct).toFixed(1)}%"></i></div>
+      <div class="sheet-espacio-s">${kb(e.bytes)} de 1 MB${pct >= 70 ? ' · conviene separar el historial en varios documentos' : ''}</div>
+    </div>`;
+  }
+  // Aviso al pasar del 70, 85 y 95 %: una vez por nivel, en este dispositivo
+  function avisarEspacio() {
+    const e = espacio();
+    if (!e) return;
+    const nivel = nivelDe(e.pct);
+    let visto = 0;
+    try { visto = Number(localStorage.getItem('mp_aviso_espacio')) || 0; } catch (_) {}
+    if (nivel < visto) { try { localStorage.setItem('mp_aviso_espacio', String(nivel)); } catch (_) {} return; }
+    if (!nivel || nivel === visto || document.querySelector('.mp-aviso')) return;
+    const av = document.createElement('div');
+    av.className = 'mp-aviso' + (nivel >= 85 ? ' is-alto' : '');
+    av.setAttribute('role', 'alert');
+    av.innerHTML = `<button type="button" class="mp-aviso-txt"><b>Espacio en la nube al ${Math.round(e.pct)} %</b><span>${kb(e.bytes)} de 1 MB. Toca para ver el detalle.</span></button>
+      <button type="button" class="mp-aviso-x" aria-label="Cerrar aviso"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 1l10 10M11 1 1 11"/></svg></button>`;
+    const listo = () => { try { localStorage.setItem('mp_aviso_espacio', String(nivel)); } catch (_) {} av.remove(); };
+    av.querySelector('.mp-aviso-x').addEventListener('click', listo);
+    av.querySelector('.mp-aviso-txt').addEventListener('click', () => { listo(); const t = document.querySelector('.tab[data-tab="mas"], .tab:last-child'); if (t) t.click(); });
+    document.body.appendChild(av);
+  }
+  window.addEventListener('mp-sync-ready', () => setTimeout(avisarEspacio, 600));
 
   window.addEventListener('mp-sync-estado', () => { if (sheet && !sheet.hidden) pintarPie(); });
 
