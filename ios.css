@@ -2068,3 +2068,128 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 @media (min-width: 900px) {
   .sheet.vs-sheet { width: 560px; }
 }
+
+/* ─────────────────────────────────────────────────
+   Cotizar · diseño en listas agrupadas (de Claude Design).
+   Solo presentación y solo dentro de #cq-form; Ventas usa otras clases.
+───────────────────────────────────────────────── */
+#cq-form > .cq-step.form-card { background: none !important; padding: 0 !important; gap: 10px; }
+#cq-form .cq-step-title { margin: 0 4px; }
+.cq2-card { border-radius: var(--r-lg); background: var(--ios-bg-2); overflow: hidden; }
+#cq-form #mats-container, #cq-form #time-container { gap: 0; }
+.cq2-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  min-height: 48px; padding: 8px var(--pad-card); box-sizing: border-box;
+  font-size: 16px; color: var(--text); border-top: 0.5px solid var(--ios-separator);
+}
+.cq2-card > .cq2-row:first-child, .cq2-card > .cq2-name:first-child { border-top: 0; }
+.cq2-row > label, .cq2-row > span:first-child { min-width: 0; }
+.cq2-stack { flex-direction: column; align-items: stretch; gap: 8px; padding-top: 12px; padding-bottom: 12px; }
+.cq2-lbl { font-size: 13px; font-weight: 500; color: var(--ios-label-2); }
+.cq2-toggle { cursor: pointer; }
+.cq2-toggle small { font-size: 13px; }
+
+/* Nombre del trabajo: etiqueta pequeña y campo grande, sin caja */
+.cq2-name { display: block; padding: 10px var(--pad-card) 8px; cursor: text; }
+.cq2-name > span { display: block; font-size: 12px; font-weight: 500; color: var(--ios-label-2); }
+#cq-form .cq2-name input {
+  width: 100%; min-height: 0; padding: 2px 0 0 !important; border: 0 !important; border-radius: 0 !important;
+  background: transparent !important; box-shadow: none !important; font-size: 17px !important; font-weight: 600;
+}
+
+/* Campos pequeños (gramos, horas, minutos) a la derecha del renglón */
+.cq2-g { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; font-size: 14px; color: var(--ios-label-2); }
+#cq-form .cq2-g input {
+  width: 66px; min-height: 36px; height: 36px; padding: 0 6px !important; text-align: center;
+  border-radius: 10px !important; font-family: var(--ios-font-rounded) !important; font-size: 16px !important; font-weight: 600;
+}
+.cq2-hm { display: inline-flex; align-items: center; gap: 10px; }
+#cq-form .cq2-hm input { width: 52px; }
+
+/* Filamento: el botón ocupa el renglón (color, nombre y gramos disponibles) */
+.cq2-mat { gap: 8px; padding-top: 6px; padding-bottom: 6px; }
+.cq2-mat .mat-pick { flex: 1; background: transparent; padding: 6px 0; min-height: 44px; }
+.cq2-mat .mp-sw { width: 30px; height: 30px; }
+.cq2-mat .mp-name { font-size: 16px; }
+.cq2-mat .mp-meta { font-size: 13px; }
+.cq2-mat .rm-btn { flex-shrink: 0; }
+#cq-form .mat-row.cq2-mat { display: flex; grid-template-columns: none; padding-left: var(--pad-card); padding-right: var(--pad-card); }
+
+/* Renglón "+ Agregar" */
+#cq-form .cq2-add {
+  width: 100%; min-height: 48px; margin: 0; padding: 0 var(--pad-card); border: 0; border-top: 0.5px solid var(--ios-separator);
+  border-radius: 0; background: transparent; color: var(--ios-green); text-align: left;
+  font-family: var(--ios-font); font-size: 16px; font-weight: 600; cursor: pointer;
+}
+/* Varias impresiones: cada una como renglón */
+#cq-form .time-row { padding: 10px var(--pad-card); border-top: 0.5px solid var(--ios-separator); margin: 0; }
+#cq-form .tr-ayuda, #cq-form .tr-total { padding: 0 var(--pad-card); }
+#cq-form .tr-ayuda { margin-top: 8px; }
+
+/* Precio */
+.cq2-stepper { width: 132px; flex-shrink: 0; }
+#cq-form .cq2-stepper input { padding: 6px 0 !important; min-height: 38px; }
+.cq2-gan { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 16px; }
+#cq-form .cq2-gan .cq-margin-val input {
+  width: 70px !important; min-height: 0; padding: 0 !important; background: transparent !important; text-align: right;
+  color: var(--ios-green) !important; font-size: 22px !important;
+}
+.cq2-gan .cq-margin-val span { color: var(--ios-green); }
+#cq-form #rng-margen {
+  width: 100%; min-height: 0 !important; height: 28px; padding: 0 !important; margin: 0;
+  background: transparent !important; box-shadow: none !important; accent-color: var(--ios-green);
+}
+.cq2-escala { display: flex; justify-content: space-between; margin-top: -6px; font-size: 12px; color: var(--ios-label-2); }
+#cq-form .cq2-stack .markup-hint:empty { display: none; }
+.cq2-sub { padding: 0 var(--pad-card) 12px; }
+.cq2-urg { border-radius: 14px; }
+.cq2-urg button { min-height: 48px; border-radius: 11px; }
+
+/* Barra inferior */
+.cq-bar-btn svg { width: 17px; height: 17px; margin-left: 4px; vertical-align: -3px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Resultado */
+.cq2-hero { padding: 18px; border-radius: 24px; background: rgba(48, 209, 88, 0.14); display: flex; flex-direction: column; gap: 4px; }
+.cq2-hero-t { font-size: 16px; font-weight: 600; color: var(--text); }
+.cq2-hero-s { font-size: 13px; color: var(--ios-label-2); }
+.cq2-hero-nums { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.cq2-hero-nums small { display: block; font-size: 13px; font-weight: 500; color: var(--ios-label-2); }
+.cq2-hero-nums b { font-family: var(--ios-font-rounded); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -0.02em; }
+.cq2-hero-nums > div:first-child b { font-size: 36px; line-height: 40px; color: var(--ios-green); }
+.cq2-hero-pp { text-align: right; }
+.cq2-hero-pp b { font-size: 22px; color: var(--text); }
+.cq2-hero-pp[hidden] { display: none; }
+.cq2-hero-bar { display: flex; gap: 2px; height: 10px; margin-top: 14px; border-radius: 5px; overflow: hidden; }
+.cq2-hero-bar i, .cq2-hero-ley i { display: block; }
+.cq2-hero-bar .is-costo, .cq2-hero-ley .is-costo { background: #8e8e93; }
+.cq2-hero-bar .is-gan, .cq2-hero-ley .is-gan { background: var(--ios-green); }
+.cq2-hero-bar .is-iva, .cq2-hero-ley .is-iva { background: var(--ios-orange); }
+.cq2-hero-ley { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 12px; color: var(--ios-label-2); }
+.cq2-hero-ley span { display: inline-flex; align-items: center; gap: 5px; }
+.cq2-hero-ley i { width: 8px; height: 8px; border-radius: 50%; }
+.cq2-rows { margin-top: var(--sp); }
+.cq2-rrow { min-height: 44px; font-variant-numeric: tabular-nums; }
+.cq2-rrow small { font-size: 13px; color: var(--ios-label-2); }
+.cq2-rrow.is-bold { font-weight: 700; }
+.cq2-rrow.is-gan span:last-child { color: var(--ios-green); font-weight: 600; }
+.cq2-rrow.is-total { min-height: 50px; font-size: 17px; font-weight: 700; }
+.cq2-acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: var(--sp); }
+.cq2-act {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 64px;
+  border: 0; border-radius: 18px; background: var(--ios-bg-2); color: var(--text);
+  font-family: var(--ios-font); font-size: 13px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 120ms;
+}
+.cq2-act:active, .cq2-imp:active { transform: scale(0.97); }
+.cq2-act svg { width: 22px; height: 22px; fill: none; stroke: var(--ios-green); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.cq2-act.is-wa svg { stroke: #25d366; }
+.cq2-imp {
+  width: 100%; min-height: 64px; margin-top: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 0; border-radius: 22px; background: var(--ios-green); color: var(--ios-on-accent);
+  font-family: var(--ios-font); cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 120ms;
+}
+.cq2-imp > span { display: inline-flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; }
+.cq2-imp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.cq2-imp small { font-size: 12px; opacity: 0.9; padding: 0 16px; text-align: center; }
+.cq2-msg { margin-top: 8px; font-size: 13px; color: var(--ios-label-2); text-align: center; }
+.cq2-msg:empty { display: none; }
+#result-panel .cq-details { margin-top: var(--sp); }

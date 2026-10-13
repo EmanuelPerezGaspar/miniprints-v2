@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261013a"></script>
-  <script src="whatsapp.js?v=20261013a"></script>
-  <script src="categorias.js?v=20261013a"></script>
-  <link rel="stylesheet" href="styles.css?v=20261013a" />
+  <script src="theme.js?v=20261013b"></script>
+  <script src="whatsapp.js?v=20261013b"></script>
+  <script src="categorias.js?v=20261013b"></script>
+  <link rel="stylesheet" href="styles.css?v=20261013b" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261013a" />
-  <link rel="stylesheet" href="nav.css?v=20261013a" />
+  <link rel="stylesheet" href="ios.css?v=20261013b" />
+  <link rel="stylesheet" href="nav.css?v=20261013b" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,22 +595,20 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261013a"></script>
+  <script type="module" src="firebase-sync.js?v=20261013b"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
     <div class="dash-layout">
       <main class="dash-main">
-        <div class="dash-header cq-header">
+        <div class="dash-header cq-header inv-header">
           <div>
             <h1 class="dash-title">Cotizar</h1>
             <p class="dash-subtitle">Llena los pasos y el precio se calcula solo.</p>
           </div>
-          <div class="dash-toolbar">
-            <button class="btn btn-ghost" onclick="clearDraft()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Nueva
-            </button>
+          <div class="inv-actions">
+            <a class="inv-icon-btn" href="cotizaciones.html" aria-label="Historial de cotizaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></a>
+            <button class="inv-icon-btn" type="button" onclick="clearDraft()" aria-label="Nueva cotización"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           </div>
         </div>
 
@@ -624,100 +622,103 @@
           <!-- 1. Proyecto -->
           <section class="form-card cq-step" aria-labelledby="cq-s1">
             <h2 class="cq-step-title" id="cq-s1"><span class="cq-num">1</span>¿Qué vas a imprimir?</h2>
-            <div class="field">
-              <label for="inp-cliente">Cliente o modelo</label>
-              <input type="text" id="inp-cliente" placeholder="Ej: Ana López · Llavero logo" autocomplete="off" oninput="debouncedSave()" />
-            </div>
-            <div class="cq-pieces">
-              <label for="inp-piezas">Piezas</label>
-              <div class="cq-stepper">
-                <button type="button" aria-label="Menos piezas" onclick="stepPiezas(-1)">−</button>
-                <input type="number" inputmode="numeric" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
-                <button type="button" aria-label="Más piezas" onclick="stepPiezas(1)">+</button>
+            <div class="cq2-card">
+              <label class="cq2-name" for="inp-cliente"><span>Cliente o modelo</span>
+                <input type="text" id="inp-cliente" placeholder="Ej: Ana López · Llavero logo" autocomplete="off" oninput="debouncedSave()" /></label>
+              <div class="cq2-row cq2-stack">
+                <span class="cq2-lbl">Tipo de pieza</span>
+                <div class="cq-chips" data-for="inp-tipo-pieza" role="radiogroup" aria-label="Tipo de pieza">
+                  <button type="button" data-v="">General</button>
+                  <button type="button" data-v="decorativa">Decorativa</button>
+                  <button type="button" data-v="funcional">Funcional</button>
+                  <button type="button" data-v="prototipo">Prototipo</button>
+                  <button type="button" data-v="repuesto">Repuesto</button>
+                </div>
+                <select id="inp-tipo-pieza" hidden onchange="updateMarkupSuggestion()">
+                  <option value="">General</option>
+                  <option value="funcional">Funcional</option>
+                  <option value="decorativa">Decorativa</option>
+                  <option value="prototipo">Prototipo</option>
+                  <option value="repuesto">Repuesto</option>
+                </select>
               </div>
-            </div>
-            <div class="field">
-              <label>Tipo de pieza</label>
-              <div class="cq-chips" data-for="inp-tipo-pieza" role="radiogroup" aria-label="Tipo de pieza">
-                <button type="button" data-v="">General</button>
-                <button type="button" data-v="decorativa">Decorativa</button>
-                <button type="button" data-v="funcional">Funcional</button>
-                <button type="button" data-v="prototipo">Prototipo</button>
-                <button type="button" data-v="repuesto">Repuesto</button>
-              </div>
-              <select id="inp-tipo-pieza" hidden onchange="updateMarkupSuggestion()">
-                <option value="">General</option>
-                <option value="funcional">Funcional</option>
-                <option value="decorativa">Decorativa</option>
-                <option value="prototipo">Prototipo</option>
-                <option value="repuesto">Repuesto</option>
-              </select>
-            </div>
-            <div class="field">
-              <label>¿Para cuándo?</label>
-              <div class="cq-seg" data-for="inp-urgencia" role="radiogroup" aria-label="Urgencia">
-                <button type="button" data-v="normal">Normal</button>
-                <button type="button" data-v="express">2-3 días <small>+25%</small></button>
-                <button type="button" data-v="urgente">24 h <small>+50%</small></button>
-              </div>
-              <select id="inp-urgencia" hidden>
-                <option value="normal">Normal</option>
-                <option value="express">Express</option>
-                <option value="urgente">Urgente</option>
-              </select>
             </div>
           </section>
 
           <!-- 2. Material -->
           <section class="form-card cq-step" aria-labelledby="cq-s2">
-            <div class="cq-step-head">
-              <h2 class="cq-step-title" id="cq-s2"><span class="cq-num">2</span>Material</h2>
-              <label class="cq-inline-toggle">Varios colores
+            <h2 class="cq-step-title" id="cq-s2"><span class="cq-num">2</span>Material</h2>
+            <div class="cq2-card">
+              <label class="cq2-row cq2-toggle"><span>Varios colores</span>
                 <span class="toggle"><input type="checkbox" id="chk-multicolor" onchange="renderMats()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
+              <div id="mats-container"></div>
             </div>
-            <div id="mats-container"></div>
             <div class="stock-warn" id="stock-warn"></div>
             <p class="cq-step-sub" id="sub-mat" aria-live="polite"></p>
           </section>
 
           <!-- 3. Impresión -->
           <section class="form-card cq-step" aria-labelledby="cq-s3">
-            <div class="cq-step-head">
-              <h2 class="cq-step-title" id="cq-s3"><span class="cq-num">3</span>Tiempo de impresión</h2>
-              <label class="cq-inline-toggle">Varias impresiones
+            <h2 class="cq-step-title" id="cq-s3"><span class="cq-num">3</span>Tiempo de impresión</h2>
+            <div class="cq2-card">
+              <label class="cq2-row cq2-toggle"><span>Varias impresiones</span>
                 <span class="toggle"><input type="checkbox" id="chk-multi-imp" onchange="renderTimes()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
+              <div id="time-container"></div>
             </div>
-            <div id="time-container"></div>
             <p class="cq-step-sub" id="sub-tiempo" aria-live="polite"></p>
           </section>
 
           <!-- 4. Precio -->
           <section class="form-card cq-step" aria-labelledby="cq-s4">
-            <h2 class="cq-step-title" id="cq-s4"><span class="cq-num">4</span>Tu ganancia</h2>
-            <div class="cq-margin">
-              <input type="range" id="rng-margen" min="0" max="300" step="5" value="60" aria-label="Porcentaje de ganancia" />
-              <div class="cq-margin-val"><input type="number" inputmode="numeric" id="inp-margen" value="60" min="0" max="300" step="5" aria-label="Ganancia en porcentaje" oninput="debouncedSave()" /><span>%</span></div>
-            </div>
-            <span class="markup-hint" id="markup-hint"></span>
-            <div class="cq-list">
-              <label class="cq-list-row">
+            <h2 class="cq-step-title" id="cq-s4"><span class="cq-num">4</span>Precio</h2>
+            <div class="cq2-card">
+              <div class="cq2-row">
+                <label for="inp-piezas">Piezas que salen</label>
+                <div class="cq-stepper cq2-stepper">
+                  <button type="button" aria-label="Menos piezas" onclick="stepPiezas(-1)">−</button>
+                  <input type="number" inputmode="numeric" id="inp-piezas" value="1" min="1" oninput="debouncedSave()" />
+                  <button type="button" aria-label="Más piezas" onclick="stepPiezas(1)">+</button>
+                </div>
+              </div>
+              <div class="cq2-row cq2-stack">
+                <div class="cq2-gan"><span>Ganancia</span>
+                  <span class="cq-margin-val"><input type="number" inputmode="numeric" id="inp-margen" value="60" min="0" max="300" step="5" aria-label="Ganancia en porcentaje" oninput="debouncedSave()" /><span>%</span></span>
+                </div>
+                <input type="range" id="rng-margen" min="0" max="300" step="5" value="60" aria-label="Porcentaje de ganancia" />
+                <div class="cq2-escala" aria-hidden="true"><span>0%</span><span>150%</span><span>300%</span></div>
+                <span class="markup-hint" id="markup-hint"></span>
+              </div>
+              <label class="cq2-row cq2-toggle">
                 <span>Cobrar mano de obra</span>
                 <span class="toggle"><input type="checkbox" id="chk-mo" onchange="toggleMO()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
-              <div id="mo-fields" class="cq-row2" style="display:none;">
+              <div id="mo-fields" class="cq-row2 cq2-sub" style="display:none;">
                 <div class="field"><label for="inp-mo-costo">Costo por hora ($)</label><input type="number" inputmode="decimal" id="inp-mo-costo" value="20" min="0" step="5" /></div>
                 <div class="field"><label for="inp-mo-horas">Horas</label><input type="number" inputmode="decimal" id="inp-mo-horas" value="1" min="0" step="0.5" /></div>
               </div>
-              <label class="cq-list-row">
-                <span>Cobrar empaque y envío <small class="cq-row-note" id="empaque-lbl">$12</small></span>
+              <label class="cq2-row cq2-toggle">
+                <span>Empaque y envío <small class="cq-row-note" id="empaque-lbl">$12</small></span>
                 <span class="toggle"><input type="checkbox" id="chk-empaque" checked /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
-              <label class="cq-list-row">
-                <span>Agregar IVA (16%)</span>
+              <label class="cq2-row cq2-toggle">
+                <span>Agregar IVA <small class="cq-row-note">16%</small></span>
                 <span class="toggle"><input type="checkbox" id="chk-iva" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
               </label>
+              <div class="cq2-row cq2-stack">
+                <span class="cq2-lbl">Urgencia</span>
+                <div class="cq-seg cq2-urg" data-for="inp-urgencia" role="radiogroup" aria-label="Urgencia">
+                  <button type="button" data-v="normal">Normal <small>sin cargo</small></button>
+                  <button type="button" data-v="express">2-3 días <small>+25%</small></button>
+                  <button type="button" data-v="urgente">24 h <small>+50%</small></button>
+                </div>
+                <select id="inp-urgencia" hidden>
+                  <option value="normal">Normal</option>
+                  <option value="express">Express</option>
+                  <option value="urgente">Urgente</option>
+                </select>
+              </div>
             </div>
           </section>
 
@@ -748,124 +749,34 @@
 
           <!-- Resultado -->
           <div id="result-panel" style="display:none;">
-            <div class="result-hero" id="result-hero">
-              <div class="rh-cliente" id="res-cliente" style="display:none;"></div>
-              <div class="rh-label">Total a cobrar</div>
-              <div class="rh-amount" id="res-total">$0.00</div>
-              <div class="rh-unit">MXN</div>
-              <div class="rh-unitprice" id="res-unit" style="display:none;"></div>
-              <div class="rh-printer" id="res-printer"></div>
-              <div class="rh-badges" id="res-badges"></div>
-            </div>
-
-            <div class="cq-actions">
-              <button class="btn-export wa cq-action-main" onclick="sendWhatsApp()" aria-label="Enviar cotización por WhatsApp">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
-                WhatsApp
-              </button>
-              <button class="btn-export" onclick="exportPDF()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                PDF
-              </button>
-            </div>
-
-            <div class="confirm-card">
-              <div class="confirm-card-title">¿El cliente aceptó?</div>
-              <div class="confirm-card-sub" id="confirm-sub">Si se imprime, se descuentan los materiales y las piezas pasan al inventario.</div>
-              <div class="confirm-btns">
-                <button class="btn-confirm btn-confirm-yes" onclick="confirmarImpresion(true)">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="20 6 9 17 4 12"/></svg>
-                  Sí, se imprime
-                </button>
-                <button class="btn-confirm btn-confirm-no" onclick="confirmarImpresion(false)">Solo guardar cotización</button>
+            <div class="cq2-hero" id="result-hero">
+              <div class="cq2-hero-t" id="res-cliente"></div>
+              <div class="cq2-hero-s" id="res-sub"></div>
+              <div class="cq2-hero-nums">
+                <div><small>Precio total</small><b id="res-total">$0.00</b></div>
+                <div class="cq2-hero-pp" id="res-pp"><small>Por pieza</small><b id="res-unit">$0.00</b></div>
               </div>
-              <div id="confirm-msg" style="margin-top:8px; font-size:13px; color:var(--text-dim);"></div>
+              <div class="cq2-hero-bar" id="res-bar" role="img"></div>
+              <div class="cq2-hero-ley" id="res-ley"></div>
             </div>
+
+            <div class="cq2-card cq2-rows" id="res-rows"></div>
+
+            <div class="cq2-acts">
+              <button type="button" class="cq2-act" onclick="confirmarImpresion(false)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Solo guardar</button>
+              <button type="button" class="cq2-act" onclick="exportPDF()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>PDF</button>
+              <button type="button" class="cq2-act is-wa" onclick="sendWhatsApp()" aria-label="Enviar cotización por WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp</button>
+            </div>
+            <button type="button" class="cq2-imp" onclick="confirmarImpresion(true)">
+              <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Sí, se imprime</span>
+              <small id="confirm-sub">Si se imprime, se descuentan los materiales y las piezas pasan al inventario.</small>
+            </button>
+            <div id="confirm-msg" class="cq2-msg"></div>
 
             <details class="cq-details">
-              <summary>Ver desglose del precio</summary>
-              <div class="breakdown-grid">
-                <!-- Costo de producción -->
-                <div class="bm-card bm-card--cost">
-                  <div class="bm-header">
-                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                    <span class="bm-label">Costo de producción</span>
-                  </div>
-                  <div class="bm-value" id="res-costo">$0.00</div>
-                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-costo-bar"></div></div>
-                  <div class="bm-bar-meta">
-                    <span class="bm-bar-hint">del precio total</span>
-                    <span class="bm-bar-pct" id="res-costo-sub">—</span>
-                  </div>
-                  <div class="bm-levels">
-                    <div class="bm-lv bm-lv-g" style="width:40%"></div>
-                    <div class="bm-lv bm-lv-y" style="width:20%"></div>
-                    <div class="bm-lv bm-lv-o" style="width:20%"></div>
-                    <div class="bm-lv bm-lv-r" style="width:20%"></div>
-                  </div>
-                </div>
-                <!-- Ganancia -->
-                <div class="bm-card bm-card--profit">
-                  <div class="bm-header">
-                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                    <span class="bm-label">Ganancia</span>
-                  </div>
-                  <div class="bm-value" id="res-ganancia">$0.00</div>
-                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-ganancia-bar"></div></div>
-                  <div class="bm-bar-meta">
-                    <span class="bm-bar-hint">del precio total</span>
-                    <span class="bm-bar-pct" id="res-ganancia-sub">margen 0%</span>
-                  </div>
-                  <div class="bm-levels">
-                    <div class="bm-lv bm-lv-r" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-o" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-y" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-g" style="width:25%"></div>
-                  </div>
-                </div>
-                <!-- IVA -->
-                <div class="bm-card bm-card--iva">
-                  <div class="bm-header">
-                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
-                    <span class="bm-label">IVA</span>
-                  </div>
-                  <div class="bm-value" id="res-iva">$0.00</div>
-                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-iva-bar"></div></div>
-                  <div class="bm-bar-meta">
-                    <span class="bm-bar-hint" id="res-iva-hint">tasa 16%</span>
-                    <span class="bm-bar-pct" id="res-iva-sub">—</span>
-                  </div>
-                  <div class="bm-levels">
-                    <div class="bm-lv bm-lv-y" style="width:50%"></div>
-                    <div class="bm-lv bm-lv-o" style="width:50%"></div>
-                  </div>
-                </div>
-                <!-- Por pieza -->
-                <div class="bm-card bm-card--unit" id="bc-unit" style="display:none;">
-                  <div class="bm-header">
-                    <svg class="bm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                    <span class="bm-label">Por pieza</span>
-                  </div>
-                  <div class="bm-value" id="res-unit-card">$0.00</div>
-                  <div class="bm-bar-track"><div class="bm-bar-fill" id="res-unit-bar"></div></div>
-                  <div class="bm-bar-meta">
-                    <span class="bm-bar-hint">del precio total</span>
-                    <span class="bm-bar-pct" id="res-unit-sub">—</span>
-                  </div>
-                  <div class="bm-levels">
-                    <div class="bm-lv bm-lv-r" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-o" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-y" style="width:25%"></div>
-                    <div class="bm-lv bm-lv-g" style="width:25%"></div>
-                  </div>
-                </div>
-              </div>
-
+              <summary>Ver desglose detallado</summary>
               <div class="res-table">
-                <div class="res-table-head">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                  Desglose de materiales
-                </div>
+                <div class="res-table-head">Desglose de materiales</div>
                 <div class="table-wrap">
                   <table>
                     <thead><tr><th>Material</th><th style="text-align:right;">g</th><th style="text-align:right;">$/kg</th><th style="text-align:right;">Costo</th></tr></thead>
@@ -873,12 +784,8 @@
                   </table>
                 </div>
               </div>
-
               <div class="res-table">
-                <div class="res-table-head">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Desglose de costos
-                </div>
+                <div class="res-table-head">Desglose de costos</div>
                 <div class="table-wrap">
                   <table>
                     <thead><tr><th>Concepto</th><th style="text-align:right;">Valor</th></tr></thead>
@@ -893,11 +800,11 @@
         <!-- Barra fija con el precio en vivo -->
         <div class="cq-bar" id="cq-bar" aria-live="polite">
           <div class="cq-bar-info">
-            <span class="cq-bar-label">Precio estimado</span>
+            <span class="cq-bar-label">Precio total</span>
             <span class="cq-bar-total" id="cq-bar-total">$0.00</span>
             <span class="cq-bar-sub" id="cq-bar-sub"></span>
           </div>
-          <button class="cq-bar-btn" type="button" onclick="calcular()">Ver cotización</button>
+          <button class="cq-bar-btn" type="button" onclick="calcular()">Ver resultado<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
       </main>
     </div>
@@ -959,24 +866,6 @@
   <script>
     /* ── Utilities ─────────────────────────────── */
     const fmt = n => '$' + parseFloat(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    function animateBmValue(el, toVal, duration) {
-      const from = parseFloat((el.textContent || '').replace(/[^0-9.-]/g, '')) || 0;
-      const start = performance.now();
-      (function tick(now) {
-        const t = Math.min((now - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - t, 3);
-        el.textContent = fmt(from + (toVal - from) * ease);
-        if (t < 1) requestAnimationFrame(tick);
-        else el.textContent = fmt(toVal);
-      })(performance.now());
-    }
-    function animateBmBar(barEl, pct) {
-      barEl.style.width = '0%';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        barEl.style.width = Math.max(0, Math.min(pct, 100)) + '%';
-      }));
-    }
 
     function showToast(msg, dur = 3200) {
       const t = document.getElementById('toast');
@@ -1307,44 +1196,31 @@
       if (!isMulti) {
         const selId = state.singleMatId || (matsSorted()[0]?.id || '');
         c.innerHTML = `
-          <div class="field">
-            <label for="single-mat">Filamento</label>
-            <select id="single-mat" onchange="state.singleMatId=this.value; showStock(); checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
+          <div class="cq2-row cq2-mat">
+            <select id="single-mat" aria-label="Filamento" onchange="state.singleMatId=this.value; showStock(); checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(selId)}</select>
+            <label class="cq2-g"><input type="number" inputmode="decimal" id="single-grams" min="0" step="0.1" placeholder="0" value="${state.singleGrams}" aria-label="Gramos del trabajo" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" /><span>g</span></label>
           </div>
-          <div class="cq-row2">
-            <div class="field">
-              <label for="single-grams">Gramos del trabajo</label>
-              <input type="number" inputmode="decimal" id="single-grams" min="0" step="0.1" placeholder="0" value="${state.singleGrams}" oninput="state.singleGrams=this.value; checkStock(); debouncedSave()" />
-            </div>
-            <div class="field">
-              <label>Tienes en stock</label>
-              <div class="cq-readout" id="single-stock">—</div>
-            </div>
-          </div>`;
+          <span id="single-stock" hidden>—</span>`;
         showStock();
       } else {
         if (state.matRows.length < 2) {
           const firstId = matsSorted()[0]?.id || '';
           state.matRows = [{ matId: firstId, grams: '' }, { matId: firstId, grams: '' }];
         }
-        const header = document.createElement('div');
-        header.className = 'mat-rows-header';
-        header.innerHTML = '<span>Material</span><span>Gramos totales</span><span></span>';
-        c.appendChild(header);
-
         state.matRows.forEach((row, i) => {
           const d = document.createElement('div');
-          d.className = 'mat-row';
+          d.className = 'mat-row cq2-row cq2-mat';
           d.innerHTML = `
-            <select class="mat-select" onchange="state.matRows[${i}].matId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(row.matId)}</select>
-            <input type="number" class="mat-grams" min="0" step="0.1" placeholder="0.0" value="${row.grams}" oninput="state.matRows[${i}].grams=this.value; checkStock(); debouncedSave()" style="background:rgba(var(--ink), 0.05);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font);font-size:0.875rem;padding:9px 12px;outline:none;width:100%;" />
-            <div class="rm-btn" onclick="removeMatRow(${i})">✕</div>`;
+            <select class="mat-select" aria-label="Filamento ${i + 1}" onchange="state.matRows[${i}].matId=this.value; checkStock(); updateFallaSuggestion(); debouncedSave()">${matOptions(row.matId)}</select>
+            <label class="cq2-g"><input type="number" inputmode="decimal" class="mat-grams" min="0" step="0.1" placeholder="0" value="${row.grams}" aria-label="Gramos del filamento ${i + 1}" oninput="state.matRows[${i}].grams=this.value; checkStock(); debouncedSave()" /><span>g</span></label>
+            <button type="button" class="rm-btn" onclick="removeMatRow(${i})" aria-label="Quitar filamento ${i + 1}">✕</button>`;
           c.appendChild(d);
         });
 
         const btn = document.createElement('button');
-        btn.className = 'add-row-btn';
-        btn.textContent = '+ Agregar material';
+        btn.className = 'add-row-btn cq2-add';
+        btn.type = 'button';
+        btn.textContent = '+ Agregar filamento';
         btn.onclick = () => {
           if (state.matRows.length >= 20) return showToast('Máximo 20 materiales');
           state.matRows.push({ matId: matsSorted()[0]?.id || '', grams: '' });
@@ -1372,14 +1248,17 @@
         const prOpts = Object.keys(PRINTERS).map(k => `<option value="${k}">${k}</option>`).join('');
         const prBtns = Object.keys(PRINTERS).map(k => `<button type="button" data-v="${k}">${k}</button>`).join('');
         c.innerHTML = `
-          <div class="field">
-            <label>Impresora</label>
+          <div class="cq2-row cq2-stack">
+            <span class="cq2-lbl">Impresora</span>
             <div class="cq-seg" data-for="single-printer" role="radiogroup" aria-label="Impresora">${prBtns}</div>
             <select id="single-printer" hidden onchange="debouncedSave()">${prOpts}</select>
           </div>
-          <div class="cq-row2">
-            <div class="field"><label for="single-hours">Horas</label><input type="number" inputmode="numeric" id="single-hours" min="0" step="1" placeholder="0" oninput="debouncedSave()" /></div>
-            <div class="field"><label for="single-minutes">Minutos</label><input type="number" inputmode="numeric" id="single-minutes" min="0" max="59" step="1" placeholder="0" oninput="debouncedSave()" /></div>
+          <div class="cq2-row">
+            <span>Tiempo</span>
+            <span class="cq2-hm">
+              <label class="cq2-g"><input type="number" inputmode="numeric" id="single-hours" min="0" step="1" placeholder="0" aria-label="Horas" oninput="debouncedSave()" /><span>h</span></label>
+              <label class="cq2-g"><input type="number" inputmode="numeric" id="single-minutes" min="0" max="59" step="1" placeholder="0" aria-label="Minutos" oninput="debouncedSave()" /><span>min</span></label>
+            </span>
           </div>`;
         syncUI();
       } else {
@@ -1412,7 +1291,8 @@
         c.appendChild(total);
 
         const btn = document.createElement('button');
-        btn.className = 'add-row-btn';
+        btn.className = 'add-row-btn cq2-add';
+        btn.type = 'button';
         btn.textContent = '+ Agregar impresión';
         btn.onclick = () => {
           if (state.timeRows.length >= 60) return showToast('Máximo 60 filas; usa "veces" para las que se repiten');
@@ -1562,48 +1442,42 @@
 
       state.lastCalc = { detMat, detTiempos, numPiezas, precioFinal, costoBase, subtotalFalla, ganancia, ivaMonto, urgenciaMonto, empaqueMonto, urgencia, tiempo, printer: printerDisplay, telefono, tipoPieza, filas: null /* se asigna abajo */ };
 
-      // ── Render result ──────────────────────────
+      // ── Render result (solo presentación: usa los mismos valores de computeQuote) ──
       const cliente = document.getElementById('inp-cliente').value.trim();
-      const rc = document.getElementById('res-cliente');
-      if (cliente) { rc.textContent = cliente; rc.style.display = 'block'; } else { rc.style.display = 'none'; }
-
-      document.getElementById('res-total').textContent = fmt(precioFinal);
-
-      // Badges
-      const badges = [];
-      if (urgencia === 'express') badges.push('<span class="rh-badge express">Express +25%</span>');
-      if (urgencia === 'urgente') badges.push('<span class="rh-badge urgente">Urgente +50%</span>');
+      document.getElementById('res-cliente').textContent = (cliente || 'Cotización') + (numPiezas > 1 ? ` · ${numPiezas} piezas` : '');
+      const urgTxt = { express: 'Express +25%', urgente: 'Urgente +50%' }[urgencia] || 'Entrega normal';
       const tipoLabels = { funcional:'Funcional', decorativa:'Decorativa', prototipo:'Prototipo', repuesto:'Repuesto' };
-      if (tipoPieza) badges.push(`<span class="rh-badge tipo">${tipoLabels[tipoPieza] || tipoPieza}</span>`);
-      document.getElementById('res-badges').innerHTML = badges.join('');
+      const matsTxt = [...new Set(detMat.filter(d => Number(d.grams) > 0).map(d => d.nombre.split(' · ')[0]))].join(' + ');
+      document.getElementById('res-sub').textContent = [matsTxt, printerDisplay, urgTxt, tipoLabels[tipoPieza], aplicaIva ? 'con IVA' : ''].filter(Boolean).join(' · ');
+      document.getElementById('res-total').textContent = fmt(precioFinal);
+      document.getElementById('res-unit').textContent = fmt(xUnidad);
+      document.getElementById('res-pp').hidden = numPiezas <= 1;
 
-      const ru = document.getElementById('res-unit');
-      const bcUnit = document.getElementById('bc-unit');
-      if (numPiezas > 1) {
-        ru.textContent = fmt(xUnidad) + ' c/u · ' + numPiezas + ' piezas';
-        ru.style.display = 'inline-block';
-        animateBmValue(document.getElementById('res-unit-card'), xUnidad, 800);
-        document.getElementById('res-unit-sub').textContent = `${((xUnidad / precioFinal) * 100).toFixed(0)}%`;
-        animateBmBar(document.getElementById('res-unit-bar'), (xUnidad / precioFinal) * 100);
-        bcUnit.style.display = '';
-      } else {
-        ru.style.display = 'none';
-        bcUnit.style.display = 'none';
-      }
-      document.getElementById('res-printer').textContent = '🖨️ ' + printerDisplay;
+      // Proporción del precio: costo (con fallas y empaque), ganancia (con urgencia) e IVA
+      const pCosto = subtotalFalla + empaqueMonto, pGan = ganancia + urgenciaMonto, pIva = aplicaIva ? ivaMonto : 0;
+      const pct = x => precioFinal > 0 ? Math.round(x / precioFinal * 100) : 0;
+      const seg = (cls, x) => x > 0.004 ? `<i class="${cls}" style="flex-grow:${(x / precioFinal * 100).toFixed(2)}"></i>` : '';
+      const bar = document.getElementById('res-bar');
+      bar.innerHTML = seg('is-costo', pCosto) + seg('is-gan', pGan) + seg('is-iva', pIva);
+      bar.setAttribute('aria-label', `Costo ${pct(pCosto)} %, ganancia ${pct(pGan)} %${pIva ? `, IVA ${pct(pIva)} %` : ''}`);
+      document.getElementById('res-ley').innerHTML = `<span><i class="is-costo"></i>Costo ${pct(pCosto)}%</span><span><i class="is-gan"></i>Ganancia ${pct(pGan)}%</span>${pIva ? `<span><i class="is-iva"></i>IVA ${pct(pIva)}%</span>` : ''}`;
 
-      animateBmValue(document.getElementById('res-costo'), subtotalFalla, 800);
-      document.getElementById('res-costo-sub').textContent = `${((subtotalFalla / precioFinal) * 100).toFixed(0)}%`;
-      animateBmBar(document.getElementById('res-costo-bar'), (subtotalFalla / precioFinal) * 100);
-
-      animateBmValue(document.getElementById('res-ganancia'), ganancia, 800);
-      document.getElementById('res-ganancia-sub').textContent = `margen ${(margenPct * 100).toFixed(0)}%`;
-      animateBmBar(document.getElementById('res-ganancia-bar'), (ganancia / precioFinal) * 100);
-
-      animateBmValue(document.getElementById('res-iva'), aplicaIva ? ivaMonto : 0, 800);
-      document.getElementById('res-iva-hint').textContent = aplicaIva ? 'tasa 16%' : 'exento';
-      document.getElementById('res-iva-sub').textContent  = aplicaIva ? `${((ivaMonto / precioFinal) * 100).toFixed(0)}%` : '—';
-      animateBmBar(document.getElementById('res-iva-bar'), aplicaIva ? (ivaMonto / precioFinal) * 100 : 0);
+      // Renglones del desglose
+      const gTot = detMat.reduce((s, d) => s + (Number(d.grams) || 0), 0);
+      const hTxt = (() => { const t = Math.round(tiempo * 60), h = Math.floor(t / 60), m = t % 60; return `${h} h${m ? ` ${m} min` : ''}`; })();
+      const fila = (a, b, cls = '') => `<div class="cq2-row cq2-rrow ${cls}"><span>${a}</span><span>${b}</span></div>`;
+      const nota = t => ` <small>· ${t}</small>`;
+      document.getElementById('res-rows').innerHTML =
+        fila('Material' + nota(`${Math.round(gTot * 10) / 10} g`), fmt(costoMat))
+        + fila('Luz y máquina' + nota(hTxt), fmt(costoElec + costoMaq))
+        + (aplicaMO ? fila('Mano de obra' + nota(`${horasMO} h`), fmt(costoMO)) : '')
+        + fila('Fallas' + nota(`${CONFIG.falla}%`), fmt(margenFalla))
+        + fila('Costo de producción', fmt(subtotalFalla), 'is-bold')
+        + fila('Ganancia' + nota(`${(margenPct * 100).toFixed(0)}%`), '+' + fmt(ganancia), 'is-gan')
+        + (urgencia !== 'normal' ? fila('Urgencia' + nota(urgencia === 'express' ? '25%' : '50%'), '+' + fmt(urgenciaMonto)) : '')
+        + (empaqueMonto > 0 ? fila('Empaque y envío', fmt(empaqueMonto)) : '')
+        + (aplicaIva ? fila('IVA' + nota('16%'), fmt(ivaMonto)) : '')
+        + fila('Precio total', fmt(precioFinal), 'is-total');
 
       // Materiales table
       document.getElementById('tbl-mats').innerHTML = detMat.map(d =>
@@ -2377,6 +2251,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261013a"></script>
+  <script src="nav.js?v=20261013b"></script>
 </body>
 </html>
