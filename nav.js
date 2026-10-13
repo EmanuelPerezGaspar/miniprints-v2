@@ -12,7 +12,7 @@
 
   const TABS = [
     { id: 'inicio',     label: 'Inicio',     href: 'dashboard.html',   pages: ['dashboard.html', 'index.html', ''] },
-    { id: 'cotizar',    label: 'Cotizar',    href: 'cotizador.html',   pages: ['cotizador.html'] },
+    { id: 'cotizar',    label: 'Cotizar',    href: 'cotizador.html',   pages: ['cotizador.html', 'plantillas.html'] },
     { id: 'ventas',     label: 'Ventas',     href: 'ventas.html',      pages: ['ventas.html', 'historial-ventas.html'] },
     { id: 'inventario', label: 'Inventario', href: 'stock-piezas.html', pages: ['stock-piezas.html', 'stock-material.html'] },
     { id: 'mas',        label: 'Más',        pages: ['cotizaciones.html', 'finanzas.html', 'reset.html'] },
@@ -21,6 +21,7 @@
   const SHEET_ICONS = {
     ventas:    '<path d="M5.2 8h13.6l-1 11.6a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
     historial: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    plantilla: '<path d="M6 3h12v18l-6-4-6 4z"/>',
     finanzas:  '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>',
     piezas:    '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
     material:  '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
@@ -33,6 +34,7 @@
     { label: 'Negocio', rows: [
       { href: 'historial-ventas.html', icon: 'ventas', color: '#30d158', title: 'Historial de ventas', sub: 'Ventas registradas y cobros' },
       { href: 'cotizaciones.html',   icon: 'historial', color: '#0a84ff', title: 'Historial de cotizaciones', sub: 'Cotizaciones guardadas' },
+      { href: 'plantillas.html',     icon: 'plantilla', color: '#ff9f0a', title: 'Plantillas', sub: 'Trabajos frecuentes para cotizar' },
       { href: 'finanzas.html',       icon: 'finanzas',  color: '#5e5ce6', title: 'Finanzas', sub: 'Ingresos, costos y ganancia' },
     ]},
     { label: 'Inventario', rows: [

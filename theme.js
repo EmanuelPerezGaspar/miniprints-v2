@@ -43,7 +43,7 @@
 // Entrar a una sección se desliza desde la derecha, regresar se desliza a la derecha
 // y cambiar de pestaña hace un fundido suave. nav.js marca el tipo al tocar la barra.
 (function () {
-  const DEPTH = { 'historial-ventas.html': 1, 'cotizaciones.html': 1, 'finanzas.html': 1, 'reset.html': 1 };
+  const DEPTH = { 'historial-ventas.html': 1, 'cotizaciones.html': 1, 'plantillas.html': 1, 'finanzas.html': 1, 'reset.html': 1 };
   const pageOf = href => (new URL(href, location.href).pathname.split('/').pop() || 'index.html').toLowerCase();
   const here = pageOf(location.href);
   const ss = {

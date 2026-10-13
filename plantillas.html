@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MiniPrints — Plantillas</title>
+  <script src="theme.js?v=20261013e"></script>
+  <script src="inventario.js?v=20261013e"></script>
+  <script src="costos.js?v=20261013e"></script>
+  <link rel="stylesheet" href="styles.css?v=20261013e" />
+  <style>
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
+  </style>
+  <link rel="stylesheet" href="ios.css?v=20261013e" />
+  <link rel="stylesheet" href="nav.css?v=20261013e" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-180.png?v=4" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=4" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=4" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MiniPrints" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>
+<body>
+  <script type="module" src="firebase-sync.js?v=20261013e"></script>
+
+  <div class="page-container">
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Plantillas</h1>
+          <p class="dash-subtitle" id="pl-sub">Tus trabajos frecuentes, listos para cotizar.</p>
+        </div>
+        <div class="inv-actions">
+          <a class="inv-icon-btn is-primary" href="cotizador.html" aria-label="Nueva cotización">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="hx-wrap">
+        <input type="search" id="pl-buscar" class="hx-search" placeholder="Buscar plantilla, material o tipo" autocomplete="off" aria-label="Buscar plantilla" />
+        <div id="pl-list"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Hoja: detalle de la plantilla -->
+  <div class="sheet inv-sheet" id="sh-pl" role="dialog" aria-modal="true" aria-labelledby="sh-pl-t" hidden>
+    <div class="sheet-head">
+      <h2 id="sh-pl-t">Plantilla</h2>
+      <button class="sheet-close" type="button" data-sheet-close aria-label="Cerrar"><svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1 1 11"/></svg></button>
+    </div>
+    <div class="inv-group" id="p-mat"></div>
+    <div class="inv-group" id="p-tiempo"></div>
+    <div class="inv-group" id="p-precio"></div>
+    <div class="inv-btns">
+      <button type="button" class="inv-btn" onclick="usar()">Usar en Cotizar</button>
+      <button type="button" class="inv-btn is-plain" onclick="renombrar()">Cambiar nombre</button>
+      <button type="button" class="inv-btn is-danger" onclick="eliminar()">Eliminar plantilla</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script>
+    const { esc, money } = MP_INV;
+    let TPLS = [], MATS = {}, COTS = [], actual = -1;
+    const leer = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch (e) { return d; } };
+    function loadDB() {
+      TPLS = leer('mp_templates', []); if (!Array.isArray(TPLS)) TPLS = [];
+      MATS = leer('mp_materials', {}) || {};
+      COTS = leer('mp_cotizaciones', []); if (!Array.isArray(COTS)) COTS = [];
+    }
+    const guardar = () => { try { localStorage.setItem('mp_templates', JSON.stringify(TPLS)); } catch (e) {} };
+
+    // Muestra de color aproximada a partir del nombre (igual que en Cotizar)
+    const COLORES = [
+      [/transp|natural|cristal|clear/, 'transparente'], [/negr|black/, '#1c1c1e'], [/blanc|white|hueso/, '#f5f5f2'],
+      [/gris|gray|grey|plata|silver/, '#a1a1a6'], [/roj|red|vino/, '#e5372e'], [/rosa|pink|magenta|fucsia/, '#ff6fa5'],
+      [/morad|violet|lila|purple/, '#9a5cf0'], [/azul|blue|marino|cyan|cian|turques|celeste/, '#2f7bf6'],
+      [/verde|green|lima|menta|oliva/, '#34c759'], [/amarill|yellow/, '#ffd60a'], [/naranj|orange/, '#ff9500'],
+      [/dorad|oro|gold/, '#d4a72c'], [/caf|marr|brown|chocolate|madera|wood/, '#8b5a2b'], [/beige|arena|crema|piel/, '#e8d5b0'],
+    ];
+    const norm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const colorDe = m => { const c = COLORES.find(([re]) => re.test(norm(m && m.color))); return c ? c[1] : ''; };
+    const swatch = m => { const c = colorDe(m); return `<span class="pl-sw${c === 'transparente' ? ' is-clear' : ''}${!c ? ' is-none' : ''}" style="${c && c !== 'transparente' ? `background:${c}` : ''}"></span>`; };
+
+    // Lo que guarda cada plantilla, en palabras
+    function materiales(t) {
+      const filas = t.multicolor ? (t.matRows || []).map(r => ({ id: r.matId, g: r.grams })) : [{ id: t.singleMatId, g: t.singleGrams }];
+      return filas.map(f => ({ id: f.id, m: MATS[f.id], g: parseFloat(f.g) || 0 }));
+    }
+    function minutos(t) {
+      if (t.multiImp) return (t.timeRows || []).reduce((s, r) => s + ((parseFloat(r.h) || 0) * 60 + (parseFloat(r.m) || 0)) * Math.max(1, parseInt(r.n) || 1), 0);
+      return (parseFloat(t.singleHours) || 0) * 60 + (parseFloat(t.singleMins) || 0);
+    }
+    const hm = min => { min = Math.round(min); const h = Math.floor(min / 60), m = min % 60; return min ? `${h} h${m ? ` ${m} min` : ''}` : ''; };
+    const nombreMat = (m, id) => m ? `${m.tipo} ${m.color}` : id ? 'Filamento ya no registrado' : 'Filamento sin elegir';
+    const TIPO = { '': 'General', funcional: 'Funcional', decorativa: 'Decorativa', prototipo: 'Prototipo', repuesto: 'Repuesto' };
+    const URG = { normal: 'Normal', express: 'Express · 2-3 días (+25%)', urgente: 'Urgente · 24 h (+50%)' };
+    // Último precio con el que se cotizó (mismo nombre)
+    function ultima(t) {
+      let c = null;
+      COTS.forEach(x => { if (x && (x.cliente === t.nombre || x.pieza === t.nombre) && Number(x.total) > 0 && (!c || (x.id || 0) > (c.id || 0))) c = x; });
+      return c;
+    }
+
+    function render() {
+      const q = norm(document.getElementById('pl-buscar').value).trim();
+      document.getElementById('pl-sub').textContent = TPLS.length
+        ? `${TPLS.length} plantilla${TPLS.length !== 1 ? 's' : ''} guardada${TPLS.length !== 1 ? 's' : ''}`
+        : 'Tus trabajos frecuentes, listos para cotizar.';
+      const cont = document.getElementById('pl-list');
+      if (!TPLS.length) {
+        cont.innerHTML = `<div class="hx-empty"><b>Aún no tienes plantillas</b>En Cotizar llena un trabajo que repites y toca "Guardar como plantilla".<br><a class="btn btn-primary" href="cotizador.html">Ir a Cotizar</a></div>`;
+        return;
+      }
+      const lista = TPLS.map((t, i) => ({ t, i })).filter(({ t }) => {
+        if (!q) return true;
+        const txt = norm([t.nombre, TIPO[t.tipo || ''], ...materiales(t).map(x => x.m ? `${x.m.tipo} ${x.m.color} ${x.m.marca}` : '')].join(' '));
+        return q.split(/\s+/).every(w => txt.includes(w));
+      }).sort((a, b) => String(a.t.nombre || '').localeCompare(String(b.t.nombre || ''), 'es'));
+      if (!lista.length) {
+        cont.innerHTML = `<div class="hx-empty"><b>Sin resultados</b>No hay plantillas con "${esc(document.getElementById('pl-buscar').value.trim())}".</div>`;
+        return;
+      }
+      cont.innerHTML = `<div class="hx-list">${lista.map(({ t, i }) => {
+        const mats = materiales(t), g = mats.reduce((s, x) => s + x.g, 0), n = parseInt(t.piezas) || 1;
+        const meta = [mats.length > 1 ? `${mats.length} colores` : nombreMat(mats[0] && mats[0].m, mats[0] && mats[0].id), g ? `${Math.round(g * 10) / 10} g` : '', hm(minutos(t)), n > 1 ? `${n} piezas` : ''].filter(Boolean).join(' · ');
+        const u = ultima(t);
+        return `<button type="button" class="hx-row pl-row" data-i="${i}">
+          <span class="pl-sws">${mats.slice(0, 3).map(x => swatch(x.m)).join('')}</span>
+          <span class="hx-text"><span class="hx-title">${esc(t.nombre || 'Sin nombre')}</span><span class="hx-meta">${esc(meta)}</span></span>
+          <span class="hx-right">${u ? `<span class="hx-amt">${money(u.total)}</span><span class="pl-ult">última vez</span>` : ''}</span>
+        </button>`;
+      }).join('')}</div>`;
+    }
+
+    function abrir(i) {
+      const t = TPLS[i]; if (!t) return;
+      actual = i;
+      document.getElementById('sh-pl-t').textContent = t.nombre || 'Sin nombre';
+      const row = (a, b) => `<div class="inv-group-row"><span>${a}</span><span>${b}</span></div>`;
+      document.getElementById('p-mat').innerHTML = materiales(t).map(x =>
+        row(`<span class="pl-mrow">${swatch(x.m)}${esc(nombreMat(x.m, x.id))}${x.m ? `<small>${esc(x.m.marca)}</small>` : ''}</span>`, x.g ? `${x.g} g` : '—')).join('');
+      const tiempos = t.multiImp
+        ? (t.timeRows || []).map((r, k) => row(`Impresión ${k + 1}<small class="pl-small"> · ${esc(r.printer || 'A1 MINI')}</small>`, `${hm((parseFloat(r.h) || 0) * 60 + (parseFloat(r.m) || 0)) || '0 h'}${(parseInt(r.n) || 1) > 1 ? ` × ${parseInt(r.n)}` : ''}`)).join('')
+        : row(`Impresión<small class="pl-small"> · ${esc(t.singlePrinter || 'A1 MINI')}</small>`, hm(minutos(t)) || '—');
+      document.getElementById('p-tiempo').innerHTML = tiempos + (t.multiImp ? row('Total', hm(minutos(t)) || '—') : '');
+      const u = ultima(t);
+      document.getElementById('p-precio').innerHTML =
+        row('Tipo de pieza', TIPO[t.tipo || ''] || esc(t.tipo))
+        + row('Piezas que salen', parseInt(t.piezas) || 1)
+        + row('Ganancia', `${t.margen || 60}%`)
+        + (t.mo ? row('Mano de obra', `${t.moHoras || 1} h × ${money(parseFloat(t.moCosto) || 0)}`) : '')
+        + row('Empaque y envío', t.empaque === false ? 'No' : 'Sí')
+        + row('IVA', t.iva ? 'Sí' : 'No')
+        + row('Urgencia', URG[t.urgencia] || 'Normal')
+        + (u ? row('Última cotización', money(u.total)) : '');
+      MP_INV.abrir('sh-pl');
+    }
+
+    // Se abre Cotizar y ahí se carga la plantilla (la misma función de siempre)
+    function usar() {
+      const t = TPLS[actual]; if (!t) return;
+      try { sessionStorage.setItem('mp_usar_plantilla', JSON.stringify({ i: actual, nombre: t.nombre || '' })); } catch (e) {}
+      location.href = 'cotizador.html';
+    }
+    function renombrar() {
+      const t = TPLS[actual]; if (!t) return;
+      const n = (prompt('Nuevo nombre de la plantilla:', t.nombre || '') || '').trim().toLocaleUpperCase('es-MX');
+      if (!n || n === t.nombre) return;
+      t.nombre = n; guardar(); render();
+      document.getElementById('sh-pl-t').textContent = n;
+      MP_INV.toast('Nombre cambiado');
+    }
+    function eliminar() {
+      const t = TPLS[actual]; if (!t) return;
+      if (!confirm(`¿Eliminar la plantilla "${t.nombre || 'Sin nombre'}"?`)) return;
+      TPLS.splice(actual, 1); guardar(); MP_INV.cerrar(); render();
+      MP_INV.toast(`"${t.nombre || 'Plantilla'}" eliminada`);
+    }
+
+    document.getElementById('pl-buscar').addEventListener('input', render);
+    document.getElementById('pl-list').addEventListener('click', e => { const r = e.target.closest('[data-i]'); if (r) abrir(Number(r.dataset.i)); });
+
+    function mpInit() { loadDB(); render(); }
+    window.addEventListener('mp-sync-ready', mpInit, { once: true });
+    window.addEventListener('mp-sync-update', mpInit);
+  </script>
+  <script src="nav.js?v=20261013e"></script>
+</body>
+</html>

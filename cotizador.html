@@ -4,10 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Cotizador</title>
-  <script src="theme.js?v=20261013d"></script>
-  <script src="whatsapp.js?v=20261013d"></script>
-  <script src="categorias.js?v=20261013d"></script>
-  <link rel="stylesheet" href="styles.css?v=20261013d" />
+  <script src="theme.js?v=20261013e"></script>
+  <script src="whatsapp.js?v=20261013e"></script>
+  <script src="categorias.js?v=20261013e"></script>
+  <link rel="stylesheet" href="styles.css?v=20261013e" />
   <style>
     /* ── Cotizador layout ─────────────────────── */
     .cot-grid {
@@ -581,8 +581,8 @@
     }
 
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261013d" />
-  <link rel="stylesheet" href="nav.css?v=20261013d" />
+  <link rel="stylesheet" href="ios.css?v=20261013e" />
+  <link rel="stylesheet" href="nav.css?v=20261013e" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -595,7 +595,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261013d"></script>
+  <script type="module" src="firebase-sync.js?v=20261013e"></script>
 
   <!-- CONTENT -->
   <div class="page-container">
@@ -607,6 +607,7 @@
             <h1 class="dash-title">Cotizar</h1>
           </div>
           <div class="inv-actions">
+            <a class="inv-icon-btn" href="plantillas.html" aria-label="Plantillas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></a>
             <a class="inv-icon-btn" href="cotizaciones.html" aria-label="Historial de cotizaciones"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></a>
             <button class="inv-icon-btn" type="button" onclick="clearDraft()" aria-label="Nueva cotización"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
           </div>
@@ -710,9 +711,9 @@
           </section>
 
           <!-- Plantillas: trabajos frecuentes -->
-          <div class="cq-tpl-row">
-            <div class="cq-tpl-list" id="tpl-list"></div>
-            <button class="cq-link" type="button" onclick="saveTemplate()">Guardar como plantilla</button>
+          <div class="cq2-card cq2-tpl">
+            <a class="cq2-row cq2-tpl-link" href="plantillas.html"><span>Mis plantillas</span><span class="cq2-tpl-n"><span id="tpl-count"></span><svg viewBox="0 0 8 14" aria-hidden="true"><path d="M1 1l6 6-6 6"/></svg></span></a>
+            <button class="cq2-add" type="button" onclick="saveTemplate()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Guardar como plantilla</button>
           </div>
 
           <!-- Ajustes del taller (se cambian poco) -->
@@ -1953,20 +1954,23 @@
     }
 
     /* ── Templates ────────────────────────────── */
+    // Las plantillas viven en su propia página (plantillas.html); aquí solo se cuenta cuántas hay
     function renderTemplates() {
-      const list = document.getElementById('tpl-list');
-      if (!list) return;
+      const el = document.getElementById('tpl-count');
+      if (!el) return;
       let tpls = [];
       try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
-      if (!tpls.length) {
-        list.innerHTML = '<span class="cq-tpl-empty">Guarda los trabajos que repites como plantilla.</span>';
-        return;
-      }
-      list.innerHTML = tpls.map((t, i) => `
-        <span class="cq-tpl-chip">
-          <button type="button" class="cq-tpl-load" onclick="loadTemplate(${i})">${escapeHtml(t.nombre || 'Sin nombre')}</button>
-          <button type="button" class="cq-tpl-del" onclick="deleteTemplate(${i})" aria-label="Eliminar plantilla ${escapeHtml(t.nombre || '')}">✕</button>
-        </span>`).join('');
+      el.textContent = tpls.length ? String(tpls.length) : 'Ninguna';
+    }
+    // Plantilla elegida en la página de Plantillas
+    function usarPlantillaPendiente() {
+      let p = null;
+      try { p = JSON.parse(sessionStorage.getItem('mp_usar_plantilla')); sessionStorage.removeItem('mp_usar_plantilla'); } catch (e) {}
+      if (!p) return;
+      let tpls = [];
+      try { tpls = JSON.parse(localStorage.getItem('mp_templates') || '[]'); } catch(e) {}
+      let i = tpls[p.i] && tpls[p.i].nombre === p.nombre ? p.i : tpls.findIndex(t => t && t.nombre === p.nombre);
+      if (i >= 0) loadTemplate(i);
     }
 
     function saveTemplate() {
@@ -1986,7 +1990,7 @@
         moHoras:       document.getElementById('inp-mo-horas')?.value    || '1',
         iva:           document.getElementById('chk-iva')?.checked        || false,
         empaque:       document.getElementById('chk-empaque')?.checked ?? true,
-        singleMatId:   state.singleMatId,
+        singleMatId:   state.singleMatId || document.getElementById('single-mat')?.value || '',
         singleGrams:   state.singleGrams,
         singlePrinter: document.getElementById('single-printer')?.value  || 'A1 MINI',
         singleHours:   document.getElementById('single-hours')?.value    || '',
@@ -2228,6 +2232,7 @@
       renderTimes();
       loadConfig();
       loadDraft();
+      usarPlantillaPendiente();
       updateFallaSuggestion();
       renderTemplates();
       syncUI();
@@ -2237,6 +2242,6 @@
     window.addEventListener('mp-sync-update', () => { loadDB(); renderTemplates(); });
     window.addEventListener('beforeunload', saveDraft);
   </script>
-  <script src="nav.js?v=20261013d"></script>
+  <script src="nav.js?v=20261013e"></script>
 </body>
 </html>
