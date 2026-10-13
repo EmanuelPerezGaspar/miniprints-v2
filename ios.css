@@ -2293,3 +2293,47 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .cq2-tpl-link:active { background: rgba(var(--ink), 0.05); }
 .cq2-tpl-n { display: inline-flex; align-items: center; gap: 8px; color: var(--ios-label-2); }
 .cq2-tpl-n svg { width: 8px; height: 14px; fill: none; stroke: var(--ios-label-3); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Hoja de filamentos (diseño de Claude Design): una tarjeta, color grande y círculo de elegido */
+.mp-sheet .sheet-head h2 { display: flex; flex-direction: column; align-items: center; line-height: 1.2; }
+.mp-sub { display: block; font-size: 12px; font-weight: 500; color: var(--ios-label-2); }
+.mp-sheet .mp-tipos { margin: 2px -16px 0; padding: 2px 16px; flex-shrink: 0; }
+.mp-sheet .mp-tipos:empty { display: none; }
+.mp-sheet .mp-grupo-l { border-radius: 20px; }
+.mp-sheet .mp-row { min-height: 60px; padding: 11px 14px; gap: 12px; }
+.mp-sheet .mp-row .mp-sw { width: 34px; height: 34px; }
+.mp-sheet .mp-row .mp-name { font-size: 16px; font-weight: 600; }
+.mp-sheet .mp-row .mp-meta { font-size: 13px; }
+.mp-sheet .mp-row.is-on .mp-name { color: inherit; }
+.mp-sheet .mp-check {
+  visibility: visible; width: 26px; height: 26px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--ios-separator); background: transparent; fill: none; stroke: none;
+}
+.mp-sheet .mp-check svg { width: 16px; height: 16px; fill: none; stroke: var(--ios-on-accent); stroke-width: 2.8; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
+.mp-sheet .mp-row.is-on .mp-check { background: var(--ios-green); box-shadow: none; }
+.mp-sheet .mp-row.is-on .mp-check svg { visibility: visible; }
+
+/* ─────────────────────────────────────────────────
+   Tarjetas de lista en toda la app (estilo de la hoja de filamentos de Claude Design):
+   tarjeta de 20 px, renglones de 60 px con círculo de 34 px, nombre 16 px y detalle 13 px,
+   y línea divisoria a todo lo ancho.
+───────────────────────────────────────────────── */
+.hx-list, .inv-list:not(.is-grid), .mp-grupo-l, .cq2-card, .inv-group, .vs-list { border-radius: 20px; }
+.hx-row { min-height: 60px; padding: 11px 14px; gap: 12px; }
+.hx-row + .hx-row::before { left: 0; }
+.hx-ico, .inv-mark { width: 34px; height: 34px; border-radius: 50%; }
+.hx-ico svg, .inv-mark svg { width: 18px; height: 18px; }
+.hx-title { font-size: 16px; font-weight: 600; letter-spacing: -0.2px; }
+.hx-meta { font-size: 13px; }
+.inv-row { min-height: 60px; padding: 11px 14px 11px 0; gap: 12px; }
+.inv-row-main { gap: 12px; }
+.inv-row-name { letter-spacing: -0.2px; }
+/* Color del filamento: círculo sólido, como en el diseño */
+.inv-swatch { box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35); }
+.inv-swatch::after { display: none; }
+.pl-sws { width: 34px; height: 34px; }
+.pl-sw { width: 34px; height: 34px; }
+.pl-sws .pl-sw + .pl-sw { margin-left: -20px; }
+.inv-row-main { padding-left: 14px; }
+/* Inventario agrupado: cada grupo es una tarjeta de renglones */
+.inv-list.is-grid .inv-list-g { border-radius: 20px; background: var(--ios-fill-2); overflow: hidden; }

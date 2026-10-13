@@ -4,16 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20261013e"></script>
-  <script src="categorias.js?v=20261013e"></script>
-  <script src="inventario.js?v=20261013e"></script>
-  <script src="costos.js?v=20261013e"></script>
-  <link rel="stylesheet" href="styles.css?v=20261013e" />
+  <script src="theme.js?v=20261014a"></script>
+  <script src="categorias.js?v=20261014a"></script>
+  <script src="inventario.js?v=20261014a"></script>
+  <script src="costos.js?v=20261014a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261014a" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261013e" />
-  <link rel="stylesheet" href="nav.css?v=20261013e" />
+  <link rel="stylesheet" href="ios.css?v=20261014a" />
+  <link rel="stylesheet" href="nav.css?v=20261014a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +26,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261013e"></script>
+  <script type="module" src="firebase-sync.js?v=20261014a"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -50,7 +50,7 @@
           <div class="vs-cats" id="inv-cats" role="radiogroup" aria-label="Filtrar"></div>
           <div class="vs-list-head mat-head"><span id="inv-count"></span>
             <div class="cq-seg mat-vista" data-for="pz-vista" role="radiogroup" aria-label="Vista">
-              <button type="button" data-v="grid" aria-label="Cuadrícula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></button>
+              <button type="button" data-v="grid" aria-label="Agrupado por categoría"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="6.5" rx="2"/><rect x="3.5" y="13.5" width="17" height="6.5" rx="2"/></svg></button>
               <button type="button" data-v="lista" aria-label="Lista"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>
             </div>
             <input type="hidden" id="pz-vista" value="grid" />
@@ -228,7 +228,6 @@
       if (n > BAJO) return { cls: 'st-low', txt: 'Poco stock' };
       return { cls: 'st-crit', txt: n === 1 ? 'Última unidad' : 'Por agotarse' };
     }
-    const ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>';
     const matLabel = m => `${m.tipo} ${m.color} · ${m.marca}`;
     const matsSorted = () => Object.values(DB.materials).sort((a, b) => (a.tipo + a.color + a.marca).localeCompare(b.tipo + b.color + b.marca, 'es'));
 
@@ -304,26 +303,28 @@
       list.classList.toggle('is-grid', grid);
       if (!vis.length) { list.innerHTML = `<div class="inv-empty">Sin resultados${q ? ` para "${esc(q)}"` : ''}</div>`; return; }
       if (grid) { list.innerHTML = cuadricula(vis); return; }
-      list.innerHTML = vis.map(p => {
-        const n = DB.piezas[p], st = estado(n), cat = catDe(p);
-        return `<div class="inv-row ${st.cls}" role="listitem" data-p="${esc(p)}">
-          <button type="button" class="inv-row-main" data-act="abrir" aria-label="Editar ${esc(p)}">
-            <span class="inv-mark">${ICON}</span>
-            <span class="inv-row-text">
-              <span class="inv-row-name">${esc(p)}</span>
-              <span class="inv-row-meta"><b>${st.txt}</b>${DB.precios[p] > 0 ? ' · ' + fmt(DB.precios[p]) : ''}${cat ? ' · ' + catNombre(cat) : ''}</span>
-            </span>
-          </button>
-          <div class="inv-step" role="group" aria-label="Unidades de ${esc(p)}">
-            <button type="button" data-act="menos" aria-label="Quitar una">−</button>
-            <span aria-live="polite">${n}</span>
-            <button type="button" data-act="mas" aria-label="Agregar una">+</button>
-          </div>
-        </div>`;
-      }).join('');
+      list.innerHTML = vis.map(p => filaPieza(p)).join('');
     }
 
-    // Cuadrícula agrupada por categoría (mismo estilo que Material)
+    function filaPieza(p, agrupado) {
+      const n = DB.piezas[p], st = estado(n), cat = catDe(p);
+      return `<div class="inv-row ${st.cls}" role="listitem" data-p="${esc(p)}">
+        <button type="button" class="inv-row-main" data-act="abrir" aria-label="Editar ${esc(p)}">
+          <span class="inv-mark"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_CAT.icono(cat || '')}</svg></span>
+          <span class="inv-row-text">
+            <span class="inv-row-name">${esc(p)}</span>
+            <span class="inv-row-meta"><b>${st.txt}</b>${DB.precios[p] > 0 ? ' · ' + fmt(DB.precios[p]) : ''}${cat && !agrupado ? ' · ' + catNombre(cat) : ''}</span>
+          </span>
+        </button>
+        <div class="inv-step" role="group" aria-label="Unidades de ${esc(p)}">
+          <button type="button" data-act="menos" aria-label="Quitar una">−</button>
+          <span aria-live="polite">${n}</span>
+          <button type="button" data-act="mas" aria-label="Agregar una">+</button>
+        </div>
+      </div>`;
+    }
+
+    // Agrupada por categoría: una tarjeta de renglones por categoría (mismo estilo que Material)
     function cuadricula(vis) {
       const grupos = {};
       vis.forEach(p => { const c = catDe(p) || 'otras'; (grupos[c] = grupos[c] || []).push(p); });
@@ -333,15 +334,7 @@
         const uds = ps.reduce((s, p) => s + DB.piezas[p], 0);
         return `<section class="mat-grupo">
           <div class="mat-grupo-head"><span>${esc(id === 'otras' ? 'Sin categoría' : catNombre(id))}</span><span>${ps.length} · ${uds} uds</span></div>
-          <div class="mat-grid">${ps.map(p => {
-            const n = DB.piezas[p], st = estado(n);
-            return `<button type="button" class="mat-tile pz-tile ${st.cls}" data-p="${esc(p)}" data-act="abrir" aria-label="${esc(p)}, ${n} unidades, ${st.txt}">
-              <span class="mat-tile-top"><span class="pz-ico"><svg viewBox="0 0 24 24" aria-hidden="true">${MP_CAT.icono(id === 'otras' ? '' : id)}</svg></span><span class="mat-tile-marca">${DB.precios[p] > 0 ? MP_INV.money0(DB.precios[p]) : ''}</span></span>
-              <span class="mat-tile-color">${esc(p)}</span>
-              <span class="mat-tile-g">${n}<small>uds</small></span>
-              <span class="pz-estado">${st.txt}</span>
-            </button>`;
-          }).join('')}</div>
+          <div class="inv-list inv-list-g" role="list">${ps.map(p => filaPieza(p, true)).join('')}</div>
         </section>`;
       }).join('');
     }
@@ -614,6 +607,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261013e"></script>
+  <script src="nav.js?v=20261014a"></script>
 </body>
 </html>
