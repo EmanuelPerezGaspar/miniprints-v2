@@ -26,11 +26,20 @@
     if (!s) return;
     if (abierta && cambio && abierta !== s) {
       const prev = abierta;
+      const altoAntes = prev.offsetHeight;
       [prev, s].forEach(x => x.style.transition = 'none');
       prev.classList.remove('open'); prev.hidden = true;
       s.hidden = false; s.classList.add('open'); s.scrollTop = 0; s.classList.remove('is-scrolled');
+      // Cada hoja mide lo que su contenido: el cambio de alto se anima en vez de saltar
+      s.style.height = ''; const altoNuevo = s.offsetHeight;
+      s.style.height = altoAntes + 'px';
       void s.offsetWidth;
       [prev, s].forEach(x => x.style.transition = '');
+      if (Math.abs(altoNuevo - altoAntes) > 2 && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        s.style.transition = 'transform 520ms var(--ios-spring), height 340ms var(--ios-spring)';
+        requestAnimationFrame(() => { s.style.height = altoNuevo + 'px'; });
+        clearTimeout(s._alto); s._alto = setTimeout(() => { s.style.height = ''; s.style.transition = ''; }, 380);
+      } else s.style.height = '';
       s.classList.remove('sheet-swap-adelante', 'sheet-swap-atras');
       void s.offsetWidth;
       s.classList.add('sheet-swap-' + cambio);
