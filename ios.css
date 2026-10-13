@@ -935,7 +935,17 @@ tbody td { font-size: 15px; letter-spacing: -0.24px; }
 }
 
 .stat-tile .st-value { margin-top: auto; }
-.st-sub { margin-top: -12px; font-size: 13px; font-weight: 600; color: var(--ios-label-2); }
+.st-sub { font-size: 12px; font-weight: 600; color: var(--ios-label-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Indicadores compactos: título en una línea, ícono chico y sin espacio vacío */
+.stat-tiles { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.stat-tile { min-width: 0; min-height: 0; gap: 4px; padding: 12px 14px; justify-content: flex-start; }
+.stat-tile .st-top { align-items: center; margin-bottom: 2px; }
+.stat-tile .st-label { font-size: 13px; line-height: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.stat-tile .st-label br { display: none; }
+.stat-tile .st-icon { width: 28px; height: 28px; }
+.stat-tile .st-icon svg { width: 16px; height: 16px; }
+.stat-tile .st-num { font-size: 24px; line-height: 28px; }
+.stat-tile .st-unit { font-size: 13px; }
 .st-sub:empty { display: none; }
 .st-sub.is-up { color: var(--ios-green); }
 .st-sub.is-down, .st-sub.is-warn { color: var(--ios-orange); }
