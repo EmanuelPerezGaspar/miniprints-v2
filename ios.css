@@ -2253,7 +2253,9 @@ input[type="text"]::placeholder, input[type="search"]::placeholder, input:not([t
 .cq2-urg button { font-size: 14px; font-weight: 600; }
 .cq2-urg button small { font-size: 11px; }
 /* Plantillas: al final, discretas */
-#cq-form .cq-tpl-row { align-items: flex-start; gap: 6px; padding: 0 6px; }
+#cq-form .cq-tpl-row { align-items: stretch; gap: 6px; padding: 0 6px; min-width: 0; max-width: 100%; }
+#cq-form .cq-tpl-row .cq-tpl-list { width: 100%; min-width: 0; max-width: 100%; }
+#cq-form .cq-tpl-row .cq-link { align-self: flex-start; }
 #cq-form .cq-tpl-row .cq-link { padding: 0; }
 #cq-form .cq2-add { background: transparent !important; box-shadow: none !important; border-radius: 0 !important; }
 #cq-form .cq2-mat .rm-btn, #cq-form .cq2-trow .rm-btn {
