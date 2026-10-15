@@ -2364,15 +2364,3 @@ html .sheet.vs-sheet { height: auto; min-height: min(460px, calc(100dvh - env(sa
 .mp-sheet .mp-tipos { margin: 2px -16px 0; padding: 2px 16px; }
 /* La lista de los buscadores se encoge al alto disponible y se desplaza por dentro */
 html .sheet.vs-sheet .vs-sheet-scroll { flex: 1 1 auto; min-height: 0; }
-
-/* Catálogo (enlace con el catálogo público) */
-.ce-card { margin-bottom: 4px; }
-.ce-card .cq2-stack span, .ce-seguridad span { font-size: 14px; line-height: 1.45; color: var(--ios-label-2); }
-.ce-ok { display: flex; flex-direction: column; } .ce-ok small, .ce-sub { display: block; font-size: 13px; color: var(--ios-label-2); }
-.ce-btn { width: auto; min-height: 40px; padding: 0 16px; }
-.ce-form input { width: 100%; min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--ios-fill); color: var(--text); font: inherit; font-size: 16px; box-sizing: border-box; }
-.ce-err { color: var(--ios-red) !important; } .ce-err:empty { display: none; }
-.ce-tit { margin: 10px 4px 8px; font-size: 20px; font-weight: 700; }
-.ce-row { cursor: default; }
-.ce-quitar { width: 28px; height: 28px; flex-shrink: 0; border: 0; border-radius: 50%; background: var(--ios-fill); color: var(--ios-label-2); font-size: 12px; cursor: pointer; }
-.ce-hint { margin: 8px 6px 0; }
