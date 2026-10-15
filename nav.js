@@ -1,5 +1,10 @@
 // MiniPrints — menú estilo iOS: tab bar flotante + hoja "Más"
 (function () {
+  // Restos de la conexión con el catálogo (se quitó): marcas y sesión de ese proyecto en este dispositivo
+  try {
+    ['mp_catalogo', 'mp_catalogo_huella', 'mp_catalogo_publicado'].forEach(k => localStorage.removeItem(k));
+    Object.keys(localStorage).filter(k => k.indexOf('firebase:authUser:AIzaSyBb4gSaDQlotX7c1uy5XQaHJW0hTyzNCHc') === 0).forEach(k => localStorage.removeItem(k));
+  } catch (_) {}
   const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
 
   const ICONS = {
@@ -15,14 +20,13 @@
     { id: 'cotizar',    label: 'Cotizar',    href: 'cotizador.html',   pages: ['cotizador.html', 'plantillas.html'] },
     { id: 'ventas',     label: 'Ventas',     href: 'ventas.html',      pages: ['ventas.html', 'historial-ventas.html'] },
     { id: 'inventario', label: 'Inventario', href: 'stock-piezas.html', pages: ['stock-piezas.html', 'stock-material.html'] },
-    { id: 'mas',        label: 'Más',        pages: ['cotizaciones.html', 'finanzas.html', 'reset.html', 'catalogo-enlace.html'] },
+    { id: 'mas',        label: 'Más',        pages: ['cotizaciones.html', 'finanzas.html', 'reset.html'] },
   ];
 
   const SHEET_ICONS = {
     ventas:    '<path d="M5.2 8h13.6l-1 11.6a1.5 1.5 0 0 1-1.5 1.4H7.7a1.5 1.5 0 0 1-1.5-1.4z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>',
     historial: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
     plantilla: '<path d="M6 3h12v18l-6-4-6 4z"/>',
-    catalogo:  '<path d="M4 7h16l-1.5 12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M9 7a3 3 0 0 1 6 0"/><path d="M9.5 13.5l2 2 3.5-4"/>',
     finanzas:  '<path d="M4 19V5M4 19h16M8 15l4-4 3 3 5-6"/>',
     piezas:    '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
     material:  '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.5"/>',
@@ -37,7 +41,6 @@
       { href: 'cotizaciones.html',   icon: 'historial', color: '#0a84ff', title: 'Historial de cotizaciones', sub: 'Cotizaciones guardadas' },
       { href: 'plantillas.html',     icon: 'plantilla', color: '#ff9f0a', title: 'Plantillas', sub: 'Trabajos frecuentes para cotizar' },
       { href: 'finanzas.html',       icon: 'finanzas',  color: '#5e5ce6', title: 'Finanzas', sub: 'Ingresos, costos y ganancia' },
-      { href: 'catalogo-enlace.html', icon: 'catalogo', color: '#ff375f', title: 'Catálogo', sub: 'Avisos de últimas piezas y agotado' },
     ]},
     { label: 'Inventario', rows: [
       { href: 'stock-piezas.html',   icon: 'piezas',    color: '#ff9f0a', title: 'Piezas terminadas', sub: 'Stock listo para vender' },
