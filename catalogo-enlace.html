@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MiniPrints — Catálogo</title>
+  <script src="theme.js?v=20261015a"></script>
+  <script src="inventario.js?v=20261015a"></script>
+  <script src="catalogo-sync.js?v=20261015a"></script>
+  <script src="costos.js?v=20261015a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261015a" />
+  <style>
+    #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
+  </style>
+  <link rel="stylesheet" href="ios.css?v=20261015a" />
+  <link rel="stylesheet" href="nav.css?v=20261015a" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-180.png?v=4" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png?v=4" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=4" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="MiniPrints" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+</head>
+<body>
+  <script type="module" src="firebase-sync.js?v=20261015a"></script>
+
+
+  <div class="page-container">
+    <main class="dash-main">
+      <div class="dash-header inv-header">
+        <div>
+          <h1 class="dash-title">Catálogo</h1>
+          <p class="dash-subtitle">Avisos de "Últimas piezas" y "Agotado" en tu catálogo para clientes.</p>
+        </div>
+      </div>
+
+      <div class="hx-wrap">
+        <div class="cq2-card ce-card" id="ce-conexion"></div>
+
+        <section>
+          <h2 class="ce-tit">Piezas en el catálogo</h2>
+          <div id="ce-lista"></div>
+          <p class="inv-hint ce-hint">Para agregar una pieza, ábrela en Inventario › Piezas y activa "Mostrar en catálogo". Con ${ULT} o menos se ve "Últimas piezas" y con 0, "Agotado".</p>
+        </section>
+
+        <div class="cq2-card ce-card ce-seguridad">
+          <div class="cq2-row cq2-stack">
+            <b>Qué se publica</b>
+            <span>Solo el aviso de cada pieza marcada: disponible, últimas piezas o agotado. Nunca cantidades, precios, costos, ventas ni clientes. El catálogo está en otro proyecto de Firebase y en otra dirección; no puede leer ni cambiar nada de este sistema.</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" role="status"></div>
+
+  <script>
+    const { esc } = MP_INV;
+    const C = window.MP_CATALOGO;
+    const AVISO = { ok: ['Disponible', 'st-ok'], ultimas: ['Últimas piezas', 'st-low'], agotado: ['Agotado', 'st-crit'] };
+    document.querySelector('.ce-hint').textContent = document.querySelector('.ce-hint').textContent.replace('${ULT}', C.ULTIMAS);
+
+    function cuando(t) {
+      if (!t) return 'todavía no';
+      const d = new Date(t);
+      return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) + ' · ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    async function pintarConexion() {
+      const box = document.getElementById('ce-conexion');
+      if (!C.configurado) {
+        box.innerHTML = `<div class="cq2-row cq2-stack"><b>Falta conectar el proyecto del catálogo</b>
+          <span>Cuando crees el proyecto <i>miniprints-catalogo</i> en Firebase y me pases su configuración, aquí podrás iniciar sesión y los avisos se publicarán solos.</span></div>`;
+        return;
+      }
+      box.innerHTML = '<div class="cq2-row"><span>Revisando conexión…</span></div>';
+      const s = await C.sesion();
+      if (s) {
+        box.innerHTML = `<div class="cq2-row"><span class="ce-ok"><b>Conectado</b><small>${esc(s.email)}</small></span><button type="button" class="cq-link" onclick="salir()">Desconectar</button></div>
+          <div class="cq2-row"><span>Última publicación<small class="ce-sub">${esc(cuando(C.publicadoEn()))}</small></span><button type="button" class="inv-btn ce-btn" onclick="publicarAhora(this)">Publicar ahora</button></div>`;
+      } else {
+        const email = (window.MP_AUTH && MP_AUTH.quien && (MP_AUTH.quien() || {}).email) || '';
+        box.innerHTML = `<form class="cq2-row cq2-stack ce-form" onsubmit="conectar(event)">
+            <b>Conecta el catálogo</b>
+            <span>Inicia sesión una vez en este dispositivo con la cuenta del proyecto del catálogo.</span>
+            <input type="email" id="ce-email" autocomplete="username" placeholder="Correo" value="${esc(email)}" required />
+            <input type="password" id="ce-clave" autocomplete="current-password" placeholder="Contraseña" required />
+            <button type="submit" class="inv-btn">Conectar</button>
+            <span class="ce-err" id="ce-err"></span>
+          </form>`;
+      }
+    }
+
+    function pintarLista() {
+      const piezas = (() => { try { return JSON.parse(localStorage.getItem('mp_piezas')) || {}; } catch (e) { return {}; } })();
+      const lista = C.marcadas().sort((a, b) => a.localeCompare(b, 'es'));
+      const cont = document.getElementById('ce-lista');
+      if (!lista.length) { cont.innerHTML = '<div class="hx-empty"><b>Ninguna pieza todavía</b>Activa "Mostrar en catálogo" en las piezas que tengas publicadas.</div>'; return; }
+      cont.innerHTML = `<div class="hx-list">${lista.map(n => {
+        const [txt, cls] = AVISO[C.estadoDe(piezas[n])];
+        return `<div class="hx-row ce-row ${cls}">
+          <span class="hx-text"><span class="hx-title">${esc(n)}</span><span class="hx-meta">Código ${esc(C.slug(n))}</span></span>
+          <span class="hx-tag">${txt}</span>
+          <button type="button" class="ce-quitar" data-n="${esc(n)}" aria-label="Quitar ${esc(n)} del catálogo">✕</button>
+        </div>`;
+      }).join('')}</div>`;
+    }
+    document.getElementById('ce-lista').addEventListener('click', e => {
+      const b = e.target.closest('.ce-quitar'); if (!b) return;
+      if (!confirm(`¿Dejar de mostrar el aviso de "${b.dataset.n}" en el catálogo?`)) return;
+      C.marcar(b.dataset.n, false); pintarLista(); MP_INV.toast('Quitada del catálogo');
+    });
+
+    async function conectar(e) {
+      e.preventDefault();
+      const err = document.getElementById('ce-err'); err.textContent = '';
+      try { await C.conectar(document.getElementById('ce-email').value.trim(), document.getElementById('ce-clave').value); MP_INV.toast('Catálogo conectado'); }
+      catch (x) { err.textContent = /invalid|wrong|user-not-found|credential/i.test(x.code || '') ? 'Correo o contraseña incorrectos.' : 'No se pudo conectar. Revisa tu internet.'; return; }
+      pintarConexion();
+    }
+    async function salir() { await C.desconectar(); pintarConexion(); }
+    async function publicarAhora(btn) {
+      btn.disabled = true;
+      try { const r = await C.publicar(true); MP_INV.toast(r === 'ok' ? 'Avisos publicados' : 'Inicia sesión primero'); }
+      catch (x) { MP_INV.toast('No se pudo publicar. Revisa tu internet.'); }
+      btn.disabled = false; pintarConexion();
+    }
+
+    function mpInit() { pintarConexion(); pintarLista(); }
+    window.addEventListener('mp-sync-ready', mpInit, { once: true });
+    window.addEventListener('mp-sync-update', pintarLista);
+    window.addEventListener('mp-catalogo', pintarConexion);
+  </script>
+  <script src="nav.js?v=20261015a"></script>
+</body>
+</html>

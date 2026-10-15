@@ -4,16 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>MiniPrints — Piezas</title>
-  <script src="theme.js?v=20261014d"></script>
-  <script src="categorias.js?v=20261014d"></script>
-  <script src="inventario.js?v=20261014d"></script>
-  <script src="costos.js?v=20261014d"></script>
-  <link rel="stylesheet" href="styles.css?v=20261014d" />
+  <script src="theme.js?v=20261015a"></script>
+  <script src="categorias.js?v=20261015a"></script>
+  <script src="inventario.js?v=20261015a"></script>
+  <script src="catalogo-sync.js?v=20261015a"></script>
+  <script src="costos.js?v=20261015a"></script>
+  <link rel="stylesheet" href="styles.css?v=20261015a" />
   <style>
     #toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 100px); z-index: 1200; display: none; }
   </style>
-  <link rel="stylesheet" href="ios.css?v=20261014d" />
-  <link rel="stylesheet" href="nav.css?v=20261014d" />
+  <link rel="stylesheet" href="ios.css?v=20261015a" />
+  <link rel="stylesheet" href="nav.css?v=20261015a" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +27,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 </head>
 <body>
-  <script type="module" src="firebase-sync.js?v=20261014d"></script>
+  <script type="module" src="firebase-sync.js?v=20261015a"></script>
 
   <div class="page-container">
     <main class="dash-main">
@@ -155,6 +156,14 @@
       </button>
       <div class="pz-det-body" id="e-mats" hidden></div>
     </div>
+    <!-- Catálogo público: solo se publica "disponible", "últimas piezas" o "agotado" -->
+    <div class="inv-group">
+      <label class="inv-group-row">
+        <span>Mostrar en catálogo</span>
+        <span class="toggle"><input type="checkbox" id="e-catalogo" onchange="pintarCatalogo()" /><span class="toggle-track"></span><span class="toggle-thumb"></span></span>
+      </label>
+    </div>
+    <p class="inv-hint" id="e-catalogo-hint"></p>
     <div class="inv-btns">
       <button type="button" class="inv-btn" onclick="guardarPieza()">Guardar</button>
       <button type="button" class="inv-btn is-danger" onclick="eliminarPieza()">Eliminar del inventario</button>
@@ -491,6 +500,8 @@
       cerrarDet('e-cat'); cerrarDet('e-mats');
 
       pintarCotizacion();
+      document.getElementById('e-catalogo').checked = !!(window.MP_CATALOGO && MP_CATALOGO.esta(nombre));
+      pintarCatalogo();
 
       const usados = DB.historial[nombre] || [];
       const box = document.getElementById('e-mats');
@@ -520,6 +531,16 @@
         : d === 0 ? 'Igual a lo cotizado'
         : `${d > 0 ? '+' : '−'}${MP_INV.money(Math.abs(d))} (${d > 0 ? '+' : '−'}${Math.abs(pct)} %) ${d > 0 ? 'sobre' : 'debajo de'} lo cotizado`;
     }
+    // Qué verá el cliente en el catálogo (nunca la cantidad)
+    function pintarCatalogo() {
+      const el = document.getElementById('e-catalogo-hint'), C = window.MP_CATALOGO;
+      if (!C || !editando) { el.textContent = ''; return; }
+      if (!document.getElementById('e-catalogo').checked) { el.textContent = 'El catálogo no muestra ningún aviso de esta pieza.'; return; }
+      const n = Math.max(0, parseInt(document.getElementById('e-cant').value) || 0);
+      const txt = { ok: 'disponible (sin aviso)', ultimas: '"Últimas piezas"', agotado: '"Agotado"' }[C.estadoDe(n)];
+      el.textContent = `En el catálogo se verá ${txt}. Solo se publica el aviso, nunca la cantidad. Código: ${C.slug(editando)}`;
+    }
+    document.getElementById('e-cant').addEventListener('input', pintarCatalogo);
     // Filas que se despliegan (categoría y filamento usado)
     function toggleDet(id) {
       const body = document.getElementById(id === 'e-cat' ? 'e-cat-body' : id);
@@ -540,6 +561,7 @@
     function pasoEdit(d) {
       const i = document.getElementById('e-cant');
       i.value = Math.max(0, (parseInt(i.value) || 0) + d);
+      pintarCatalogo();
     }
     function guardarPieza() {
       if (!editando) return;
@@ -559,6 +581,8 @@
       saveCategorias();
       if (precio != null) DB.precios[editando] = precio; else delete DB.precios[editando];
       savePrecios();
+      const enCat = document.getElementById('e-catalogo').checked;
+      if (window.MP_CATALOGO && enCat !== MP_CATALOGO.esta(editando)) MP_CATALOGO.marcar(editando, enCat);
       MP_INV.cerrar();
       render();
       MP_INV.toast('Cambios guardados');
@@ -607,6 +631,6 @@
     window.addEventListener('mp-sync-ready', mpInit, { once: true });
     window.addEventListener('mp-sync-update', mpInit);
   </script>
-  <script src="nav.js?v=20261014d"></script>
+  <script src="nav.js?v=20261015a"></script>
 </body>
 </html>
