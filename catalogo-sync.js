@@ -7,8 +7,16 @@
 // (miniprints-v2) no cambia ni se abre al público.
 (function () {
   // Se llena al crear el proyecto miniprints-catalogo (Firebase › Configuración del proyecto ›
-  // Tus apps › Configuración del SDK). Mientras sea null, nada se conecta ni se publica.
-  const CONFIG = null;
+  // Tus apps › Configuración del SDK). Mientras sea null, nada se conecta ni se publica. Estos datos no son secretos:
+  // la seguridad la ponen las reglas de ese proyecto (firestore-catalogo.rules).
+  const CONFIG = {
+    apiKey: "AIzaSyBb4gSaDQlotX7c1uy5XQaHJW0hTyzNCHc",
+    authDomain: "miniprints-catalogo.firebaseapp.com",
+    projectId: "miniprints-catalogo",
+    storageBucket: "miniprints-catalogo.firebasestorage.app",
+    messagingSenderId: "692247777678",
+    appId: "1:692247777678:web:2a2ba2ef7382dafd4f14df"
+  };
 
   const FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
   const MARCAS = 'mp_catalogo';            // { "Turbo": true, … } (se sincroniza entre dispositivos)
